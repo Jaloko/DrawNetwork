@@ -1,0 +1,114 @@
+<html>
+	<head>
+		<title>Coop Canvas</title>
+		<script src="/socket.io/socket.io.js"></script>
+		<style>
+			#chat{
+				height: 500px;
+			}
+		</style>
+	</head>
+	<body onload="sync()">
+		 <canvas id="canvas" width="960" height="528" style="border:1px solid #000000;"></canvas>
+		 <input type="button" onclick="clearCanvas()" value="Clear"></input>
+	</body>
+		<script>
+			var mouseDown = false;
+			var mousePos = {
+				x : 0,
+				y : 0
+			}
+			var socket = io.connect();
+			var canvas = document.getElementById('canvas');
+			var c = canvas.getContext('2d');
+			var colour = getRandomColor();
+
+			function sync() {
+				var data = "";
+				socket.emit('sync', data);
+			}
+
+			function clearCanvas() {
+				c.fillStyle = "white";
+			    c.fillRect(0, 0, canvas.width, canvas.height);
+			    socket.emit('recieve canvas', canvas.toDataURL());
+			}
+
+			function draw() {
+				var json = {
+					x: mousePos.x,
+					y: mousePos.y,
+					size: 15,
+					colour: colour
+				}
+				drawRect(json.x, json.y, json.colour);
+				socket.emit('send message', json);
+			}
+
+			function drawRect(x, y, colour) {
+			    c.fillStyle = colour;
+				c.fillRect(x, y, 15, 15);
+			}
+
+			socket.on('new message', function(data) {
+				c.fillStyle = data.colour;
+			    c.fillRect(data.x, data.y, 15, 15);
+			});
+
+			socket.on('sync result', function(data) {
+				var img = new Image();
+				img.onload = function(){
+				  c.drawImage(img,0,0); // Or at whatever offset you like
+				};
+				img.src = data;
+				console.log(true);
+			});
+
+			socket.on('send canvas', function(data) {
+				socket.emit('recieve canvas', canvas.toDataURL());
+			});
+
+			/**
+			** Helper Functions
+			**/
+			function getRandomColor() {
+			    var letters = '0123456789ABCDEF'.split('');
+			    var color = '#';
+			    for (var i = 0; i < 6; i++ ) {
+			        color += letters[Math.floor(Math.random() * 16)];
+			    }
+			    return color;
+			}
+
+			function getMousePos(canvas, evt) {
+			    var rect = canvas.getBoundingClientRect();
+			    return {
+			        x: evt.clientX - rect.left,
+			       	y: evt.clientY - rect.top
+			    };
+			}
+
+			/**
+			** Canvas Event Listeners
+			**/
+			canvas.addEventListener('mousemove', function(evt) {
+			    mousePos = getMousePos(canvas, evt);
+			    			if(mouseDown == true) {
+				draw();
+			}
+			}, false);
+
+			canvas.addEventListener("mousedown", function(evt) {
+				if(evt.button == 0) {
+			    	mouseDown = true;
+				} else {
+					colour = getRandomColor();
+				}
+			});
+			canvas.addEventListener("mouseup", function(evt) {
+				if(evt.button == 0) {
+			    	mouseDown = false;
+				}
+			});
+		</script>
+</html>
