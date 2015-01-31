@@ -6,11 +6,32 @@
 			#chat{
 				height: 500px;
 			}
+			canvas.dragged{
+				cursor: pointer;
+			}
 		</style>  
 	</head>
 	<body onload="sync()">
 		 <canvas id="canvas" width="960" height="528" style="border:1px solid #000000;"></canvas>
 		 <input type="button" onclick="clearCanvas()" value="Clear"></input>
+
+		 <select id="brushSelection">
+		 	<option value="5">Brush: 5</option>
+		 	<option value="10">Brush: 10</option>
+		 	<option value="15">Brush: 15</option>
+		 	<option value="20">Brush: 20</option>
+		 	<option value="25">Brush: 25</option>
+		 	<option value="30">Brush: 30</option>
+		 </select>
+
+		 <select id="colourPicker">
+		 	<option value="red">Red</option>
+		 	<option value="purple">Purple</option>
+		 	<option value="blue">Blue</option>
+		 	<option value="green">Green</option>
+		 	<option value="yellow">Yellow</option>
+		 	<option value="black">Black</option>
+		 </select>
 
 	</body>
 		<script>
@@ -136,6 +157,43 @@
 			    } 
 			}
 
+			// **
+			// Brushes
+			//
+
+			// Brush Lines 
+			// note: doesnt support other browsers gl
+			var brushSelection = document.getElementById('brushSelection');
+			
+			brushSelection.addEventListener("click", function(evt){
+				var value = getOptionSelected(brushSelection);
+				brushSize(value);
+			});
+
+			function brushSize(newSize){
+				size = newSize;
+			}
+
+			// Brush Colour Picker
+
+			var colourPicker = document.getElementById("colourPicker");
+			colourPicker.addEventListener("click", function(evt){
+				var value = getOptionSelected(colourPicker);
+				assignColour(value);
+			});
+
+			function assignColour(newColour){
+				colour = newColour;
+			}
+
+
+			// Use with html element select and option. Returns the value of the selected option. Parameter is the select element
+			function getOptionSelected(selectElement){
+				return selectElement.options[selectElement.selectedIndex].value;
+			}
+
+
+
 			/**
 			** Canvas Event Listeners
 			**/
@@ -159,6 +217,7 @@
 			}, false);
 
 			canvas.addEventListener("mousedown", function(evt) {
+				canvas.className = "dragged";
 				if(evt.button == 0) {
 			    	mouseDown = true;
 				} else {
@@ -166,9 +225,11 @@
 				}
 			});
 			canvas.addEventListener("mouseup", function(evt) {
+				canvas.className = ""; // Reverts to no classname
 				if(evt.button == 0) {
 			    	mouseDown = false;
 				}
 			});
+
 		</script>
 </html>
