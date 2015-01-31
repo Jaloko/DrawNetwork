@@ -1,0 +1,10 @@
+To do:
+-Colour dropper
+-Paint bucket
+-Text
+-Basic shapes
+-Slide for brush sizes
+-Line tool
+-Nicknames
+-Sessions (public/private sessions)
+-Save image buttton
