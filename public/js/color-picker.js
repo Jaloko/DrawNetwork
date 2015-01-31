@@ -25,7 +25,7 @@ img.onload = function () {
 	context.drawImage(this, 0, 0);
 };
 
-img.src = "public/img/color_picker.png";
+img.src = "img/color_picker.png";
 
 colCanvas.addEventListener('mousemove', function(evt) {
 	// Gets the position of the canvas
