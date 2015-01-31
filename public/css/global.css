@@ -1,0 +1,34 @@
+*{
+	padding:0; margin:0;
+}
+canvas.dragged{
+	cursor: pointer;
+}
+
+
+/*---------------------------------
+	Tools
+---------------------------------*/
+#tool-col-pick{
+	margin: 10px;
+	border:2px solid #000;
+	width:600px;
+	height:260;
+}
+
+#tool-col-pick > #color-picker{
+	float: left;
+	cursor:crosshair;
+}
+#tool-col-pick > #tool-rgb-val{
+	float: right;
+}
+#tool-rgb-val label{
+
+}
+#tool-rgb-val span{
+	display: block;
+}
+#tool-rgb-val input{
+	width: 80px;
+}
