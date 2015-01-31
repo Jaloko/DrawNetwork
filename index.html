@@ -6,11 +6,12 @@
 			#chat{
 				height: 500px;
 			}
-		</style>
+		</style>  
 	</head>
 	<body onload="sync()">
 		 <canvas id="canvas" width="960" height="528" style="border:1px solid #000000;"></canvas>
 		 <input type="button" onclick="clearCanvas()" value="Clear"></input>
+
 	</body>
 		<script>
 			var mouseDown = false;
@@ -18,10 +19,15 @@
 				x : 0,
 				y : 0
 			}
+			var lastPos = {
+				x: 0,
+				y: 0
+			}
 			var socket = io.connect();
 			var canvas = document.getElementById('canvas');
 			var c = canvas.getContext('2d');
 			var colour = getRandomColor();
+			var size = 15;
 
 			function sync() {
 				var data = "";
@@ -38,10 +44,13 @@
 				var json = {
 					x: mousePos.x,
 					y: mousePos.y,
-					size: 15,
+					lastX: lastPos.x,
+					lastY: lastPos.y,
+					size: size,
 					colour: colour
 				}
-				drawRect(json.x, json.y, json.colour);
+				drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+/*				drawRect(json.x, json.y, json.colour);*/
 				socket.emit('send message', json);
 			}
 
@@ -50,9 +59,28 @@
 				c.fillRect(x, y, 15, 15);
 			}
 
+			function drawCircle(x, y, size, colour) {
+				//draw a circle
+				c.lineTo(x, y);
+				c.fillStyle = colour;
+				c.beginPath();
+				c.arc(x, y, size, 0, Math.PI*2, true); 
+				c.closePath();
+				c.fill();
+			}
+
+			function drawLine(x, y, lastX, lastY, size, colour) {
+				c.strokeStyle = colour;
+				c.lineWidth = size;
+				c.lineCap = "round";
+				c.beginPath();
+				c.moveTo(lastX , lastY);
+				c.lineTo(x,y);
+				c.stroke();
+			}
+
 			socket.on('new message', function(data) {
-				c.fillStyle = data.colour;
-			    c.fillRect(data.x, data.y, 15, 15);
+				drawLine(data.x, data.y, data.lastX, data.lastY, data.size, data.colour);
 			});
 
 			socket.on('sync result', function(data) {
@@ -61,7 +89,6 @@
 				  c.drawImage(img,0,0); // Or at whatever offset you like
 				};
 				img.src = data;
-				console.log(true);
 			});
 
 			socket.on('send canvas', function(data) {
@@ -71,6 +98,7 @@
 			/**
 			** Helper Functions
 			**/
+
 			function getRandomColor() {
 			    var letters = '0123456789ABCDEF'.split('');
 			    var color = '#';
@@ -88,14 +116,46 @@
 			    };
 			}
 
+			function onMouseWheel(evt) {
+			     // Multi browser support
+			    var evt = window.event || evt; // old IE support
+			    var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
+
+			    if(delta > 0) {
+			    	if(size >= 30) {
+			    		size = 30;
+			    	} else {
+			    		size++;
+			    	}
+			    } else {
+			    	if(size <= 1) {
+			    		size = 1
+			    	} else {
+			        	size--;
+			    	}
+			    } 
+			}
+
 			/**
 			** Canvas Event Listeners
 			**/
+			if (canvas.addEventListener) {
+		        // IE9, Chrome, Safari, Opera
+		        canvas.addEventListener("mousewheel", onMouseWheel, false);
+		        // Firefox
+		        canvas.addEventListener("DOMMouseScroll", onMouseWheel, false);
+		    }
+		    // IE 6/7/8
+		    else {
+		        canvas.attachEvent("onmousewheel", onMouseWheel);
+		    }
+
 			canvas.addEventListener('mousemove', function(evt) {
+				lastPos = mousePos;
 			    mousePos = getMousePos(canvas, evt);
-			    			if(mouseDown == true) {
-				draw();
-			}
+			    if(mouseDown == true) {
+					draw();
+				}
 			}, false);
 
 			canvas.addEventListener("mousedown", function(evt) {
