@@ -4,6 +4,10 @@ var express = require('express'),
 	io = require('socket.io').listen(server);
 	app.use(express.static('public'));
 
+var users = [];
+var usersConnected;
+var userCount;
+
 server.listen(3000);
 
 app.get('/', function(req, res) {
@@ -17,13 +21,38 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('sync', function(data) {
-		socket.broadcast.emit('send canvas', data);
+		users.push(data.name);
+		socket.broadcast.emit('send canvas', users);
 	});
-
 
 	socket.on('recieve canvas', function(data) {
-		io.sockets.emit('sync result', data);
+		var newData = {
+			canvas: data
+		}
+		io.sockets.emit('sync result', newData);
 	});
+
+	socket.on('im online', function(data) {
+		users.push(data);
+		userCount++;
+	});
+
+	socket.on('im not online', function() {
+		userCount++;
+	});
+
+	setInterval(function() {
+		if(usersConnected == userCount) {
+			io.sockets.emit('user list', users);
+		}
+	}, 100 );
+
+	setInterval(function() {
+		usersConnected = io.engine.clientsCount;
+		userCount = 0;
+  		io.sockets.emit('get online', users);
+  		users = [];
+	}, 2000 );
 });
 
 /**Halp
