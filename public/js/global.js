@@ -9,19 +9,37 @@ var lastPos = {
 }
 var socket = io.connect();
 var canvas = document.getElementById('canvas');
-var c = canvas.getContext('2d');
-var colour = getRandomColor();
-var size = 5;
+var context = canvas.getContext('2d');
+
+var Brush = function(){
+	this.size = 30,
+	this.colour = getRandomColor(),
+	this.brushType = "freeroam",
+
+	this.setBrushType = function(type){
+		this.brushType = type;
+	},
+
+	this.getBrushType = function(){
+		return this.brushType;
+	}
+
+	this.setColour = function(newColour){
+		this.colour = newColour;
+	}
+};
+
+var brush = new Brush();
+
+function clearCanvas() {
+	context.fillStyle = "white";
+   	context.fillRect(0, 0, canvas.width, canvas.height);
+   	socket.emit('recieve canvas', canvas.toDataURL());
+}
 
 function sync() {
 	var data = "";
 	socket.emit('sync', data);
-}
-
-function clearCanvas() {
-	c.fillStyle = "white";
-    c.fillRect(0, 0, canvas.width, canvas.height);
-    socket.emit('recieve canvas', canvas.toDataURL());
 }
 
 function draw() {
@@ -30,8 +48,8 @@ function draw() {
 		y: mousePos.y,
 		lastX: lastPos.x,
 		lastY: lastPos.y,
-		size: size,
-		colour: colour
+		size: brush.size,
+		colour: brush.colour
 	}
 	drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
 	/*drawRect(json.x, json.y, json.colour);*/
@@ -39,28 +57,28 @@ function draw() {
 }
 
 function drawRect(x, y, colour) {
-    c.fillStyle = colour;
-	c.fillRect(x, y, 15, 15);
+    context.fillStyle = colour;
+	context.fillRect(x, y, 15, 15);
 }
 
 function drawCircle(x, y, size, colour) {
 	//draw a circle
-	c.lineTo(x, y);
-	c.fillStyle = colour;
-	c.beginPath();
-	c.arc(x, y, size, 0, Math.PI*2, true); 
-	c.closePath();
-	c.fill();
+	context.lineTo(x, y);
+	context.fillStyle = colour;
+	context.beginPath();
+	context.arc(x, y, size, 0, Math.PI*2, true); 
+	context.closePath();
+	context.fill();
 }
 
 function drawLine(x, y, lastX, lastY, size, colour) {
-	c.strokeStyle = colour;
-	c.lineWidth = size;
-	c.lineCap = "round";
-	c.beginPath();
-	c.moveTo(lastX , lastY);
-	c.lineTo(x,y);
-	c.stroke();
+	context.strokeStyle = colour;
+	context.lineWidth = size;
+	context.lineCap = "round";
+	context.beginPath();
+	context.moveTo(lastX , lastY);
+	context.lineTo(x,y);
+	context.stroke();
 }
 
 socket.on('new message', function(data) {
@@ -70,7 +88,7 @@ socket.on('new message', function(data) {
 socket.on('sync result', function(data) {
 	var img = new Image();
 	img.onload = function(){
-	  c.drawImage(img,0,0); // Or at whatever offset you like
+	  context.drawImage(img,0,0); // Or at whatever offset you like
 	};
 	img.src = data;
 });
@@ -108,16 +126,16 @@ function onMouseWheel(evt) {
     var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
 
     if(delta > 0) {
-    	if(size >= 30) {
-    		size = 30;
+    	if(brush.size >= 30) {
+    		brush.size = 30;
     	} else {
-    		size++;
+    		brush.size++;
     	}
     } else {
-    	if(size <= 1) {
-    		size = 1
+    	if(brush.size <= 1) {
+    		brush.size = 1
     	} else {
-        	size--;
+        	brush.size--;
     	}
     } 
 }
@@ -136,20 +154,8 @@ brushSelection.addEventListener("click", function(evt){
 });
 
 function brushSize(newSize){
-	size = newSize;
+	brush.size = newSize;
 }
-
-// Brush Colour Picker
-
-// var colourPicker = document.getElementById("colourPicker");
-// colourPicker.addEventListener("click", function(evt){
-// 	var value = getOptionSelected(colourPicker);
-// 	assignColour(value);
-// });
-
-// function assignColour(newColour){
-// 	colour = newColour;
-// }
 
 
 // Use with html element select and option. Returns the value of the selected option. Parameter is the select element
@@ -158,6 +164,29 @@ function getOptionSelected(selectElement){
 }
 
 
+/*
+	Canvas
+*/
+
+// look at this spag. Are you impressed?
+function getColourOnCanvas(){
+	var evt = window.event;
+	var canvasRect = canvas.getBoundingClientRect();
+	var mouseX = evt.clientX;
+	var mouseY = evt.clientY;
+
+	var x = mouseX - canvasRect.left;
+	var y = mouseY - canvasRect.top;
+
+	var data = context.getImageData(x,y, canvas.width, canvas.height);
+	var pixels = data.data;
+
+	var hexString = convertRGBToHex(pixels[0], pixels[1], pixels[2]);
+	assignRGBToDom(pixels[0], pixels[1], pixels[2], hexString);
+	var hex = assignSelectedHexColour();
+	brush.setColour(hex);
+	brush.setBrushType("freeroam");
+}
 
 /**
 ** Canvas Event Listeners
@@ -176,22 +205,37 @@ else {
 canvas.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(canvas, evt);
-	if(mouseDown == true) {
+	if(mouseDown === true && brush.getBrushType() === "freeroam") {
 		draw();
 	}
 }, false);
 
 canvas.addEventListener("mousedown", function(evt) {
 	canvas.className = "dragged";
-	if(evt.button == 0) {
+	if(evt.button === 0) {
     	mouseDown = true;
+    	if(mouseDown === true && brush.brushType === "dropper"){
+    		getColourOnCanvas();
+    	}
 	} else {
-		colour = getRandomColor();
+		brush.colour = getRandomColor();
 	}
 });
 canvas.addEventListener("mouseup", function(evt) {
 	canvas.className = ""; // Reverts to no classname
-	if(evt.button == 0) {
+	if(evt.button === 0) {
     	mouseDown = false;
 	}
 });
+
+document.getElementById('clearCanvas').addEventListener('click', function(evt){
+	clearCanvas();
+})
+
+document.getElementById('colourDrop').addEventListener('click', function(evt){
+	brush.setBrushType('dropper');
+});
+
+document.getElementById('freeroamBrush').addEventListener('click', function(evt){
+	brush.setBrushType('freeroam');
+})

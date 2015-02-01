@@ -2,11 +2,13 @@
 	<head>
 		<title>Coop Canvas</title>
 		<script src="/socket.io/socket.io.js"></script>
-		<link rel="stylesheet" type="text/css" href="/public/css/global.css">
+		<link rel="stylesheet" type="text/css" href="/css/global.css">
 	</head>
 	<body onload="sync()">
 		 <canvas id="canvas" width="960" height="528" style="border:1px solid #000000;"></canvas>
-		 <input type="button" onclick="clearCanvas()" value="Clear"></input>
+		 <input type="button" id="clearCanvas" value="Clear">
+		 <input	type="button" id="colourDrop" value="Colour Dropper">
+		 <input type="button" id="freeroamBrush" value="Free Draw">
 
 		 <select id="brushSelection">
 		 	<option value="5">Brush: 5</option>
@@ -16,15 +18,6 @@
 		 	<option value="25">Brush: 25</option>
 		 	<option value="30">Brush: 30</option>
 		 </select>
-
-<!-- 		 <select id="colourPicker">
-		 	<option value="red">Red</option>
-		 	<option value="purple">Purple</option>
-		 	<option value="blue">Blue</option>
-		 	<option value="green">Green</option>
-		 	<option value="yellow">Yellow</option>
-		 	<option value="black">Black</option>
-		 </select> -->
 
 		 <div id="tool-col-pick">
 		 	<canvas id="color-picker"></canvas>
@@ -39,6 +32,6 @@
 		 	<p>Mouse down to select the colour of the brush, moving around the colour wheel will display the colour... but not assign to the brush</p>
 		 </div>
 	</body>
-		<script src="/public/js/global.js"></script>
-		<script src="/public/js/color-picker.js"></script>
+		<script src="/js/global.js"></script>
+		<script src="/js/color-picker.js"></script>
 </html>
