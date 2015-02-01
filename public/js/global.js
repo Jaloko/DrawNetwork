@@ -10,9 +10,28 @@ var lastPos = {
 var socket = io.connect();
 var hasSynced = false;
 var canvas = document.getElementById('canvas');
-var c = canvas.getContext('2d');
-var colour = getRandomColor();
-var size = 5;
+var context = canvas.getContext('2d');
+
+var Brush = function(){
+	this.size = 30,
+	this.colour = getRandomColor(),
+	this.brushType = "freeroam",
+
+	this.setBrushType = function(type){
+		this.brushType = type;
+	},
+
+	this.getBrushType = function(){
+		return this.brushType;
+	}
+
+	this.setColour = function(newColour){
+		this.colour = newColour;
+	}
+};
+
+var brush = new Brush();
+
 var name;
 var randomNames = [
 "Beulah	Wright", "Curtis	Fox", "Levi	Collins", "Gustavo	Russell", "Erica	Lowe", "Sherri	Mcbride", "Zachary	Martin", "Preston	Fletcher", "Jack	Shaw", "Chris	Carr", "Morris	Goodwin", "Raquel	Drake", "Sandy	Pearson", "Francis	Farmer", "Erika	Haynes", "Edgar	Warren", "Randal	Love", "Lucas	Cannon", "Ismael	Terry", "Rex	Alexander", "Russell	Houston", "Kenneth	Potter", "Ricky	James", "Latoya	Rivera", "Katherine	Chapman", "Gerald	Gomez", "Glenda	Robinson", "Adrian	Cox", "Maurice	Barton", "Harold	Hansen", "Nicole	Townsend", "Jorge	Waters", "Hugo	Hampton", "Stephen	Mcgee", "Marguerite	Conner", "Bill	Newman", "Rodney	Cook", "Santiago	Reid", "Toby	Casey", "Mamie	Allison", "Tami	Lawrence", "Tim	Crawford", "Paula	Carpenter", "Flora	Young", "Marian	Ferguson","Lewis	Carlson", "Nina	Wise", "Elisa	Hanson", "Shelly	Lucas", "Gabriel	Stevenson", "Elbert	Reeves", "Vicky	Jackson", "Cassandra	Moreno", "Becky	Todd", "Jimmy	Soto", "Opal	Hicks", "Darren	Mendoza", "Reginald	Watts", "Cesar	Sutton", "Lionel	Rodgers", "Christopher	Robertson", "Terrance	Byrd", "Kristy	Garza", "Herbert	Flowers", "Kirk	Schmidt", "Dennis	Thomas", "Essie	Henry", "Abel	Tucker", "Katrina	Phelps", "Rolando	Gonzalez", "Olga	Howard", "Cecilia	Cortez", "Tanya	Cohen", "Juanita	Rios", "Jeff	Davis", "Marty	Perkins", "Ian	Ortiz", "Andy	George", "Salvatore	Hamilton", "Verna	Barker", "Louise	Frank", "April	Nunez", "Bonnie	Ramirez", "Kay	Sherman", "Stacy	Nelson", "Lorraine	White", "Paul	Glover", "Otis	Woods", "Darrin	Guerrero", "Whitney	Underwood", "Henry	Graves", "Eula	Leonard", "Francis	Sanchez", "Hubert	Christensen", "Doug	Stanley", "Neal	Washington", "Everett	Harvey", "Nicholas	Hale", "Pedro	Ramsey", "Sadie	Stephens"]
@@ -40,11 +59,17 @@ function sync() {
 	}
 }
 
+
+/*
+	Canvas Methods
+*/
+
 function clearCanvas() {
-	c.fillStyle = "white";
-    c.fillRect(0, 0, canvas.width, canvas.height);
-    socket.emit('recieve canvas', canvas.toDataURL());
+	context.fillStyle = "white";
+   	context.fillRect(0, 0, canvas.width, canvas.height);
+   	socket.emit('recieve canvas', canvas.toDataURL());
 }
+
 
 function draw() {
 	var json = {
@@ -52,38 +77,37 @@ function draw() {
 		y: mousePos.y,
 		lastX: lastPos.x,
 		lastY: lastPos.y,
-		size: size,
-		colour: colour
+		size: brush.size,
+		colour: brush.colour
 	}
-
 	drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
 	/*drawRect(json.x, json.y, json.colour);*/
 	socket.emit('send message', json);
 }
 
 function drawRect(x, y, colour) {
-    c.fillStyle = colour;
-	c.fillRect(x, y, 15, 15);
+    context.fillStyle = colour;
+	context.fillRect(x, y, 15, 15);
 }
 
 function drawCircle(x, y, size, colour) {
 	//draw a circle
-	c.lineTo(x, y);
-	c.fillStyle = colour;
-	c.beginPath();
-	c.arc(x, y, size, 0, Math.PI*2, true); 
-	c.closePath();
-	c.fill();
+	context.lineTo(x, y);
+	context.fillStyle = colour;
+	context.beginPath();
+	context.arc(x, y, size, 0, Math.PI*2, true); 
+	context.closePath();
+	context.fill();
 }
 
 function drawLine(x, y, lastX, lastY, size, colour) {
-	c.strokeStyle = colour;
-	c.lineWidth = size;
-	c.lineCap = "round";
-	c.beginPath();
-	c.moveTo(lastX , lastY);
-	c.lineTo(x,y);
-	c.stroke();
+	context.strokeStyle = colour;
+	context.lineWidth = size;
+	context.lineCap = "round";
+	context.beginPath();
+	context.moveTo(lastX , lastY);
+	context.lineTo(x,y);
+	context.stroke();
 }
 
 socket.on('new message', function(data) {
@@ -93,7 +117,7 @@ socket.on('new message', function(data) {
 socket.on('sync result', function(data) {
 	var img = new Image();
 	img.onload = function(){
-	  c.drawImage(img,0,0); // Or at whatever offset you like
+	  context.drawImage(img,0,0); // Or at whatever offset you like
 	};
 	img.src = data.canvas;
 });
@@ -122,17 +146,13 @@ socket.on('get online', function(data) {
 	if(hasSynced == true) {
 		var me = {
 			name : name,
-			colour: colour
+			colour: brush.colour
 		}
 		socket.emit('im online', me);
 	} else {
 		socket.emit('im not online');
 	}
 });	
-
-/**
-** Helper Functions
-**/
 
 function clearUsers() {
 	var users = document.getElementById('users');
@@ -144,6 +164,10 @@ function addUser(name, colour) {
 	var newUser = '<div id="' + name +  '" class="row"><div class="colour" style="background-color: ' + colour + ';"></div><div class="name">' + name + '</div></div>';
 	users.innerHTML += newUser;
 }
+
+/**
+** Helper Functions
+**/
 
 function getRandomColor() {
     var letters = '0123456789ABCDEF'.split('');
@@ -170,16 +194,16 @@ function onMouseWheel(evt) {
     var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
 
     if(delta > 0) {
-    	if(size >= 30) {
-    		size = 30;
+    	if(brush.size >= 30) {
+    		brush.size = 30;
     	} else {
-    		size++;
+    		brush.size++;
     	}
     } else {
-    	if(size <= 1) {
-    		size = 1
+    	if(brush.size <= 1) {
+    		brush.size = 1
     	} else {
-        	size--;
+        	brush.size--;
     	}
     } 
 }
@@ -198,20 +222,8 @@ brushSelection.addEventListener("click", function(evt){
 });
 
 function brushSize(newSize){
-	size = newSize;
+	brush.size = newSize;
 }
-
-// Brush Colour Picker
-
-// var colourPicker = document.getElementById("colourPicker");
-// colourPicker.addEventListener("click", function(evt){
-// 	var value = getOptionSelected(colourPicker);
-// 	assignColour(value);
-// });
-
-// function assignColour(newColour){
-// 	colour = newColour;
-// }
 
 
 // Use with html element select and option. Returns the value of the selected option. Parameter is the select element
@@ -220,9 +232,28 @@ function getOptionSelected(selectElement){
 }
 
 
+// look at this spag. Are you impressed?
+function getColourOnCanvas(){
+	var evt = window.event;
+	var canvasRect = canvas.getBoundingClientRect();
+	var mouseX = evt.clientX;
+	var mouseY = evt.clientY;
+
+	var x = mouseX - canvasRect.left;
+	var y = mouseY - canvasRect.top;
+
+	var data = context.getImageData(x,y, canvas.width, canvas.height);
+	var pixels = data.data;
+
+	var hexString = convertRGBToHex(pixels[0], pixels[1], pixels[2]);
+	assignRGBToDom(pixels[0], pixels[1], pixels[2], hexString);
+	var hex = assignSelectedHexColour();
+	brush.setColour(hex);
+	brush.setBrushType("freeroam");
+}
 
 /**
-** Canvas Event Listeners
+** Event Listeners
 **/
 if (canvas.addEventListener) {
 	// IE9, Chrome, Safari, Opera
@@ -238,24 +269,37 @@ else {
 canvas.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(canvas, evt);
-	if(mouseDown == true) {
-		if(hasSynced == true) {
-			draw();
-		}
+	if(mouseDown === true && brush.getBrushType() === "freeroam") {
+		draw();
 	}
 }, false);
 
 canvas.addEventListener("mousedown", function(evt) {
 	canvas.className = "dragged";
-	if(evt.button == 0) {
+	if(evt.button === 0) {
     	mouseDown = true;
+    	if(mouseDown === true && brush.brushType === "dropper"){
+    		getColourOnCanvas();
+    	}
 	} else {
-		colour = getRandomColor();
+		brush.colour = getRandomColor();
 	}
 });
 canvas.addEventListener("mouseup", function(evt) {
 	canvas.className = ""; // Reverts to no classname
-	if(evt.button == 0) {
+	if(evt.button === 0) {
     	mouseDown = false;
 	}
 });
+
+document.getElementById('clearCanvas').addEventListener('click', function(evt){
+	clearCanvas();
+})
+
+document.getElementById('colourDrop').addEventListener('click', function(evt){
+	brush.setBrushType('dropper');
+});
+
+document.getElementById('freeroamBrush').addEventListener('click', function(evt){
+	brush.setBrushType('freeroam');
+})

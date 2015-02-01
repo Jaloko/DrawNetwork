@@ -7,7 +7,9 @@
 	<body onload="init()">
 		<div id="leftCol">
 			 <canvas id="canvas" width="960" height="528" style="border:1px solid #000000;"></canvas>
-			 <input type="button" onclick="clearCanvas()" value="Clear"></input>
+		 	<input type="button" id="clearCanvas" value="Clear">
+		 	<input	type="button" id="colourDrop" value="Colour Dropper">
+		 	<input type="button" id="freeroamBrush" value="Free Draw">
 
 			 <select id="brushSelection">
 			 	<option value="5">Brush: 5</option>
@@ -18,14 +20,6 @@
 			 	<option value="30">Brush: 30</option>
 			 </select>
 
-	<!-- 		 <select id="colourPicker">
-			 	<option value="red">Red</option>
-			 	<option value="purple">Purple</option>
-			 	<option value="blue">Blue</option>
-			 	<option value="green">Green</option>
-			 	<option value="yellow">Yellow</option>
-			 	<option value="black">Black</option>
-			 </select> -->
 			 <input id="name" type="text"></input>
 			 <button id="nameSubmit" type="submit" onclick="sync()">Submit Name</button>
 			 <div id="tool-col-pick">

@@ -1,7 +1,7 @@
 // Danni Dickson
 var img = new Image();
 var colCanvas = document.getElementById("color-picker");
-var context = colCanvas.getContext('2d');
+var colContext = colCanvas.getContext('2d');
 colCanvas.width = 260;
 colCanvas.height = 260;
 
@@ -22,7 +22,7 @@ var rgbInputs = {
 // load image into canvas
 
 img.onload = function () {
-	context.drawImage(this, 0, 0);
+	colContext.drawImage(this, 0, 0);
 };
 
 img.src = "img/color_picker.png";
@@ -36,35 +36,41 @@ colCanvas.addEventListener('mousemove', function(evt) {
 	var x = mouseX - canvasRect.left;
 	var y = mouseY - canvasRect.top;
 
-	var data = context.getImageData(x, y, 1,1);
+	var data = colContext.getImageData(x, y, 1,1);
 	var pixels = data.data;
 
 	colourRGBArray.r = pixels[0];
 	colourRGBArray.g = pixels[1];
 	colourRGBArray.b = pixels[2];
 
-	assignRBGToDom();
+	var hex = convertRGBToHex(colourRGBArray.r, colourRGBArray.g, colourRGBArray.b);
+	assignRGBToDom(colourRGBArray.r, colourRGBArray.g, colourRGBArray.b, hex);
 
 }, false);
 
 colCanvas.addEventListener('mousedown', function(evt){
-	rgbInputs.selected.value = rgbInputs.hex.value;
-	colour = rgbInputs.selected.value;
+	var hex = assignSelectedHexColour();
+	brush.setColour(hex);
 });
 
 
-function assignRBGToDom(){
-	console.log("R:" + colourRGBArray.r + " G: " + colourRGBArray.g + " B: " + colourRGBArray.b);
-	rgbInputs.r.value = colourRGBArray.r;
-	rgbInputs.g.value = colourRGBArray.g;
-	rgbInputs.b.value = colourRGBArray.b;
-	rgbInputs.hex.value = convertRGBToHex();
+function assignSelectedHexColour(){
+	rgbInputs.selected.value = rgbInputs.hex.value;
+	return rgbInputs.selected.value;
 }
 
-function convertRGBToHex(){
-	var r = colourRGBArray.r.toString(16);
-	var g = colourRGBArray.g.toString(16);
-	var b = colourRGBArray.b.toString(16);
+function assignRGBToDom(red, green, blue, hex){
+	// console.log("R:" + colourRGBArray.r + " G: " + colourRGBArray.g + " B: " + colourRGBArray.b);
+	rgbInputs.r.value = red;
+	rgbInputs.g.value = green;
+	rgbInputs.b.value = blue;
+	rgbInputs.hex.value = hex;
+}
+
+function convertRGBToHex(red, green, blue){
+	var r = red.toString(16);
+	var g = green.toString(16);
+	var b = blue.toString(16);
 
 	return "#" + binaryResult(r) + binaryResult(g) + binaryResult(b);
 }
