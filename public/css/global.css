@@ -5,6 +5,19 @@ canvas.dragged{
 	cursor: pointer;
 }
 
+/*---------------------------------
+	Layout
+---------------------------------*/
+#leftCol {
+	float: left;
+	display: inline-block;
+	width: 960px;
+}
+
+#rightCol {
+	float: left;
+	display: inline-block;
+}
 
 /*---------------------------------
 	Tools
@@ -31,4 +44,31 @@ canvas.dragged{
 }
 #tool-rgb-val input{
 	width: 80px;
+}
+
+/*---------------------------------
+	Users
+---------------------------------*/
+#users {
+	display: block;
+	width: 200px;
+}
+
+#users.row {
+	display: block;
+	width: 100%;
+	margin-bottom: 3px;
+}
+
+.name {
+	float: left;
+	display: inline-block;
+	width: 90%;
+}
+
+.colour {
+	float: left;
+	display: inline-block;
+	width: 18px;
+	height: 18px;
 }
