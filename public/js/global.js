@@ -119,7 +119,7 @@ socket.on('sync result', function(data) {
 	img.onload = function(){
 	  context.drawImage(img,0,0); // Or at whatever offset you like
 	};
-	img.src = data;
+	img.src = data.canvas;
 });
 
 socket.on('send canvas', function(data) {
