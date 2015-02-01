@@ -7,7 +7,6 @@ var express = require('express'),
 var users = [];
 var usersConnected;
 var userCount;
-
 server.listen(3000);
 
 app.get('/', function(req, res) {
@@ -40,20 +39,15 @@ io.sockets.on('connection', function(socket) {
 	socket.on('im not online', function() {
 		userCount++;
 	});
-
-	setInterval(function() {
-		if(usersConnected == userCount) {
-			io.sockets.emit('user list', users);
-		}
-	}, 100 );
-
-	setInterval(function() {
-		usersConnected = io.engine.clientsCount;
-		userCount = 0;
-  		io.sockets.emit('get online', users);
-  		users = [];
-	}, 2000 );
 });
+
+setInterval(function() {
+	io.sockets.emit('user list', users);
+	usersConnected = io.engine.clientsCount;
+	userCount = 0;
+		io.sockets.emit('get online', users);
+		users = [];
+}, 500 );
 
 /**Halp
 // send to current request socket client

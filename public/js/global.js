@@ -143,7 +143,7 @@ socket.on('user list', function(data) {
 });
 
 socket.on('get online', function(data) {
-	if(hasSynced == true) {
+	if(hasSynced == true && name != null) {
 		var me = {
 			name : name,
 			colour: brush.colour
@@ -270,7 +270,10 @@ canvas.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(canvas, evt);
 	if(mouseDown === true && brush.getBrushType() === "freeroam") {
-		draw();
+		if(hasSynced == true) {
+			draw();
+		}
+
 	}
 }, false);
 
