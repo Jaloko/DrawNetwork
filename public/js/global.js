@@ -239,17 +239,12 @@ function getOptionSelected(selectElement){
 
 // look at this spag. Are you impressed?
 function getColourOnCanvas(){
-	var evt = window.event;
 	var canvasRect = canvas.getBoundingClientRect();
-	var mouseX = evt.clientX;
-	var mouseY = evt.clientY;
 
-	var x = mouseX - canvasRect.left;
-	var y = mouseY - canvasRect.top;
+	var x = mousePos.x - canvasRect.left;
+	var y = mousePos.y - canvasRect.top;
 
-/*	var data = context.getImageData(x,y, canvas.width, canvas.height);*/
-	// More efficient
-	var data = context.getImageData(x,y, x+1, y+1);
+	var data = context.getImageData(x,y, x, y);
 	var pixels = data.data;
 	var hexString = convertRGBToHex(pixels[0], pixels[1], pixels[2]);
 	assignRGBToDom(pixels[0], pixels[1], pixels[2], hexString);
