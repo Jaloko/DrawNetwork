@@ -296,13 +296,15 @@ document.addEventListener("mousedown", function(evt) {
 	if(evt.button === 0) {
     	mouseDown = true;
     	if(mouseDown === true) {
-    		if(brush.brushType === "dropper"){
-	    		brush.setColour(getColourOnCanvas().hex);
-				brush.setBrushType("freeroam");
-			} else if(brush.brushType === "fillBucket") {
-				fillBucket(context, brush.colour);
-				brush.setBrushType("freeroam");
-			}
+    		if(hasSynced == true) {
+    			if(brush.brushType === "dropper"){
+		    		brush.setColour(getColourOnCanvas().hex);
+					brush.setBrushType("freeroam");
+				} else if(brush.brushType === "fillBucket") {
+					fillBucket(context, brush.colour);
+					brush.setBrushType("freeroam");
+				}
+    		}
     	}
 	} else {
 		brush.colour = getRandomColor();

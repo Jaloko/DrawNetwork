@@ -18,6 +18,7 @@ function fillBucket(ctx, colour) {
 	 	}
 	 }
 	 context.putImageData(imgData, 0, 0);
+	 socket.emit('canvas update', canvas.toDataURL());
 }
 
 /**

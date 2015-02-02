@@ -39,6 +39,14 @@ io.sockets.on('connection', function(socket) {
 	socket.on('im not online', function() {
 		userCount++;
 	});
+
+	socket.on('canvas update', function(data) {
+		var newData = {
+			canvas: data
+		}
+		io.sockets.emit('sync result', newData);
+	});
+
 });
 
 setInterval(function() {
