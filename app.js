@@ -16,6 +16,14 @@ app.get('/', function(req, res) {
 
 io.sockets.on('connection', function(socket) {
 	socket.on('send message', function(data) {
+		for(var i = 0; i < users.length; i++) {
+			if(users[i] != null) {
+				if(users[i].name == data.name) {
+					users[i].colour = data.colour;
+					break;
+				}
+			}
+		}
 		socket.broadcast.emit('new message', data);
 	});
 
@@ -32,12 +40,31 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('im online', function(data) {
-		users.push(data);
-		userCount++;
+		if(users.length > 0) {
+			var counter = 0;
+			for(var i = 0; i < users.length; i++) {
+				if(users[i] != null) {
+					if(users[i].name == data.name) {
+						counter++;
+					}
+				}
+			}
+			if(counter <= 0) {
+				users.push(data);
+			}
+		}
+
 	});
 
-	socket.on('im not online', function() {
-		userCount++;
+	socket.on('im offline', function(data) {
+		for(var i = 0; i < users.length; i++) {
+			if(users[i] != null) {
+				if(users[i].name == data.name) {
+					users.splice(i, 1);
+					break;
+				}
+			}
+		}
 	});
 
 	socket.on('canvas update', function(data) {
@@ -52,10 +79,10 @@ io.sockets.on('connection', function(socket) {
 setInterval(function() {
 	io.sockets.emit('user list', users);
 	usersConnected = io.engine.clientsCount;
-	userCount = 0;
-		io.sockets.emit('get online', users);
-		users = [];
-}, 500 );
+/*	userCount = 0;
+	io.sockets.emit('get online', users);
+	users = [];*/
+}, 50 );
 
 /**Halp
 // send to current request socket client

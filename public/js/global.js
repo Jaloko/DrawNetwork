@@ -58,6 +58,11 @@ function sync() {
 		var data = "";
 		socket.emit('sync', data);
 		hasSynced = true;
+		var me = {
+			name : name,
+			colour: brush.colour
+		}
+		socket.emit('im online', me);
 	}
 }
 
@@ -75,6 +80,7 @@ function clearCanvas() {
 
 function draw() {
 	var json = {
+		name: name,
 		x: mousePos.x,
 		y: mousePos.y,
 		lastX: lastPos.x,
@@ -144,16 +150,13 @@ socket.on('user list', function(data) {
 
 });
 
-socket.on('get online', function(data) {
-	if(hasSynced == true && name != null) {
-		var me = {
-			name : name,
-			colour: brush.colour
-		}
-		socket.emit('im online', me);
-	} else {
-		socket.emit('im not online');
+// Fired when just before you leave the site
+window.addEventListener("beforeunload", function (e) {
+	var me = {
+		name : name,
+		colour: brush.colour
 	}
+	socket.emit('im offline', me);
 });	
 
 function clearUsers() {
