@@ -11,6 +11,7 @@ var socket = io.connect();
 var hasSynced = false;
 var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
+context.imageSmoothingEnabled = false;
 
 var Brush = function(){
 	this.size = 30,
@@ -53,6 +54,7 @@ function init() {
 
 function sync() {
 	if(hasSynced == false) {
+		name = document.getElementById('name').value;
 		var data = "";
 		socket.emit('sync', data);
 		hasSynced = true;
@@ -242,14 +244,26 @@ function getColourOnCanvas(){
 	var x = mouseX - canvasRect.left;
 	var y = mouseY - canvasRect.top;
 
-	var data = context.getImageData(x,y, canvas.width, canvas.height);
+/*	var data = context.getImageData(x,y, canvas.width, canvas.height);*/
+	// More efficient
+	var data = context.getImageData(x,y, x+1, y+1);
 	var pixels = data.data;
-
 	var hexString = convertRGBToHex(pixels[0], pixels[1], pixels[2]);
 	assignRGBToDom(pixels[0], pixels[1], pixels[2], hexString);
 	var hex = assignSelectedHexColour();
-	brush.setColour(hex);
-	brush.setBrushType("freeroam");
+
+	var rgba = {
+		r: pixels[0],
+		g: pixels[1],
+		b: pixels[2],
+		a: pixels[3]
+	};
+	var colour = {
+		hex: hex,
+		rgba: rgba
+	};
+
+	return colour;
 }
 
 /**
@@ -266,7 +280,7 @@ else {
 	canvas.attachEvent("onmousewheel", onMouseWheel);
 }
 
-canvas.addEventListener('mousemove', function(evt) {
+document.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(canvas, evt);
 	if(mouseDown === true && brush.getBrushType() === "freeroam") {
@@ -277,18 +291,24 @@ canvas.addEventListener('mousemove', function(evt) {
 	}
 }, false);
 
-canvas.addEventListener("mousedown", function(evt) {
+document.addEventListener("mousedown", function(evt) {
 	canvas.className = "dragged";
 	if(evt.button === 0) {
     	mouseDown = true;
-    	if(mouseDown === true && brush.brushType === "dropper"){
-    		getColourOnCanvas();
+    	if(mouseDown === true) {
+    		if(brush.brushType === "dropper"){
+	    		brush.setColour(getColourOnCanvas().hex);
+				brush.setBrushType("freeroam");
+			} else if(brush.brushType === "fillBucket") {
+				fillBucket(context, brush.colour);
+				brush.setBrushType("freeroam");
+			}
     	}
 	} else {
 		brush.colour = getRandomColor();
 	}
 });
-canvas.addEventListener("mouseup", function(evt) {
+document.addEventListener("mouseup", function(evt) {
 	canvas.className = ""; // Reverts to no classname
 	if(evt.button === 0) {
     	mouseDown = false;
@@ -303,6 +323,6 @@ document.getElementById('colourDrop').addEventListener('click', function(evt){
 	brush.setBrushType('dropper');
 });
 
-document.getElementById('freeroamBrush').addEventListener('click', function(evt){
-	brush.setBrushType('freeroam');
-})
+document.getElementById('fillBucket').addEventListener('click', function(evt){
+	brush.setBrushType('fillBucket');
+});
