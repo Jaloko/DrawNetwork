@@ -99,10 +99,10 @@ function initBuffers() {
     squareVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
     vertices = [
-         5.9,  1.0,  0.0,
+         1.0,  1.0,  0.0,
         -1.0,  1.0,  0.0,
-         5.9, -5.9,  0.0,
-        -1.0, -5.9,  0.0
+         1.0, -1.0,  0.0,
+        -1.0, -1.0,  0.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     squareVertexPositionBuffer.itemSize = 3;
@@ -143,11 +143,10 @@ function setMatrixUniforms() {
 function drawColourSquare() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+    mat4.ortho(this.pMatrix, -1.0, 1.0, -1.0, 1.0, 0.1, 100.0);
     mat4.identity(mvMatrix);
-    mat4.translate(mvMatrix, [0.0, 0.0, -7.0]);
+    mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -1.0]);
     setMatrixUniforms();
-    mat4.translate(mvMatrix, [-3.0, +2.0, 0.0]);
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
