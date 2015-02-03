@@ -3,26 +3,49 @@
 		<title>Coop Canvas</title>
 		<script src="/socket.io/socket.io.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/global.css">
+		<link rel="stylesheet" type="text/css" href="css/main.css">
 	</head>
 	<body onload="init()">
 		<div id="leftCol">
 			 <canvas id="canvas" width="960" height="528" style="border:1px solid #000000;"></canvas>
-		 	<input type="button" id="clearCanvas" value="Clear">
-		 	<input	type="button" id="colourDrop" value="Colour Dropper">
-		 	<input	type="button" id="fillBucket" value="Fill Bucket">
+			 <div id="canvas-functions">
+			 	<h2>Canvas Functions</h2>
+			 	<input type="button" id="clearCanvas" value="Clear">
+			 	<input	type="button" id="colourDrop" value="Colour Dropper">
+			 	<input	type="button" id="fillBucket" value="Fill Bucket">
 
-			 <select id="brushSelection">
-			 	<option value="5">Brush: 5</option>
-			 	<option value="10">Brush: 10</option>
-			 	<option value="15">Brush: 15</option>
-			 	<option value="20">Brush: 20</option>
-			 	<option value="25">Brush: 25</option>
-			 	<option value="30">Brush: 30</option>
-			 </select>
-
-			 <input id="name" type="text"></input>
-			 <button id="nameSubmit" type="submit" onclick="sync()">Submit Name</button>
-			 <div id="tool-col-pick">
+				<select id="brushSelection">
+				 	<option value="5">Brush: 5</option>
+				 	<option value="10">Brush: 10</option>
+				 	<option value="15">Brush: 15</option>
+				 	<option value="20">Brush: 20</option>
+				 	<option value="25">Brush: 25</option>
+				 	<option value="30">Brush: 30</option>
+				</select>
+				<input id="name" type="text"></input>
+				<button id="nameSubmit" type="submit" onclick="sync()">Submit Name</button>
+			 </div>
+			<div id="colour-picker">
+				<h2>Colour Picker</h2>
+				<div class="paletteLeftCol">
+					<canvas id="webgl-temp" width="250" height="250" style="display: none;"></canvas>
+					<canvas id="tint" width="250" height="250"></canvas>
+					<canvas id="hue" width="30" height="250"></canvas>
+				</div>
+				<div class="paletteArrowCol">
+					<div id="palette-arrow" class="arrow-left" style="position: absolute;"></div>
+				</div>
+				<div class="paletteRightCol">
+					<span class="value">R:</span>  <input id="rValue" type="text"></input></br>
+					<span class="value">G:</span>	<input id="gValue" type="text"></input></br>
+					<span class="value">B:</span>	<input id="bValue"type="text"></input></br>
+					<span class="value">Hex:</span>	<input id="hexValue"type="text"></input></br>
+					<div id="currentColour"></div>
+				</div>
+				<div class="clear">
+				</div>
+			</div>
+<!-- 			 <div id="tool-col-pick">
 			 	<canvas id="color-picker"></canvas>
 			 	<div id='tool-rgb-val'>
 			 		<h2>Colour Wheel</h2>
@@ -33,7 +56,7 @@
 			 		<span><label>Selected: </label><input id="selectedVal" type="text"></span>
 			 	</div>
 			 	<p>Mouse down to select the colour of the brush, moving around the colour wheel will display the colour... but not assign to the brush</p>
-			 </div>
+			 </div> -->
 		 </div>
 		 <div id="rightCol">
 		 	<h2>Online User List</h2>
@@ -41,7 +64,9 @@
 		 	</div>
 		 </div>
 	</body>
+		<script type="text/javascript" src="js/glMatrix-0.9.5.min.js"></script>
+	<script src="js/shaders.js"></script>
+	<script src="js/colour-picker2.js"></script>
 		<script src="js/global.js"></script>
-		<script src="js/color-picker.js"></script>
 		<script src="js/fill-bucket.js"></script>
 </html>

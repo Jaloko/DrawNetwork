@@ -3,7 +3,7 @@
 **/
 function fillBucket(ctx, colour) {
 	var colourVal = hexToRgb(colour);
-	var colourSelected = getColourOnCanvas().rgba;
+	var colourSelected = getColourOnCanvas(canvas, context);
 	var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	 for(var i = 0; i < imgData.data.length - 4; i+=4) {
 	 	if(imgData.data[i] == colourSelected.r && 

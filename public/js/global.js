@@ -50,6 +50,7 @@ function setNameTextBox() {
 
 function init() {
 	setNameTextBox();
+	webGLStart();
 }
 
 function sync() {
@@ -183,11 +184,14 @@ function getRandomColor() {
     return color;
 }
 
-function getMousePos(canvas, evt) {
-    var rect = canvas.getBoundingClientRect();
+function getMousePos(evt) {
+	// Scroll bar offsets
+	var doc = document.documentElement;
+	var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+	var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
     return {
-        x: evt.clientX - rect.left,
-       	y: evt.clientY - rect.top
+        x: evt.clientX + left,
+       	y: evt.clientY + top
     };
 }
 
@@ -236,7 +240,7 @@ function getOptionSelected(selectElement){
 	return selectElement.options[selectElement.selectedIndex].value;
 }
 
-
+/*
 // look at this spag. Are you impressed?
 function getColourOnCanvas(){
 	var canvasRect = canvas.getBoundingClientRect();
@@ -262,7 +266,7 @@ function getColourOnCanvas(){
 	};
 
 	return colour;
-}
+}*/
 
 /**
 ** Event Listeners
@@ -280,12 +284,14 @@ else {
 
 document.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
-	mousePos = getMousePos(canvas, evt);
+	mousePos = getMousePos(evt);
 	if(mouseDown === true && brush.getBrushType() === "freeroam") {
 		if(hasSynced == true) {
-			draw();
+			if(mouseIsHoveringCanvas(canvas)) {
+				draw();
+			}
+			changeColour();
 		}
-
 	}
 }, false);
 
@@ -296,12 +302,14 @@ document.addEventListener("mousedown", function(evt) {
     	if(mouseDown === true) {
     		if(hasSynced == true) {
     			if(brush.brushType === "dropper"){
-		    		brush.setColour(getColourOnCanvas().hex);
+    				var hex = convertRGBToHex(getColourOnCanvas(canvas, context).r, getColourOnCanvas(canvas, context).g, getColourOnCanvas(canvas, context).b);
+		    		brush.setColour(hex);
 					brush.setBrushType("freeroam");
 				} else if(brush.brushType === "fillBucket") {
 					fillBucket(context, brush.colour);
 					brush.setBrushType("freeroam");
 				}
+				changeColour();
     		}
     	}
 	} else {
