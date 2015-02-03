@@ -221,7 +221,12 @@ function assignHTMLValues() {
 }
 function getColourOnCanvas(canvas, ctx){
     var rect = canvas.getBoundingClientRect();
-    var data = ctx.getImageData(mousePos.x - rect.left, mousePos.y - rect.top, mousePos.x - rect.left, mousePos.y - rect.top);
+    var doc = document.documentElement;
+    var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+    var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+    var x = mousePos.x - left - rect.left;
+    var y = mousePos.y - top - rect.top;
+    var data = ctx.getImageData(x, y, x, y);
     var pixels = data.data;
     var rgba = {
         r: pixels[0],
