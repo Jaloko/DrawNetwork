@@ -13,11 +13,18 @@ var pickedColour = {
     b: 0
 }
 var tintCtx;
+var tintPointerCtx;
 var hueCtx;
 var image;
 var webglCanvas;
 var hueCanvas;
 var tintCanvas;
+var tintPointerCanvas;
+var tintPointer = {
+    x: 0,
+    y: 0
+}
+var canMoveTintPointer = false;
 
 /**
 ** WebGL Functions
@@ -26,6 +33,8 @@ function webGLStart() {
     webglCanvas = document.getElementById("webgl-temp");
     tintCanvas = document.getElementById("tint");
     tintCtx = tintCanvas.getContext('2d');
+    tintPointerCanvas = document.getElementById("tint-pointer");
+    tintPointerCtx = tintPointerCanvas.getContext('2d');
     hueCanvas = document.getElementById("hue");
     hueCtx = hueCanvas.getContext('2d');
     image = new Image();
@@ -41,6 +50,7 @@ function webGLStart() {
     gl.enable(gl.DEPTH_TEST);
 
     drawColourSquare();
+    drawTintPointer();
   }
 
 function initGL(canvas) {
@@ -108,10 +118,12 @@ function initBuffers() {
     squareVertexPositionBuffer.itemSize = 3;
     squareVertexPositionBuffer.numItems = 4;
     squareVertexColorBuffer = gl.createBuffer();
+
+    var col = checkPrimaryColour(pickedColour.r, pickedColour.g, pickedColour.b);
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
     var colors = [
-        1.0, 1.0, 1.0, 1.0,
-        pickedColour.r / 255, pickedColour.g / 255, pickedColour.b / 255, 1.0,
+        1.0060, 1.0060, 1.0060, 1.0,
+        (pickedColour.r / 255) + col.r, (pickedColour.g / 255) + col.g, (pickedColour.b / 255) + col.b, 1.0,
         0.0, 0.0, 0.0, 1.0,
         0.0, 0.0, 0.0, 1.0
     ];
@@ -119,12 +131,12 @@ function initBuffers() {
     squareVertexColorBuffer.itemSize = 4;
     squareVertexColorBuffer.numItems = 4;
 }
-
 function updateColourBuffer() {
+    var col = checkPrimaryColour(pickedColour.r, pickedColour.g, pickedColour.b);
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
     var colors = [
-        1.0, 1.0, 1.0, 1.0,
-        pickedColour.r / 255, pickedColour.g / 255, pickedColour.b / 255, 1.0,
+        1.0060, 1.0060, 1.0060, 1.0,
+        (pickedColour.r / 255) + col.r, (pickedColour.g / 255) + col.g, (pickedColour.b / 255) + col.b, 1.0,
         0.0, 0.0, 0.0, 1.0,
         0.0, 0.0, 0.0, 1.0
     ];
@@ -133,6 +145,26 @@ function updateColourBuffer() {
     squareVertexColorBuffer.numItems = 4;
 
     drawColourSquare();
+}
+
+function checkPrimaryColour(r, g, b) {
+    var obj = {
+        r: 0,
+        g: 0,
+        b: 0
+    }
+    if(r == 255) {
+        obj.r = 0.0060;
+    }
+
+    if(g == 255) {
+        obj.g = 0.0060;
+    }
+
+    if(b == 255) {
+        obj.b = 0.0060;
+    }
+    return obj;
 }
 
 function setMatrixUniforms() {
@@ -156,6 +188,23 @@ function drawColourSquare() {
     tintCtx.drawImage(webglCanvas, 0, 0);
 }
 
+function drawTintPointer() {
+     // Draw the colour pointer
+    tintPointerCtx.clearRect ( 0 , 0 , tintPointerCanvas.width, tintPointerCanvas.height );
+    tintPointerCtx.beginPath();
+    tintPointerCtx.strokeStyle = 'white';
+    tintPointerCtx.arc(tintPointer.x,tintPointer.y,5,0,2*Math.PI);
+    tintPointerCtx.stroke();
+    tintPointerCtx.beginPath();
+    tintPointerCtx.strokeStyle = 'black';
+    tintPointerCtx.arc(tintPointer.x,tintPointer.y,6,0,2*Math.PI);
+    tintPointerCtx.stroke();
+    tintPointerCtx.beginPath();
+    tintPointerCtx.strokeStyle = 'white';
+    tintPointerCtx.arc(tintPointer.x,tintPointer.y,7,0,2*Math.PI);
+    tintPointerCtx.stroke();
+}
+
 /**
 ** Colour Picker Functions
 **/
@@ -165,8 +214,42 @@ function changeColour() {
         g: 0,
         b: 0
     };
-    if(mouseIsHoveringCanvas(tintCanvas)) {
-        rgb = getColourOnCanvas(tintCanvas, tintCtx);
+    if(canMoveTintPointer == true) {
+        var canvasRect = tintCanvas.getBoundingClientRect();
+        if(mouseIsHoveringCanvas(tintCanvas)) {
+            tintPointer = getActualMousePos(tintCanvas);
+            tintPointer.x -= canvasRect.left;
+            tintPointer.y -= canvasRect.top;
+        } else {
+            var pos = getActualMousePos(tintCanvas);
+            if(pos.x < canvasRect.left && pos.y < canvasRect.top) {
+                tintPointer.x = 0;
+                tintPointer.y = 0;
+            } else if(pos.x >= canvasRect.right && pos.y < canvasRect.top) {
+                tintPointer.x = 255;
+                tintPointer.y = 0;
+            } else if(pos.x >= canvasRect.right && pos.y >= canvasRect.bottom) {
+                tintPointer.x = 255; 
+                tintPointer.y = 255;
+            } else if(pos.x < canvasRect.left && pos.y >= canvasRect.bottom) {
+                tintPointer.x = 0;
+                tintPointer.y = 255;
+            } else if(pos.x < canvasRect.left) {
+                tintPointer.x = 0;
+                tintPointer.y = pos.y - canvasRect.top;
+            }  else if(pos.x >= canvasRect.right) {
+                tintPointer.x = 255;
+                tintPointer.y = pos.y - canvasRect.top;
+            } else if(pos.y < canvasRect.top) {
+                tintPointer.x = pos.x - canvasRect.left;
+                tintPointer.y = 0; 
+            } else if(pos.y >= canvasRect.bottom) {
+                tintPointer.x = pos.x - canvasRect.left;
+                tintPointer.y = 255; 
+            }
+        }
+
+        rgb = getColourOnTintCanvas();
         pickedColour.r = rgb.r;
         pickedColour.g = rgb.g;
         pickedColour.b = rgb.b;
@@ -176,6 +259,9 @@ function changeColour() {
         currentColour.style.height = "100px";
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         assignHTMLValues();
+
+        // Draw the tint pointer because it has moved
+        drawTintPointer();
     } else if(mouseIsHoveringCanvas(hueCanvas)) {
         rgb = getColourOnCanvas(hueCanvas, hueCtx);
         pickedColour.r = rgb.r;
@@ -190,18 +276,35 @@ function changeColour() {
         paletteArrow.style.top = mousePos.y - 10 + "px";
         assignHTMLValues();
         updateColourBuffer();
+                
+        // Apply tint based on tint pointer
+        rgb = getColourOnTintCanvas();
+        pickedColour.r = rgb.r;
+        pickedColour.g = rgb.g;
+        pickedColour.b = rgb.b;
+        brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
+        var currentColour = document.getElementById('currentColour');
+        currentColour.style.width = "100px";
+        currentColour.style.height = "100px";
+        currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
+        assignHTMLValues();
     }
 }
 
-function mouseIsHoveringCanvas(canvas) {
+function getActualMousePos(canvas) {
     var doc = document.documentElement;
     var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
     var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
     var x = mousePos.x - left;
     var y = mousePos.y - top;
+    return {x: x, y: y};
+}
+
+function mouseIsHoveringCanvas(canvas) {
+    var pos = getActualMousePos(canvas);
     var canvasRect = canvas.getBoundingClientRect();
-    if(x >= canvasRect.left && x <= canvasRect.right 
-        && y >= canvasRect.top && y <= canvasRect.bottom) {
+    if(pos.x >= canvasRect.left && pos.x <= canvasRect.right 
+        && pos.y >= canvasRect.top && pos.y <= canvasRect.bottom) {
         return true;
     } else {
         return false;
@@ -218,6 +321,30 @@ function assignHTMLValues() {
     var hexValue = document.getElementById('hexValue');
     hexValue.value = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
 }
+
+function getColourOnTintCanvas() {
+    var x = tintPointer.x;
+    var y = tintPointer.y;
+
+    // Make sure within array bounds
+    if(x >= 254) {
+        x = 254;
+    }
+    if(y >= 254) {
+        y = 254;
+    }
+
+    var data = tintCtx.getImageData(x, y, 1, 1);
+    var pixels = data.data;
+    var rgba = {
+        r: pixels[0],
+        g: pixels[1],
+        b: pixels[2],
+        a: pixels[3]
+    };
+    return rgba;
+}
+
 function getColourOnCanvas(canvas, ctx){
     var rect = canvas.getBoundingClientRect();
     var doc = document.documentElement;
@@ -225,7 +352,8 @@ function getColourOnCanvas(canvas, ctx){
     var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
     var x = mousePos.x - left - rect.left;
     var y = mousePos.y - top - rect.top;
-    var data = ctx.getImageData(x, y, x, y);
+
+    var data = ctx.getImageData(x, y, 1, 1);
     var pixels = data.data;
     var rgba = {
         r: pixels[0],

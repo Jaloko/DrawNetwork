@@ -25,11 +25,12 @@
 				<input id="name" type="text"></input>
 				<button id="nameSubmit" type="submit" onclick="sync()">Submit Name</button>
 			 </div>
-			<div id="colour-picker">
+			<div onmousedown="return false"id="colour-picker">
 				<h2>Colour Picker</h2>
 				<div class="paletteLeftCol">
 					<canvas id="webgl-temp" width="255" height="255" style="display: none;"></canvas>
 					<canvas id="tint" width="255" height="255"></canvas>
+					<canvas id="tint-pointer" style="position:absolute; left:0"; width="255" height="255"></canvas>
 					<canvas id="hue" width="30" height="255"></canvas>
 				</div>
 				<div class="paletteArrowCol">

@@ -300,6 +300,12 @@ document.addEventListener("mousedown", function(evt) {
 	if(evt.button === 0) {
     	mouseDown = true;
     	if(mouseDown === true) {
+    		// Located in colour-picker2.js
+		    if(canMoveTintPointer == false) {
+		        if(mouseIsHoveringCanvas(tintCanvas)) {
+		            canMoveTintPointer = true;
+		        }  
+		    }
     		if(hasSynced == true) {
     			if(brush.brushType === "dropper"){
     				var hex = convertRGBToHex(getColourOnCanvas(canvas, context).r, getColourOnCanvas(canvas, context).g, getColourOnCanvas(canvas, context).b);
@@ -320,6 +326,10 @@ document.addEventListener("mouseup", function(evt) {
 	canvas.className = ""; // Reverts to no classname
 	if(evt.button === 0) {
     	mouseDown = false;
+	   // Located in colour-picker2.js
+	    if(canMoveTintPointer == true) {
+	        canMoveTintPointer = false;
+	    }
 	}
 });
 
