@@ -6,7 +6,6 @@ var express = require('express'),
 
 var users = [];
 var usersConnected;
-var userCount;
 server.listen(3000);
 
 app.get('/', function(req, res) {
@@ -15,6 +14,8 @@ app.get('/', function(req, res) {
 
 
 io.sockets.on('connection', function(socket) {
+	var sessionid = socket.id;
+
 	socket.on('send message', function(data) {
 		for(var i = 0; i < users.length; i++) {
 			if(users[i] != null) {
@@ -27,8 +28,7 @@ io.sockets.on('connection', function(socket) {
 		socket.broadcast.emit('new message', data);
 	});
 
-	socket.on('sync', function(data) {
-		users.push(data.name);
+	socket.on('sync', function() {
 		socket.broadcast.emit('send canvas', users);
 	});
 
@@ -40,7 +40,7 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('im online', function(data) {
-		if(users.length > 0) {
+		if(validateText(data.name)) {
 			var counter = 0;
 			for(var i = 0; i < users.length; i++) {
 				if(users[i] != null) {
@@ -51,9 +51,9 @@ io.sockets.on('connection', function(socket) {
 			}
 			if(counter <= 0) {
 				users.push(data);
+				socket.emit('user validated');
 			}
 		}
-
 	});
 
 	socket.on('im offline', function(data) {
@@ -66,23 +66,21 @@ io.sockets.on('connection', function(socket) {
 			}
 		}
 	});
-
-	socket.on('canvas update', function(data) {
-		var newData = {
-			canvas: data
-		}
-		io.sockets.emit('sync result', newData);
-	});
-
 });
 
 setInterval(function() {
 	io.sockets.emit('user list', users);
 	usersConnected = io.engine.clientsCount;
-/*	userCount = 0;
-	io.sockets.emit('get online', users);
-	users = [];*/
-}, 50 );
+}, 50);
+
+
+function validateText(text) {
+	if(new RegExp('^[A-Za-z0-9 ]*$').test(text)) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 /**Halp
 // send to current request socket client

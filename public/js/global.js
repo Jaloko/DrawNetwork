@@ -57,15 +57,18 @@ function sync() {
 	if(hasSynced == false) {
 		name = document.getElementById('name').value;
 		var data = "";
-		socket.emit('sync', data);
-		hasSynced = true;
 		var me = {
-			name : name,
+			name : document.getElementById('name').value,
 			colour: brush.colour
 		}
 		socket.emit('im online', me);
 	}
 }
+
+socket.on('user validated', function() {
+	socket.emit('sync');
+	hasSynced = true;
+});
 
 
 /*
