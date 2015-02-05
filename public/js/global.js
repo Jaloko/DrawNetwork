@@ -35,7 +35,7 @@ var brush = new Brush();
 
 var name;
 var randomNames = [
-"Beulah	Wright", "Curtis	Fox", "Levi	Collins", "Gustavo	Russell", "Erica	Lowe", "Sherri	Mcbride", "Zachary	Martin", "Preston	Fletcher", "Jack	Shaw", "Chris	Carr", "Morris	Goodwin", "Raquel	Drake", "Sandy	Pearson", "Francis	Farmer", "Erika	Haynes", "Edgar	Warren", "Randal	Love", "Lucas	Cannon", "Ismael	Terry", "Rex	Alexander", "Russell	Houston", "Kenneth	Potter", "Ricky	James", "Latoya	Rivera", "Katherine	Chapman", "Gerald	Gomez", "Glenda	Robinson", "Adrian	Cox", "Maurice	Barton", "Harold	Hansen", "Nicole	Townsend", "Jorge	Waters", "Hugo	Hampton", "Stephen	Mcgee", "Marguerite	Conner", "Bill	Newman", "Rodney	Cook", "Santiago	Reid", "Toby	Casey", "Mamie	Allison", "Tami	Lawrence", "Tim	Crawford", "Paula	Carpenter", "Flora	Young", "Marian	Ferguson","Lewis	Carlson", "Nina	Wise", "Elisa	Hanson", "Shelly	Lucas", "Gabriel	Stevenson", "Elbert	Reeves", "Vicky	Jackson", "Cassandra	Moreno", "Becky	Todd", "Jimmy	Soto", "Opal	Hicks", "Darren	Mendoza", "Reginald	Watts", "Cesar	Sutton", "Lionel	Rodgers", "Christopher	Robertson", "Terrance	Byrd", "Kristy	Garza", "Herbert	Flowers", "Kirk	Schmidt", "Dennis	Thomas", "Essie	Henry", "Abel	Tucker", "Katrina	Phelps", "Rolando	Gonzalez", "Olga	Howard", "Cecilia	Cortez", "Tanya	Cohen", "Juanita	Rios", "Jeff	Davis", "Marty	Perkins", "Ian	Ortiz", "Andy	George", "Salvatore	Hamilton", "Verna	Barker", "Louise	Frank", "April	Nunez", "Bonnie	Ramirez", "Kay	Sherman", "Stacy	Nelson", "Lorraine	White", "Paul	Glover", "Otis	Woods", "Darrin	Guerrero", "Whitney	Underwood", "Henry	Graves", "Eula	Leonard", "Francis	Sanchez", "Hubert	Christensen", "Doug	Stanley", "Neal	Washington", "Everett	Harvey", "Nicholas	Hale", "Pedro	Ramsey", "Sadie	Stephens"]
+"Beulah Wright", "Curtis Fox", "Levi Collins", "Gustavo	Russell", "Erica Lowe", "Sherri Mcbride", "Zachary Martin", "Preston Fletcher", "Jack Shaw", "Chris Carr", "Morris Goodwin", "Raquel Drake", "Sandy Pearson", "Francis Farmer", "Erika Haynes", "Edgar Warren", "Randal Love", "Lucas Cannon", "Ismael Terry", "Rex Alexander", "Russell Houston", "Kenneth Potter", "Ricky James", "Latoya Rivera", "Katherine Chapman", "Gerald Gomez", "Glenda Robinson", "Adrian Cox", "Maurice Barton", "Harold Hansen", "Nicole Townsend", "Jorge Waters", "Hugo Hampton", "Stephen Mcgee", "Marguerite Conner", "Bill Newman", "Rodney Cook", "Santiago Reid", "Toby Casey", "Mamie Allison", "Tami Lawrence", "Tim Crawford", "Paula Carpenter", "Flora Young", "Marian Ferguson","Lewis Carlson", "Nina Wise", "Elisa Hanson", "Shelly Lucas", "Gabriel Stevenson", "Elbert Reeves", "Vicky Jackson", "Cassandra Moreno", "Becky Todd", "Jimmy Soto", "Opal Hicks", "Darren Mendoza", "Reginald Watts", "Cesar Sutton", "Lionel Rodgers", "Christopher Robertson", "Terrance Byrd", "Kristy Garza", "Herbert Flowers", "Kirk Schmidt", "Dennis Thomas", "Essie Henry", "Abel Tucker", "Katrina Phelps", "Rolando Gonzalez", "Olga Howard", "Cecilia Cortez", "Tanya Cohen", "Juanita Rios", "Jeff Davis", "Marty Perkins", "Ian Ortiz", "Andy George", "Salvatore Hamilton", "Verna Barker", "Louise Frank", "April Nunez", "Bonnie Ramirez", "Kay Sherman", "Stacy Nelson", "Lorraine White", "Paul Glover", "Otis Woods", "Darrin Guerrero", "Whitney Underwood", "Henry Graves", "Eula Leonard", "Francis Sanchez", "Hubert Christensen", "Doug Stanley", "Neal Washington", "Everett Harvey", "Nicholas Hale", "Pedro Ramsey", "Sadie Stephens"]
 
 function pickRandomName() {
 	var rand = Math.floor(Math.random() * randomNames.length);
@@ -70,59 +70,7 @@ socket.on('user validated', function() {
 	hasSynced = true;
 });
 
-
-/*
-	Canvas Methods
-*/
-
-function clearCanvas() {
-	context.fillStyle = "white";
-   	context.fillRect(0, 0, canvas.width, canvas.height);
-   	socket.emit('recieve canvas', canvas.toDataURL());
-}
-
-
-function draw() {
-	var json = {
-		name: name,
-		x: mousePos.x,
-		y: mousePos.y,
-		lastX: lastPos.x,
-		lastY: lastPos.y,
-		size: brush.size,
-		colour: brush.colour
-	}
-	drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
-	/*drawRect(json.x, json.y, json.colour);*/
-	socket.emit('send message', json);
-}
-
-function drawRect(x, y, colour) {
-    context.fillStyle = colour;
-	context.fillRect(x, y, 15, 15);
-}
-
-function drawCircle(x, y, size, colour) {
-	//draw a circle
-	context.lineTo(x, y);
-	context.fillStyle = colour;
-	context.beginPath();
-	context.arc(x, y, size, 0, Math.PI*2, true); 
-	context.closePath();
-	context.fill();
-}
-
-function drawLine(x, y, lastX, lastY, size, colour) {
-	context.strokeStyle = colour;
-	context.lineWidth = size;
-	context.lineCap = "round";
-	context.beginPath();
-	context.moveTo(lastX , lastY);
-	context.lineTo(x,y);
-	context.stroke();
-}
-
-socket.on('new message', function(data) {
+socket.on('sync draw', function(data) {
 	drawLine(data.x, data.y, data.lastX, data.lastY, data.size, data.colour);
 });
 
@@ -151,8 +99,61 @@ socket.on('user list', function(data) {
 			}
 		}
 	}
-
 });
+
+
+/*
+	Canvas Methods
+*/
+
+function clearCanvas() {
+	context.fillStyle = "white";
+   	context.fillRect(0, 0, canvas.width, canvas.height);
+   	socket.emit('recieve canvas', canvas.toDataURL());
+}
+
+
+function draw() {
+	var json = {
+		name: name,
+		x: mousePos.x,
+		y: mousePos.y,
+		lastX: lastPos.x,
+		lastY: lastPos.y,
+		size: brush.size,
+		colour: brush.colour
+	}
+	drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+	/*drawRect(json.x, json.y, json.colour);*/
+	socket.emit('draw', json);
+}
+
+function drawRect(x, y, colour) {
+    context.fillStyle = colour;
+	context.fillRect(x, y, 15, 15);
+}
+
+function drawCircle(x, y, size, colour) {
+	//draw a circle
+	context.lineTo(x, y);
+	context.fillStyle = colour;
+	context.beginPath();
+	context.arc(x, y, size, 0, Math.PI*2, true); 
+	context.closePath();
+	context.fill();
+}
+
+function drawLine(x, y, lastX, lastY, size, colour) {
+	context.strokeStyle = colour;
+	context.lineWidth = size;
+	context.lineCap = "round";
+	context.beginPath();
+	context.moveTo(lastX , lastY);
+	context.lineTo(x,y);
+	context.stroke();
+}
+
+
 
 // Fired when just before you leave the site
 window.addEventListener("beforeunload", function (e) {

@@ -14,19 +14,6 @@ app.get('/', function(req, res) {
 
 
 io.sockets.on('connection', function(socket) {
-	var sessionid = socket.id;
-
-	socket.on('send message', function(data) {
-		for(var i = 0; i < users.length; i++) {
-			if(users[i] != null) {
-				if(users[i].name == data.name) {
-					users[i].colour = data.colour;
-					break;
-				}
-			}
-		}
-		socket.broadcast.emit('new message', data);
-	});
 
 	socket.on('sync', function() {
 		socket.broadcast.emit('send canvas', users);
@@ -39,8 +26,24 @@ io.sockets.on('connection', function(socket) {
 		io.sockets.emit('sync result', newData);
 	});
 
+	socket.on('draw', function(data) {
+		if(validateText(data.name) && data.name.length <= 30 && validateHex(data.colour)
+			&& validateNumber(data.x) && validateNumber(data.y) && validateNumber(data.lastX)
+			&& validateNumber(data.lastY) && validateNumber(data.size)) {
+			for(var i = 0; i < users.length; i++) {
+				if(users[i] != null) {
+					if(users[i].name == data.name) {
+						users[i].colour = data.colour;
+						break;
+					}
+				}
+			}
+			socket.broadcast.emit('sync draw', data);
+		}
+	});
+
 	socket.on('im online', function(data) {
-		if(validateText(data.name)) {
+		if(validateText(data.name) && data.name.length <= 30 && validateHex(data.colour)) {
 			var counter = 0;
 			for(var i = 0; i < users.length; i++) {
 				if(users[i] != null) {
@@ -52,30 +55,44 @@ io.sockets.on('connection', function(socket) {
 			if(counter <= 0) {
 				users.push(data);
 				socket.emit('user validated');
+				io.sockets.emit('user list', users);
 			}
 		}
 	});
 
 	socket.on('im offline', function(data) {
-		for(var i = 0; i < users.length; i++) {
-			if(users[i] != null) {
-				if(users[i].name == data.name) {
-					users.splice(i, 1);
-					break;
+		if(validateText(data.name) && data.name.length <= 30 && validateHex(data.colour)) {
+			for(var i = 0; i < users.length; i++) {
+				if(users[i] != null) {
+					if(users[i].name == data.name) {
+						users.splice(i, 1);
+						break;
+					}
 				}
 			}
+			io.sockets.emit('user list', users);
 		}
 	});
 });
 
-setInterval(function() {
-	io.sockets.emit('user list', users);
-	usersConnected = io.engine.clientsCount;
-}, 50);
-
-
 function validateText(text) {
-	if(new RegExp('^[A-Za-z0-9 ]*$').test(text)) {
+	if(new RegExp('^[A-Za-z0-9 ]+$').test(text)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function validateHex(hex) {
+	if(new RegExp('^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$').test(hex)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function validateNumber(number) {
+	if(new RegExp('[0-9]').test(number)) {
 		return true;
 	} else {
 		return false;
