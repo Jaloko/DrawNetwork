@@ -5,6 +5,7 @@ var express = require('express'),
 	app.use(express.static('public'));
 
 var users = [];
+var serverUsers = [];
 var usersConnected;
 server.listen(3000);
 
@@ -13,47 +14,107 @@ app.get('/', function(req, res) {
 });
 
 
+function pickRandom(socket) {
+	var rand = Math.floor(Math.random() * (users.length - 1));
+	if(socket.id == serverUsers[rand].id) {
+		pickRandom()
+	} else {
+		return rand;
+	}
+}
+
 io.sockets.on('connection', function(socket) {
-
 	socket.on('sync', function() {
-		socket.broadcast.emit('send canvas', users);
-	});
-
-	socket.on('recieve canvas', function(data) {
-		var newData = {
-			canvas: data
-		}
-		io.sockets.emit('sync result', newData);
-	});
-
-	socket.on('draw', function(data) {
-		if(validateText(data.name) && data.name.length <= 30 && validateHex(data.colour)
-			&& validateNumber(data.x) && validateNumber(data.y) && validateNumber(data.lastX)
-			&& validateNumber(data.lastY) && validateNumber(data.size)) {
-			for(var i = 0; i < users.length; i++) {
-				if(users[i] != null) {
-					if(users[i].name == data.name) {
-						users[i].colour = data.colour;
+/*		io.engine.clientsCount*/
+		if(users.length >= 2) {
+			for(var i = 0; i < serverUsers.length; i++) {
+				if(serverUsers[i].id == socket.id) {
+					if(serverUsers[i].hasSynced != true) {
+						var rand = pickRandom(socket);
+						serverUsers[rand].canSync = true;
+						io.to(serverUsers[rand].id).emit('send canvas');
 						break;
 					}
 				}
 			}
-			socket.broadcast.emit('sync draw', data);
+		} else {
+			serverUsers[0].hasSynced = true;
+		}
+
+/*		socket.broadcast.emit('send canvas');*/
+	});
+
+	socket.on('recieve canvas', function(data) {
+		for(var i = 0; i < serverUsers.length; i++) {
+			if(serverUsers[i].id == socket.id) {
+				if(serverUsers[i].canSync == true) {
+					var newData = {
+						canvas: data
+					}
+					for(var ii = 0; ii < serverUsers.length; ii++) {
+						if(serverUsers[ii].hasSynced == false) {
+							io.to(serverUsers[ii].id).emit('sync result', newData);
+							serverUsers[ii].hasSynced = true;
+						}
+					}
+					serverUsers[i].canSync = false;
+					break;
+				}
+			}
+		}
+/*		var newData = {
+			canvas: data
+		}
+		io.sockets.emit('sync result', newData);*/
+	});
+
+	socket.on('draw', function(data) {
+		var newData = {
+			name: data.name,
+			x: data.x,
+			y: data.y,
+			lastX: data.lastX,
+			lastY: data.lastY,
+			size: data.size,
+			colour: data.colour
+		};
+		if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)
+			&& validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.lastX)
+			&& validateNumber(newData.lastY) && validateNumber(newData.size)) {
+			for(var i = 0; i < users.length; i++) {
+				if(users[i] != null) {
+					if(users[i].name == newData.name) {
+						users[i].colour = newData.colour;
+						break;
+					}
+				}
+			}
+			socket.broadcast.emit('sync draw', newData);
 		}
 	});
 
 	socket.on('im online', function(data) {
-		if(validateText(data.name) && data.name.length <= 30 && validateHex(data.colour)) {
+		var newData = {
+			name: data.name,
+			colour : data.colour
+		};
+		if(validateText(data.name) && newData.name.length <= 30 && validateHex(newData.colour)) {
 			var counter = 0;
 			for(var i = 0; i < users.length; i++) {
 				if(users[i] != null) {
-					if(users[i].name == data.name) {
+					if(users[i].name == newData.name) {
 						counter++;
 					}
 				}
 			}
 			if(counter <= 0) {
-				users.push(data);
+				users.push(newData);
+				var serverUser = {
+					id: socket.id,
+					hasSynced: false,
+					canSync: false
+				}
+				serverUsers.push(serverUser);
 				socket.emit('user validated');
 				io.sockets.emit('user list', users);
 			}
@@ -61,17 +122,26 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('im offline', function(data) {
-		if(validateText(data.name) && data.name.length <= 30 && validateHex(data.colour)) {
+		var newData = {
+			name: data.name,
+			colour : data.colour
+		};
+		if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)) {
 			for(var i = 0; i < users.length; i++) {
 				if(users[i] != null) {
-					if(users[i].name == data.name) {
+					if(users[i].name == newData.name) {
 						users.splice(i, 1);
+						serverUsers.splice(i, 1);
 						break;
 					}
 				}
 			}
 			io.sockets.emit('user list', users);
 		}
+	});
+
+	socket.on('clear canvas', function() {
+		socket.broadcast.emit('recieve clear canvas');
 	});
 });
 

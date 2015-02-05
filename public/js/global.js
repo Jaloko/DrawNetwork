@@ -67,6 +67,7 @@ function sync() {
 
 socket.on('user validated', function() {
 	socket.emit('sync');
+	// This needs to be fixed so you cant draw until synced
 	hasSynced = true;
 });
 
@@ -82,7 +83,7 @@ socket.on('sync result', function(data) {
 	img.src = data.canvas;
 });
 
-socket.on('send canvas', function(data) {
+socket.on('send canvas', function() {
 	socket.emit('recieve canvas', canvas.toDataURL());
 });
 
@@ -101,6 +102,11 @@ socket.on('user list', function(data) {
 	}
 });
 
+socket.on('recieve clear canvas', function() {
+	context.fillStyle = "white";
+   	context.fillRect(0, 0, canvas.width, canvas.height);
+});
+
 
 /*
 	Canvas Methods
@@ -109,7 +115,7 @@ socket.on('user list', function(data) {
 function clearCanvas() {
 	context.fillStyle = "white";
    	context.fillRect(0, 0, canvas.width, canvas.height);
-   	socket.emit('recieve canvas', canvas.toDataURL());
+   	socket.emit('clear canvas');
 }
 
 
@@ -160,7 +166,7 @@ window.addEventListener("beforeunload", function (e) {
 	var me = {
 		name : name,
 		colour: brush.colour
-	}
+	};
 	socket.emit('im offline', me);
 });	
 
@@ -171,7 +177,7 @@ function clearUsers() {
 
 function addUser(name, colour) {
 	var users = document.getElementById('users');
-	var newUser = '<div id="' + name +  '" class="row"><div class="colour" style="background-color: ' + colour + ';"></div><div class="name">' + name + '</div></div>';
+	var newUser = '<div id="' + name + '" class="row"><div class="colour" style="background-color: ' + colour + ';"></div><div class="name">' + name + '</div></div>';
 	users.innerHTML += newUser;
 }
 
