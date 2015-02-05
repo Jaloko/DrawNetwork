@@ -7,6 +7,9 @@ var express = require('express'),
 var users = [];
 var serverUsers = [];
 var usersConnected;
+
+var storedCanvas;
+
 server.listen(3000);
 
 app.get('/', function(req, res) {
@@ -39,8 +42,12 @@ io.sockets.on('connection', function(socket) {
 			}
 		} else {
 			serverUsers[0].hasSynced = true;
+			if(storedCanvas != null) {
+				socket.emit('sync result', storedCanvas);
+			} else {
+				socket.emit('sync result', null);
+			}
 		}
-
 /*		socket.broadcast.emit('send canvas');*/
 	});
 
@@ -48,9 +55,7 @@ io.sockets.on('connection', function(socket) {
 		for(var i = 0; i < serverUsers.length; i++) {
 			if(serverUsers[i].id == socket.id) {
 				if(serverUsers[i].canSync == true) {
-					var newData = {
-						canvas: data
-					}
+					var newData = data;
 					for(var ii = 0; ii < serverUsers.length; ii++) {
 						if(serverUsers[ii].hasSynced == false) {
 							io.to(serverUsers[ii].id).emit('sync result', newData);
@@ -142,6 +147,12 @@ io.sockets.on('connection', function(socket) {
 
 	socket.on('clear canvas', function() {
 		socket.broadcast.emit('recieve clear canvas');
+	});
+
+	socket.on('store canvas', function(data) {
+		if(users.length == 1) {
+			storedCanvas = data;
+		}
 	});
 });
 

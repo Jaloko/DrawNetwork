@@ -35,7 +35,8 @@ var brush = new Brush();
 
 var name;
 var randomNames = [
-"Beulah Wright", "Curtis Fox", "Levi Collins", "Gustavo	Russell", "Erica Lowe", "Sherri Mcbride", "Zachary Martin", "Preston Fletcher", "Jack Shaw", "Chris Carr", "Morris Goodwin", "Raquel Drake", "Sandy Pearson", "Francis Farmer", "Erika Haynes", "Edgar Warren", "Randal Love", "Lucas Cannon", "Ismael Terry", "Rex Alexander", "Russell Houston", "Kenneth Potter", "Ricky James", "Latoya Rivera", "Katherine Chapman", "Gerald Gomez", "Glenda Robinson", "Adrian Cox", "Maurice Barton", "Harold Hansen", "Nicole Townsend", "Jorge Waters", "Hugo Hampton", "Stephen Mcgee", "Marguerite Conner", "Bill Newman", "Rodney Cook", "Santiago Reid", "Toby Casey", "Mamie Allison", "Tami Lawrence", "Tim Crawford", "Paula Carpenter", "Flora Young", "Marian Ferguson","Lewis Carlson", "Nina Wise", "Elisa Hanson", "Shelly Lucas", "Gabriel Stevenson", "Elbert Reeves", "Vicky Jackson", "Cassandra Moreno", "Becky Todd", "Jimmy Soto", "Opal Hicks", "Darren Mendoza", "Reginald Watts", "Cesar Sutton", "Lionel Rodgers", "Christopher Robertson", "Terrance Byrd", "Kristy Garza", "Herbert Flowers", "Kirk Schmidt", "Dennis Thomas", "Essie Henry", "Abel Tucker", "Katrina Phelps", "Rolando Gonzalez", "Olga Howard", "Cecilia Cortez", "Tanya Cohen", "Juanita Rios", "Jeff Davis", "Marty Perkins", "Ian Ortiz", "Andy George", "Salvatore Hamilton", "Verna Barker", "Louise Frank", "April Nunez", "Bonnie Ramirez", "Kay Sherman", "Stacy Nelson", "Lorraine White", "Paul Glover", "Otis Woods", "Darrin Guerrero", "Whitney Underwood", "Henry Graves", "Eula Leonard", "Francis Sanchez", "Hubert Christensen", "Doug Stanley", "Neal Washington", "Everett Harvey", "Nicholas Hale", "Pedro Ramsey", "Sadie Stephens"]
+"Beulah Wright", "Curtis Fox", "Levi Collins", "Gustavo	Russell", "Erica Lowe", "Sherri Mcbride", "Zachary Martin", "Preston Fletcher", "Jack Shaw", "Chris Carr", "Morris Goodwin", "Raquel Drake", "Sandy Pearson", "Francis Farmer", "Erika Haynes", "Edgar Warren", "Randal Love", "Lucas Cannon", "Ismael Terry", "Rex Alexander", "Russell Houston", "Kenneth Potter", "Ricky James", "Latoya Rivera", "Katherine Chapman", "Gerald Gomez", "Glenda Robinson", "Adrian Cox", "Maurice Barton", "Harold Hansen", "Nicole Townsend", "Jorge Waters", "Hugo Hampton", "Stephen Mcgee", "Marguerite Conner", "Bill Newman", "Rodney Cook", "Santiago Reid", "Toby Casey", "Mamie Allison", "Tami Lawrence", "Tim Crawford", "Paula Carpenter", "Flora Young", "Marian Ferguson","Lewis Carlson", "Nina Wise", "Elisa Hanson", "Shelly Lucas", "Gabriel Stevenson", "Elbert Reeves", "Vicky Jackson", "Cassandra Moreno", "Becky Todd", "Jimmy Soto", "Opal Hicks", "Darren Mendoza", "Reginald Watts", "Cesar Sutton", "Lionel Rodgers", "Christopher Robertson", "Terrance Byrd", "Kristy Garza", "Herbert Flowers", "Kirk Schmidt", "Dennis Thomas", "Essie Henry", "Abel Tucker", "Katrina Phelps", "Rolando Gonzalez", "Olga Howard", "Cecilia Cortez", "Tanya Cohen", "Juanita Rios", "Jeff Davis", "Marty Perkins", "Ian Ortiz", "Andy George", "Salvatore Hamilton", "Verna Barker", "Louise Frank", "April Nunez", "Bonnie Ramirez", "Kay Sherman", "Stacy Nelson", "Lorraine White", "Paul Glover", "Otis Woods", "Darrin Guerrero", "Whitney Underwood", "Henry Graves", "Eula Leonard", "Francis Sanchez", "Hubert Christensen", "Doug Stanley", "Neal Washington", "Everett Harvey", "Nicholas Hale", "Pedro Ramsey", "Sadie Stephens"];
+var connectedUsers;
 
 function pickRandomName() {
 	var rand = Math.floor(Math.random() * randomNames.length);
@@ -68,7 +69,6 @@ function sync() {
 socket.on('user validated', function() {
 	socket.emit('sync');
 	// This needs to be fixed so you cant draw until synced
-	hasSynced = true;
 });
 
 socket.on('sync draw', function(data) {
@@ -76,11 +76,14 @@ socket.on('sync draw', function(data) {
 });
 
 socket.on('sync result', function(data) {
-	var img = new Image();
-	img.onload = function(){
-	  context.drawImage(img,0,0); // Or at whatever offset you like
-	};
-	img.src = data.canvas;
+	if(data != null) {
+		var img = new Image();
+		img.onload = function(){
+		  	context.drawImage(img,0,0); // Or at whatever offset you like
+		};
+		img.src = data;
+	}
+	hasSynced = true;
 });
 
 socket.on('send canvas', function() {
@@ -90,6 +93,7 @@ socket.on('send canvas', function() {
 socket.on('user list', function(data) {
 	clearUsers();
 	if(data.length != 0) {
+		connectedUsers = data.length;
 		for(var i = 0; i < data.length; i++) {
 			if(data[i] != null) {
 				if(data[i].name == name) {
@@ -120,6 +124,7 @@ function clearCanvas() {
 
 
 function draw() {
+	console.log(connectedUsers);
 	var json = {
 		name: name,
 		x: mousePos.x,
@@ -159,10 +164,13 @@ function drawLine(x, y, lastX, lastY, size, colour) {
 	context.stroke();
 }
 
-
-
 // Fired when just before you leave the site
 window.addEventListener("beforeunload", function (e) {
+	if(connectedUsers != null) {
+		if(connectedUsers == 1) {
+			socket.emit('store canvas', canvas.toDataURL());
+		}
+	}
 	var me = {
 		name : name,
 		colour: brush.colour
@@ -208,7 +216,7 @@ function getMousePos(evt) {
 
 //  Can be removed as it has been potentially replaced with brushSelection
 function onMouseWheel(evt) {
-     // Multi browser support
+    // Multi browser support
     var evt = window.event || evt; // old IE support
     var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
 
