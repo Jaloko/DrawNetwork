@@ -50,6 +50,8 @@ function setNameTextBox() {
 }
 
 function init() {
+	context.fillStyle = "white";
+	context.fillRect(0, 0, canvas.width, canvas.height);
 	setNameTextBox();
 	webGLStart();
 }
@@ -57,9 +59,8 @@ function init() {
 function sync() {
 	if(hasSynced == false) {
 		name = document.getElementById('name').value;
-		var data = "";
 		var me = {
-			name : document.getElementById('name').value,
+			name : name,
 			colour: brush.colour
 		}
 		socket.emit('im online', me);
@@ -122,9 +123,7 @@ function clearCanvas() {
    	socket.emit('clear canvas');
 }
 
-
 function draw() {
-	console.log(connectedUsers);
 	var json = {
 		name: name,
 		x: mousePos.x,
@@ -135,7 +134,6 @@ function draw() {
 		colour: brush.colour
 	}
 	drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
-	/*drawRect(json.x, json.y, json.colour);*/
 	socket.emit('draw', json);
 }
 
@@ -164,19 +162,23 @@ function drawLine(x, y, lastX, lastY, size, colour) {
 	context.stroke();
 }
 
+var myEvent = window.attachEvent || window.addEventListener;
+var chkevent = window.attachEvent ? 'onbeforeunload' : 'beforeunload'; /// make IE7, IE8 compitable
+
 // Fired when just before you leave the site
-window.addEventListener("beforeunload", function (e) {
-	if(connectedUsers != null) {
-		if(connectedUsers == 1) {
-			socket.emit('store canvas', canvas.toDataURL());
-		}
-	}
+// It appears the problem here was that it cant send 2 socket.emits()
+myEvent(chkevent, function(e) { // For >=IE7, Chrome, Firefox
 	var me = {
-		name : name,
+		name: name,
 		colour: brush.colour
 	};
-	socket.emit('im offline', me);
-});	
+	if(connectedUsers == 1) {
+		me.canvas = canvas.toDataURL();
+		socket.emit('im offline store canvas', me);
+	} else {
+		socket.emit('im offline', me);
+	}
+});
 
 function clearUsers() {
 	var users = document.getElementById('users');
@@ -257,34 +259,6 @@ function brushSize(newSize){
 function getOptionSelected(selectElement){
 	return selectElement.options[selectElement.selectedIndex].value;
 }
-
-/*
-// look at this spag. Are you impressed?
-function getColourOnCanvas(){
-	var canvasRect = canvas.getBoundingClientRect();
-
-	var x = mousePos.x - canvasRect.left;
-	var y = mousePos.y - canvasRect.top;
-
-	var data = context.getImageData(x,y, x, y);
-	var pixels = data.data;
-	var hexString = convertRGBToHex(pixels[0], pixels[1], pixels[2]);
-	assignRGBToDom(pixels[0], pixels[1], pixels[2], hexString);
-	var hex = assignSelectedHexColour();
-
-	var rgba = {
-		r: pixels[0],
-		g: pixels[1],
-		b: pixels[2],
-		a: pixels[3]
-	};
-	var colour = {
-		hex: hex,
-		rgba: rgba
-	};
-
-	return colour;
-}*/
 
 /**
 ** Event Listeners

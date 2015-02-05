@@ -131,18 +131,7 @@ io.sockets.on('connection', function(socket) {
 			name: data.name,
 			colour : data.colour
 		};
-		if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)) {
-			for(var i = 0; i < users.length; i++) {
-				if(users[i] != null) {
-					if(users[i].name == newData.name) {
-						users.splice(i, 1);
-						serverUsers.splice(i, 1);
-						break;
-					}
-				}
-			}
-			io.sockets.emit('user list', users);
-		}
+		validateImOffline(newData);
 	});
 
 	socket.on('clear canvas', function() {
@@ -150,11 +139,39 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('store canvas', function(data) {
-		if(users.length == 1) {
+		console.log(users.length);
+		if(users.length == 0) {
 			storedCanvas = data;
 		}
 	});
+
+	socket.on('im offline store canvas', function(data) {
+		var newData = {
+			name: data.name,
+			colour: data.colour,
+			canvas: data.canvas
+		};
+		validateImOffline(newData);
+		if(users.length == 0) {
+			storedCanvas = newData.canvas;
+		}
+	});
 });
+
+function validateImOffline(newData) {
+	if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)) {
+		for(var i = 0; i < users.length; i++) {
+			if(users[i] != null) {
+				if(users[i].name == newData.name) {
+					users.splice(i, 1);
+					serverUsers.splice(i, 1);
+					break;
+				}
+			}
+		}
+		io.sockets.emit('user list', users);
+	}
+}
 
 function validateText(text) {
 	if(new RegExp('^[A-Za-z0-9 ]+$').test(text)) {
