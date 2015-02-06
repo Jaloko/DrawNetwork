@@ -254,6 +254,36 @@ function brushSize(newSize){
 	brush.size = newSize;
 }
 
+function inputColourChange() {
+	var rgb = {
+		r: document.getElementById("rValue").value | 0,
+		g: document.getElementById("gValue").value | 0,
+		b: document.getElementById("bValue").value | 0
+	};
+	onColourChange(rgb);
+}
+
+function onHexChange() {
+	if(document.getElementById("hexValue").value.length == 7) {
+		var rgb = convertHexToRGB(document.getElementById("hexValue").value);
+		onColourChange(rgb);
+	}
+}
+
+function onColourChange(rgb) {
+	var hex = convertRGBToHex(rgb.r, rgb.g, rgb.b);
+	var hsv = convertRGBToHSV(rgb.r, rgb.g, rgb.b);
+	tintPointer = {
+		x: Math.ceil((100 - hsv.s) * 2.55),
+		y: Math.ceil((100 - hsv.v) * 2.55)
+	};
+	huePointer = {
+		y: Math.ceil((360 - hsv.h) / 360 * 255)
+	};
+	updateColour();
+	brush.setColour(hex);
+	brush.setBrushType("freeroam");
+}
 
 // Use with html element select and option. Returns the value of the selected option. Parameter is the select element
 function getOptionSelected(selectElement){
@@ -300,9 +330,8 @@ document.addEventListener("mousedown", function(evt) {
 		    }
     		if(hasSynced == true) {
     			if(brush.brushType === "dropper"){
-    				var hex = convertRGBToHex(getColourOnCanvas(canvas, context).r, getColourOnCanvas(canvas, context).g, getColourOnCanvas(canvas, context).b);
-		    		brush.setColour(hex);
-					brush.setBrushType("freeroam");
+    				var rgb = getColourOnCanvas(canvas, context);
+					onColourChange(rgb);
 				} else if(brush.brushType === "fillBucket") {
 					fillBucket(context, brush.colour);
 					brush.setBrushType("freeroam");

@@ -25,6 +25,9 @@ var tintPointer = {
     x: 0,
     y: 0
 }
+var huePointer = {
+    y: 0
+}
 var canMoveTintPointer = false;
 
 /**
@@ -300,6 +303,9 @@ function changeColour() {
         // Draw the tint pointer because it has moved
         drawTintPointer();
     } else if(mouseIsHoveringCanvas(hueCanvas)) {
+        var canvasRect = hueCanvas.getBoundingClientRect();
+        huePointer.y = getActualMousePos(hueCanvas).y;
+        huePointer.y -= canvasRect.top;
         rgb = getColourOnCanvas(hueCanvas, hueCtx);
         pickedColour.r = rgb.r;
         pickedColour.g = rgb.g;
@@ -310,6 +316,7 @@ function changeColour() {
         currentColour.style.height = "100px";
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         var paletteArrow = document.getElementById('palette-arrow');
+
         paletteArrow.style.top = mousePos.y - 10 + "px";
         assignHTMLValues();
         updateColourBuffer();
@@ -326,6 +333,40 @@ function changeColour() {
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         assignHTMLValues();
     }
+}
+
+function updateColour() {
+    var doc = document.documentElement;
+    var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+    var canvasRect = hueCanvas.getBoundingClientRect();
+    rgb = getColourOnHueCanvas();
+    huePointer.y += canvasRect.top + top;
+    pickedColour.r = rgb.r;
+    pickedColour.g = rgb.g;
+    pickedColour.b = rgb.b;
+    brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
+    var currentColour = document.getElementById('currentColour');
+    currentColour.style.width = "100px";
+    currentColour.style.height = "100px";
+    currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
+    var paletteArrow = document.getElementById('palette-arrow');
+
+    paletteArrow.style.top = (huePointer.y - 10) + "px";
+    assignHTMLValues();
+    updateColourBuffer();
+       
+    // Apply tint based on tint pointer
+    rgb = getColourOnTintCanvas();
+    pickedColour.r = rgb.r;
+    pickedColour.g = rgb.g;
+    pickedColour.b = rgb.b;
+    brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
+    var currentColour = document.getElementById('currentColour');
+    currentColour.style.width = "100px";
+    currentColour.style.height = "100px";
+    currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
+    assignHTMLValues(); 
+    drawTintPointer();
 }
 
 function getActualMousePos(canvas) {
@@ -382,6 +423,25 @@ function getColourOnTintCanvas() {
     return rgba;
 }
 
+function getColourOnHueCanvas() {
+    var y = huePointer.y;
+
+    // Make sure within array bounds
+    if(y >= 254) {
+        y = 254;
+    }
+
+    var data = hueCtx.getImageData(0, y, 1, y + 1);
+    var pixels = data.data;
+    var rgba = {
+        r: pixels[0],
+        g: pixels[1],
+        b: pixels[2],
+        a: pixels[3]
+    };
+    return rgba;
+}
+
 function getColourOnCanvas(canvas, ctx){
     var rect = canvas.getBoundingClientRect();
     var doc = document.documentElement;
@@ -419,6 +479,15 @@ function convertRGBToHex(red, green, blue){
     return "#" + binaryResult(r) + binaryResult(g) + binaryResult(b);
 }
 
+function convertHexToRGB(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
 function binaryResult(col){
     return col.length === 1 ? "0" + col : col;
 }
@@ -428,4 +497,44 @@ function assignRGBToDom(red, green, blue, hex){
     rgbInputs.g.value = green;
     rgbInputs.b.value = blue;
     rgbInputs.hex.value = hex;
+}
+
+function convertRGBToHSV() {
+    var rr, gg, bb,
+        r = arguments[0] / 255,
+        g = arguments[1] / 255,
+        b = arguments[2] / 255,
+        h, s,
+        v = Math.max(r, g, b),
+        diff = v - Math.min(r, g, b),
+        diffc = function(c){
+            return (v - c) / 6 / diff + 1 / 2;
+        };
+
+    if (diff == 0) {
+        h = s = 0;
+    } else {
+        s = diff / v;
+        rr = diffc(r);
+        gg = diffc(g);
+        bb = diffc(b);
+
+        if (r === v) {
+            h = bb - gg;
+        }else if (g === v) {
+            h = (1 / 3) + rr - bb;
+        }else if (b === v) {
+            h = (2 / 3) + gg - rr;
+        }
+        if (h < 0) {
+            h += 1;
+        }else if (h > 1) {
+            h -= 1;
+        }
+    }
+    return {
+        h: Math.round(h * 360),
+        s: Math.round(s * 100),
+        v: Math.round(v * 100)
+    };
 }

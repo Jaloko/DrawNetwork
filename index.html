@@ -25,22 +25,22 @@
 				<input id="name" type="text"></input>
 				<button id="nameSubmit" type="submit" onclick="sync()">Submit Name</button>
 			 </div>
-			<div onmousedown="return false"id="colour-picker">
+			<div id="colour-picker">
 				<h2>Colour Picker</h2>
-				<div class="paletteLeftCol">
+				<div onmousedown="return false" class="paletteLeftCol">
 					<canvas id="webgl-temp" width="255" height="255" style="display: none;"></canvas>
 					<canvas id="tint" width="255" height="255"></canvas>
 					<canvas id="tint-pointer" style="position:absolute; left:0"; width="255" height="255"></canvas>
 					<canvas id="hue" width="30" height="255"></canvas>
 				</div>
-				<div class="paletteArrowCol">
+				<div onmousedown="return false" class="paletteArrowCol">
 					<div id="palette-arrow" class="arrow-left" style="position: absolute;"></div>
 				</div>
 				<div class="paletteRightCol">
-					<span class="value">R:</span>  <input id="rValue" type="text"></input></br>
-					<span class="value">G:</span>	<input id="gValue" type="text"></input></br>
-					<span class="value">B:</span>	<input id="bValue"type="text"></input></br>
-					<span class="value">Hex:</span>	<input id="hexValue"type="text"></input></br>
+					<span class="value">R:</span>  <input id="rValue" onchange="inputColourChange()" type="text"></input></br>
+					<span class="value">G:</span>	<input id="gValue" onchange="inputColourChange()" type="text"></input></br>
+					<span class="value">B:</span>	<input id="bValue" onchange="inputColourChange()" type="text"></input></br>
+					<span class="value">Hex:</span>	<input id="hexValue" onchange="onHexChange()" type="text"></input></br>
 					<div id="currentColour"></div>
 				</div>
 				<div class="clear">
