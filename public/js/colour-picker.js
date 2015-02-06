@@ -3,6 +3,7 @@
 **/
 var squareVertexPositionBuffer;
 var squareVertexColorBuffer;
+var blackVertexColorBuffer;
 var gl;
 var mvMatrix = mat4.create();
 var pMatrix = mat4.create();
@@ -47,7 +48,9 @@ function webGLStart() {
     initBuffers();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.enable(gl.DEPTH_TEST);
+    gl.disable(gl.DEPTH_TEST);
+    this.gl.enable(this.gl.BLEND);
+    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
     drawColourSquare();
     drawTintPointer();
@@ -55,7 +58,7 @@ function webGLStart() {
 
 function initGL(canvas) {
 	try {
-		gl = canvas.getContext("webgl");
+		gl = canvas.getContext("webgl", { alpha: false } );
 		gl.viewportWidth = canvas.width;
 		gl.viewportHeight = canvas.height;
 	} catch(e) {
@@ -117,28 +120,53 @@ function initBuffers() {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     squareVertexPositionBuffer.itemSize = 3;
     squareVertexPositionBuffer.numItems = 4;
-    squareVertexColorBuffer = gl.createBuffer();
 
+    blackVertexColorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, blackVertexColorBuffer);
+        var colors = [
+        0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0030,
+        0.0, 0.0, 0.0, 1.0030
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
+    blackVertexColorBuffer.itemSize = 4;
+    blackVertexColorBuffer.numItems = 4;
+
+    squareVertexColorBuffer = gl.createBuffer();
     var col = checkPrimaryColour(pickedColour.r, pickedColour.g, pickedColour.b);
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
+     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
     var colors = [
-        1.0060, 1.0060, 1.0060, 1.0,
+        1.0015, 1.0015, 1.0015, 1.0,
         (pickedColour.r / 255) + col.r, (pickedColour.g / 255) + col.g, (pickedColour.b / 255) + col.b, 1.0,
-        0.0, 0.0, 0.0, 1.0,
-        0.0, 0.0, 0.0, 1.0
+        1.0015, 1.0015, 1.0015, 1.0,
+        (pickedColour.r / 255) + col.r, (pickedColour.g / 255) + col.g, (pickedColour.b / 255) + col.b, 1.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
     squareVertexColorBuffer.itemSize = 4;
     squareVertexColorBuffer.numItems = 4;
 }
+
+
 function updateColourBuffer() {
+    gl.bindBuffer(gl.ARRAY_BUFFER, blackVertexColorBuffer);
+        var colors = [
+        0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0030,
+        0.0, 0.0, 0.0, 1.0030
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
+    blackVertexColorBuffer.itemSize = 4;
+    blackVertexColorBuffer.numItems = 4;
+
     var col = checkPrimaryColour(pickedColour.r, pickedColour.g, pickedColour.b);
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
+     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
     var colors = [
-        1.0060, 1.0060, 1.0060, 1.0,
+        1.0015, 1.0015, 1.0015, 1.0,
         (pickedColour.r / 255) + col.r, (pickedColour.g / 255) + col.g, (pickedColour.b / 255) + col.b, 1.0,
-        0.0, 0.0, 0.0, 1.0,
-        0.0, 0.0, 0.0, 1.0
+        1.0015, 1.0015, 1.0015, 1.0,
+        (pickedColour.r / 255) + col.r, (pickedColour.g / 255) + col.g, (pickedColour.b / 255) + col.b, 1.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
     squareVertexColorBuffer.itemSize = 4;
@@ -154,15 +182,15 @@ function checkPrimaryColour(r, g, b) {
         b: 0
     }
     if(r == 255) {
-        obj.r = 0.0060;
+        obj.r = 0.0030;
     }
 
     if(g == 255) {
-        obj.g = 0.0060;
+        obj.g = 0.0030;
     }
 
     if(b == 255) {
-        obj.b = 0.0060;
+        obj.b = 0.0030;
     }
     return obj;
 }
@@ -179,12 +207,21 @@ function drawColourSquare() {
     mat4.identity(mvMatrix);
     mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -1.0]);
     setMatrixUniforms();
+
+    // First gradient
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, squareVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	setMatrixUniforms();
-	gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+
+    //Second gradient
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, blackVertexColorBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, blackVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+
     tintCtx.drawImage(webglCanvas, 0, 0);
 }
 
