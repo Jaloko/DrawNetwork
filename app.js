@@ -4,11 +4,17 @@ var express = require('express'),
 	io = require('socket.io').listen(server);
 	app.use(express.static('public'));
 
-var users = [];
-var serverUsers = [];
-var usersConnected;
+var rooms = [];
+rooms.push(new Room("room1"));
 
-var storedCanvas;
+function Room(id, owner) {
+	this.id = id,
+	this.owner = owner,
+	this.users = [],
+	this.serverUsers = [],
+	this.usersConnected,
+	this.storedCanvas
+}
 
 server.listen(3000);
 
@@ -17,33 +23,62 @@ app.get('/', function(req, res) {
 });
 
 
-function pickRandom(socket) {
-	var rand = Math.floor(Math.random() * (users.length - 1));
-	if(socket.id == serverUsers[rand].id) {
-		pickRandom()
+function pickRandom(room, socket) {
+	var rand = Math.floor(Math.random() * (room.users.length - 1));
+	if(socket.id == room.serverUsers[rand].id) {
+		pickRandom(room, socket);
 	} else {
 		return rand;
 	}
 }
 
+function getRoomIndex(socket) {
+	for(var i = 0; i < rooms.length; i++) {
+		if(socket.rooms[1] === rooms[i].id) {
+			return i;
+		}
+	}
+}
+
+function countRoomsOwnerOf(socket) {
+	var counter = 0;
+	for(var i = 0; i < rooms.length; i++) {
+		if(rooms[i].owner === socket.request.connection.remoteAddress) {
+			counter++;
+		}
+	}
+	return counter;
+}
+
 io.sockets.on('connection', function(socket) {
+
+	socket.on('create room', function() {
+		if(countRoomsOwnerOf(socket) < 5) {
+			var id = rooms.length + "";
+			var ip = socket.request.connection.remoteAddress;
+			rooms.push(new Room(id, ip));
+			socket.emit('room result', id);
+			console.log("Room: " + id + " created by: " + socket.id + "!");
+		}
+	});
+
 	socket.on('sync', function() {
-/*		io.engine.clientsCount*/
-		if(users.length >= 2) {
-			for(var i = 0; i < serverUsers.length; i++) {
-				if(serverUsers[i].id == socket.id) {
-					if(serverUsers[i].hasSynced != true) {
-						var rand = pickRandom(socket);
-						serverUsers[rand].canSync = true;
-						io.to(serverUsers[rand].id).emit('send canvas');
+		var index = getRoomIndex(socket);
+		if(rooms[index].users.length >= 2) {
+			for(var i = 0; i < rooms[index].serverUsers.length; i++) {
+				if(rooms[index].serverUsers[i].id == socket.id) {
+					if(rooms[index].serverUsers[i].hasSynced != true) {
+						var rand = pickRandom(rooms[index],socket);
+						rooms[index].serverUsers[rand].canSync = true;
+						io.to(rooms[index].serverUsers[rand].id).emit('send canvas');
 						break;
 					}
 				}
 			}
 		} else {
-			serverUsers[0].hasSynced = true;
-			if(storedCanvas != null) {
-				socket.emit('sync result', storedCanvas);
+			rooms[index].serverUsers[0].hasSynced = true;
+			if(rooms[index].storedCanvas != null) {
+				socket.emit('sync result', rooms[index].storedCanvas);
 			} else {
 				socket.emit('sync result', null);
 			}
@@ -52,17 +87,18 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('recieve canvas', function(data) {
-		for(var i = 0; i < serverUsers.length; i++) {
-			if(serverUsers[i].id == socket.id) {
-				if(serverUsers[i].canSync == true) {
+		var index = getRoomIndex(socket);
+		for(var i = 0; i < rooms[index].serverUsers.length; i++) {
+			if(rooms[index].serverUsers[i].id == socket.id) {
+				if(rooms[index].serverUsers[i].canSync == true) {
 					var newData = data;
-					for(var ii = 0; ii < serverUsers.length; ii++) {
-						if(serverUsers[ii].hasSynced == false) {
-							io.to(serverUsers[ii].id).emit('sync result', newData);
-							serverUsers[ii].hasSynced = true;
+					for(var ii = 0; ii < rooms[index].serverUsers.length; ii++) {
+						if(rooms[index].serverUsers[ii].hasSynced == false) {
+							io.to(rooms[index].serverUsers[ii].id).emit('sync result', newData);
+							rooms[index].serverUsers[ii].hasSynced = true;
 						}
 					}
-					serverUsers[i].canSync = false;
+					rooms[index].serverUsers[i].canSync = false;
 					break;
 				}
 			}
@@ -74,6 +110,7 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('draw', function(data) {
+		var index = getRoomIndex(socket);
 		var newData = {
 			name: data.name,
 			x: data.x,
@@ -86,90 +123,107 @@ io.sockets.on('connection', function(socket) {
 		if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)
 			&& validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.lastX)
 			&& validateNumber(newData.lastY) && validateNumber(newData.size)) {
-			for(var i = 0; i < users.length; i++) {
-				if(users[i] != null) {
-					if(users[i].name == newData.name) {
-						users[i].colour = newData.colour;
+			for(var i = 0; i < rooms[index].users.length; i++) {
+				if(rooms[index].users[i] != null) {
+					if(rooms[index].users[i].name == newData.name) {
+						rooms[index].users[i].colour = newData.colour;
 						break;
 					}
 				}
 			}
-			socket.broadcast.emit('sync draw', newData);
+			socket.broadcast.to(rooms[index].id).emit('sync draw', newData);
+
+			//Old way
+/*			socket.broadcast.emit('sync draw', newData);*/
 		}
 	});
 
 	socket.on('im online', function(data) {
 		var newData = {
+			id: data.id,
 			name: data.name,
 			colour : data.colour
 		};
-		if(validateText(data.name) && newData.name.length <= 30 && validateHex(newData.colour)) {
-			var counter = 0;
-			for(var i = 0; i < users.length; i++) {
-				if(users[i] != null) {
-					if(users[i].name == newData.name) {
-						counter++;
+		var index;
+		if(validateText(newData.id)) {
+			socket.join(newData.id);
+			index = getRoomIndex(socket);
+		}
+		if(index != null) {
+			if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)) {
+				var counter = 0;
+				for(var i = 0; i < rooms[index].users.length; i++) {
+					if(rooms[index].users[i] != null) {
+						if(rooms[index].users[i].name == newData.name) {
+							counter++;
+						}
 					}
 				}
-			}
-			if(counter <= 0) {
-				users.push(newData);
-				var serverUser = {
-					id: socket.id,
-					hasSynced: false,
-					canSync: false
+				if(counter <= 0) {
+					rooms[index].users.push(newData);
+					var serverUser = {
+						id: socket.id,
+						hasSynced: false,
+						canSync: false
+					}
+					rooms[index].serverUsers.push(serverUser);
+					socket.emit('user validated');
+					io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);
+					//old
+	/*				io.sockets.emit('user list', users);*/
 				}
-				serverUsers.push(serverUser);
-				socket.emit('user validated');
-				io.sockets.emit('user list', users);
 			}
 		}
 	});
 
 	socket.on('im offline', function(data) {
-		var newData = {
-			name: data.name,
-			colour : data.colour
-		};
-		validateImOffline(newData);
-	});
-
-	socket.on('clear canvas', function() {
-		socket.broadcast.emit('recieve clear canvas');
-	});
-
-	socket.on('store canvas', function(data) {
-		console.log(users.length);
-		if(users.length == 0) {
-			storedCanvas = data;
+		var index = getRoomIndex(socket);
+		if(index != null) {
+			var newData = {
+				name: data.name,
+				colour : data.colour
+			};
+			validateImOffline(rooms[index], newData);
 		}
 	});
 
+	socket.on('clear canvas', function() {
+		var index = getRoomIndex(socket);
+		socket.broadcast.to(rooms[index].id).emit('recieve clear canvas');
+		// Old
+/*		socket.broadcast.emit('recieve clear canvas');*/
+	});
+
 	socket.on('im offline store canvas', function(data) {
-		var newData = {
-			name: data.name,
-			colour: data.colour,
-			canvas: data.canvas
-		};
-		validateImOffline(newData);
-		if(users.length == 0) {
-			storedCanvas = newData.canvas;
+		var index = getRoomIndex(socket);
+		if(index != null) {
+			var newData = {
+				name: data.name,
+				colour: data.colour,
+				canvas: data.canvas
+			};
+			validateImOffline(rooms[index], newData);
+			if(rooms[index].users.length == 0) {
+				rooms[index].storedCanvas = newData.canvas;
+			}
 		}
 	});
 });
 
-function validateImOffline(newData) {
+function validateImOffline(room, newData) {
 	if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)) {
-		for(var i = 0; i < users.length; i++) {
-			if(users[i] != null) {
-				if(users[i].name == newData.name) {
-					users.splice(i, 1);
-					serverUsers.splice(i, 1);
+		for(var i = 0; i < room.users.length; i++) {
+			if(room.users[i] != null) {
+				if(room.users[i].name == newData.name) {
+					room.users.splice(i, 1);
+					room.serverUsers.splice(i, 1);
 					break;
 				}
 			}
 		}
-		io.sockets.emit('user list', users);
+		io.sockets.in(room.id).emit('user list', room.users);
+		// Old
+/*		io.sockets.emit('user list', users);*/
 	}
 }
 

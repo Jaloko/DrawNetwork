@@ -56,10 +56,19 @@ function init() {
 	webGLStart();
 }
 
+function createRoom() {
+	socket.emit('create room');
+}
+
+socket.on('room result', function(data) {
+	insertURLParam("room", data);
+});
+
 function sync() {
 	if(hasSynced == false) {
 		name = document.getElementById('name').value;
 		var me = {
+			id: getURLParam('room'),
 			name : name,
 			colour: brush.colour
 		}
@@ -69,7 +78,6 @@ function sync() {
 
 socket.on('user validated', function() {
 	socket.emit('sync');
-	// This needs to be fixed so you cant draw until synced
 });
 
 socket.on('sync draw', function(data) {
@@ -365,3 +373,35 @@ document.getElementById('colourDrop').addEventListener('click', function(evt){
 document.getElementById('fillBucket').addEventListener('click', function(evt){
 	brush.setBrushType('fillBucket');
 });
+
+
+
+function getURLParam(name) {
+  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+}
+
+function insertURLParam(key, value) {
+        key = escape(key); value = escape(value);
+
+        var kvp = document.location.search.substr(1).split('&');
+        if (kvp == '') {
+            document.location.search = '?' + key + '=' + value;
+        }
+        else {
+
+            var i = kvp.length; var x; while (i--) {
+                x = kvp[i].split('=');
+
+                if (x[0] == key) {
+                    x[1] = value;
+                    kvp[i] = x.join('=');
+                    break;
+                }
+            }
+
+            if (i < 0) { kvp[kvp.length] = [key, value].join('='); }
+
+            //this will reload the page, it's likely better to store this until finished
+/*            document.location.search = kvp.join('&');*/
+        }
+    }
