@@ -5,7 +5,7 @@ var express = require('express'),
 	app.use(express.static('public'));
 
 var rooms = [];
-rooms.push(new Room("room1"));
+rooms.push(new Room("0", "admin"));
 
 function Room(id, owner) {
 	this.id = id,
@@ -58,7 +58,7 @@ io.sockets.on('connection', function(socket) {
 			var ip = socket.request.connection.remoteAddress;
 			rooms.push(new Room(id, ip));
 			socket.emit('room result', id);
-			console.log("Room: " + id + " created by: " + socket.id + "!");
+			console.log("Room: " + id + " created by: " + ip + "!");
 		}
 	});
 

@@ -22,6 +22,7 @@ h1 {
 .paletteLeftCol, .paletteArrowCol, .paletteRightCol {
 	float: left;
 	display: inline-block;
+	position: relative;
 }
 .paletteRightCol {
 	margin-left: 15px;
@@ -30,11 +31,6 @@ h1 {
 span.value {
 	display: inline-block;
 	width: 50px;
-}
-
-#colour-picker, #canvas-functions {
-	border: 1px solid #000;
-	margin-top: 5px;
 }
 
 .clear {

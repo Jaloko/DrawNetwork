@@ -50,6 +50,7 @@ function setNameTextBox() {
 }
 
 function init() {
+	insertURLParam("room", "0");
 	context.fillStyle = "white";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	setNameTextBox();
@@ -78,6 +79,8 @@ function sync() {
 
 socket.on('user validated', function() {
 	socket.emit('sync');
+	// Hide enter name box
+	document.getElementById('name-wrap').className = "invisible";
 });
 
 socket.on('sync draw', function(data) {
@@ -132,12 +135,13 @@ function clearCanvas() {
 }
 
 function draw() {
+	var canvasRect = canvas.getBoundingClientRect();
 	var json = {
 		name: name,
-		x: mousePos.x,
-		y: mousePos.y,
-		lastX: lastPos.x,
-		lastY: lastPos.y,
+		x: mousePos.x - canvasRect.left,
+		y: mousePos.y - canvasRect.top,
+		lastX: lastPos.x - canvasRect.left,
+		lastY: lastPos.y - canvasRect.top,
 		size: brush.size,
 		colour: brush.colour
 	}
@@ -165,7 +169,7 @@ function drawLine(x, y, lastX, lastY, size, colour) {
 	context.lineWidth = size;
 	context.lineCap = "round";
 	context.beginPath();
-	context.moveTo(lastX , lastY);
+	context.moveTo(lastX, lastY);
 	context.lineTo(x,y);
 	context.stroke();
 }
@@ -195,7 +199,13 @@ function clearUsers() {
 
 function addUser(name, colour) {
 	var users = document.getElementById('users');
-	var newUser = '<div id="' + name + '" class="row"><div class="colour" style="background-color: ' + colour + ';"></div><div class="name">' + name + '</div></div>';
+	var newUser = '<div id="' + name + '"class="row">'
+						+ '<div class="user-colour" style="background-color: ' + colour + '">'
+						+ '</div>'
+						+ '<div class="user-name">'
+							+ name +
+						'</div>'
+					+ '</div>';
 	users.innerHTML += newUser;
 }
 
@@ -225,25 +235,6 @@ function getMousePos(evt) {
 
 
 //  Can be removed as it has been potentially replaced with brushSelection
-function onMouseWheel(evt) {
-    // Multi browser support
-    var evt = window.event || evt; // old IE support
-    var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
-
-    if(delta > 0) {
-    	if(brush.size >= 30) {
-    		brush.size = 30;
-    	} else {
-    		brush.size++;
-    	}
-    } else {
-    	if(brush.size <= 1) {
-    		brush.size = 1
-    	} else {
-        	brush.size--;
-    	}
-    } 
-}
 
 // **
 // Brushes
@@ -253,10 +244,10 @@ function onMouseWheel(evt) {
 // note: doesnt support other browsers gl
 var brushSelection = document.getElementById('brushSelection');
 
-brushSelection.addEventListener("click", function(evt){
-	var value = getOptionSelected(brushSelection);
-	brushSize(value);
+brushSelection.addEventListener("input", function(evt){
+	brushSize(this.value);
 });
+
 
 function brushSize(newSize){
 	brush.size = newSize;
@@ -291,25 +282,6 @@ function onColourChange(rgb) {
 	updateColour();
 	brush.setColour(hex);
 	brush.setBrushType("freeroam");
-}
-
-// Use with html element select and option. Returns the value of the selected option. Parameter is the select element
-function getOptionSelected(selectElement){
-	return selectElement.options[selectElement.selectedIndex].value;
-}
-
-/**
-** Event Listeners
-**/
-if (canvas.addEventListener) {
-	// IE9, Chrome, Safari, Opera
-	canvas.addEventListener("mousewheel", onMouseWheel, false);
-    // Firefox
-    canvas.addEventListener("DOMMouseScroll", onMouseWheel, false);
-}
-// IE 6/7/8
-else {
-	canvas.attachEvent("onmousewheel", onMouseWheel);
 }
 
 document.addEventListener('mousemove', function(evt) {
@@ -370,10 +342,10 @@ document.getElementById('colourDrop').addEventListener('click', function(evt){
 	brush.setBrushType('dropper');
 });
 
-document.getElementById('fillBucket').addEventListener('click', function(evt){
+/*document.getElementById('fillBucket').addEventListener('click', function(evt){
 	brush.setBrushType('fillBucket');
 });
-
+*/
 
 
 function getURLParam(name) {

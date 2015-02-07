@@ -295,8 +295,6 @@ function changeColour() {
         pickedColour.b = rgb.b;
         brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
         var currentColour = document.getElementById('currentColour');
-        currentColour.style.width = "100px";
-        currentColour.style.height = "100px";
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         assignHTMLValues();
 
@@ -312,8 +310,6 @@ function changeColour() {
         pickedColour.b = rgb.b;
         brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
         var currentColour = document.getElementById('currentColour');
-        currentColour.style.width = "100px";
-        currentColour.style.height = "100px";
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         var paletteArrow = document.getElementById('palette-arrow');
 
@@ -328,8 +324,6 @@ function changeColour() {
         pickedColour.b = rgb.b;
         brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
         var currentColour = document.getElementById('currentColour');
-        currentColour.style.width = "100px";
-        currentColour.style.height = "100px";
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         assignHTMLValues();
     }
@@ -346,8 +340,6 @@ function updateColour() {
     pickedColour.b = rgb.b;
     brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
     var currentColour = document.getElementById('currentColour');
-    currentColour.style.width = "100px";
-    currentColour.style.height = "100px";
     currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
     var paletteArrow = document.getElementById('palette-arrow');
 
@@ -362,8 +354,6 @@ function updateColour() {
     pickedColour.b = rgb.b;
     brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
     var currentColour = document.getElementById('currentColour');
-    currentColour.style.width = "100px";
-    currentColour.style.height = "100px";
     currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
     assignHTMLValues(); 
     drawTintPointer();

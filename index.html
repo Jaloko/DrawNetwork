@@ -1,64 +1,97 @@
 <html>
 	<head>
 		<title>Coop Canvas</title>
-		<script src="/socket.io/socket.io.js"></script>
+ 		<script src="/socket.io/socket.io.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/global.css">
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 	</head>
 	<body onload="init()">
-		<div id="leftCol">
-			 <canvas id="canvas" width="960" height="528" style="border:1px solid #000000;"></canvas>
-			 <div id="canvas-functions">
-			 	<h2>Canvas Functions</h2>
-			 	<input type="button" id="clearCanvas" value="Clear">
-			 	<input type="button" id="colourDrop" value="Colour Dropper">
-			 	<input type="button" id="fillBucket" value="Fill Bucket">
+		<div class="content-box" >
+			<div id="wrapper">
+				<div id="left-col">
+					<div id="canvas-wrap">
+					 	<canvas id="canvas" width="960" height="528"></canvas>
+					</div>
+					<div id="tools">
+						<div class="button tool">
+						Brush
+						</div>
+						<div id="colourDrop" class="button tool">
+						Colour dropper
+						</div>
+						<div id="clearCanvas" class="button tool">
+						Clear
+						</div>
+						<input id="brushSelection" type="range" min="1" max="100" value="30"></input>
+						<div id="currentColour"></div>
+						<div class="clear">
+						</div>
+					</div>
 
-				<select id="brushSelection">
-				 	<option value="5">Brush: 5</option>
-				 	<option value="10">Brush: 10</option>
-				 	<option value="15">Brush: 15</option>
-				 	<option value="20">Brush: 20</option>
-				 	<option value="25">Brush: 25</option>
-				 	<option value="30">Brush: 30</option>
-				</select>
-				<input id="name" type="text"></input>
-				<button id="nameSubmit" type="submit" onclick="sync()">Submit Name</button>
-			 </div>
-			<div id="colour-picker">
-				<h2>Colour Picker</h2>
-				<div onmousedown="return false" class="paletteLeftCol">
-					<canvas id="webgl-temp" width="255" height="255" style="display: none;"></canvas>
-					<canvas id="tint" width="255" height="255"></canvas>
-					<canvas id="tint-pointer" style="position:absolute; left:0"; width="255" height="255"></canvas>
-					<canvas id="hue" width="30" height="255"></canvas>
 				</div>
-				<div onmousedown="return false" class="paletteArrowCol">
-					<div id="palette-arrow" class="arrow-left" style="position: absolute;"></div>
-				</div>
-				<div class="paletteRightCol">
-					<span class="value">R:</span>  <input id="rValue" onchange="inputColourChange()" type="text"></input></br>
-					<span class="value">G:</span>	<input id="gValue" onchange="inputColourChange()" type="text"></input></br>
-					<span class="value">B:</span>	<input id="bValue" onchange="inputColourChange()" type="text"></input></br>
-					<span class="value">Hex:</span>	<input id="hexValue" onchange="onHexChange()" type="text"></input></br>
-					<div id="currentColour"></div>
-				</div>
-				<div class="paletteRightCol">
-					<input type="button" id="createroom" value="Create Room" onclick="createRoom();">
+				<div id="right-col" onmousedown="return false">
+					<div id="colour-picker">
+						<div class="paletteLeftCol">
+							<canvas id="webgl-temp" width="255" height="255" style="display: none;"></canvas>
+							<canvas id="tint" width="255" height="255"></canvas>
+							<canvas id="tint-pointer" style="position:absolute; left: 0; top: 0;" width="255" height="255"></canvas>
+							<canvas id="hue" width="30" height="255"></canvas>
+						</div>
+						<div class="paletteArrowCol">
+							<div id="palette-arrow" class="arrow-left" style="position: absolute;"></div>
+						</div>
+						<div style="display: none;" class="paletteRightCol">
+							<span class="value">R:</span>  <input id="rValue" onchange="inputColourChange()" type="text"></input></br>
+							<span class="value">G:</span>	<input id="gValue" onchange="inputColourChange()" type="text"></input></br>
+							<span class="value">B:</span>	<input id="bValue" onchange="inputColourChange()" type="text"></input></br>
+							<span class="value">Hex:</span>	<input id="hexValue" onchange="onHexChange()" type="text"></input></br>
+							<div id="currentColour"></div>
+						</div>
+					</div>
+					<div id="user-tools">
+						<div id="user-tabs">
+							<div id="users-online-tab" class="tab selected">
+								Users Online
+							</div>
+							<div id="users-chat-tab" class="tab">
+								Chat
+							</div>
+							<div class="clear">
+							</div>
+						</div>
+						<div id="tab-content">
+							<div id="users-online" class="visible">
+								<div id ="users" class="users-border">
+								</div>
+							</div>
+							<div id="users-chat" class="invisible">
+								<div class="users-border">
+									This feature will be added in the near future.
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 				<div class="clear">
 				</div>
 			</div>
-		 </div>
-		 <div id="rightCol">
-		 	<h2>Online User List</h2>
-		 	<div id="users">
-		 	</div>
-		 </div>
+		</div>
+		<div id="name-wrap" class="table-visible">
+			<div id="name-box-wrap">
+				<div id="name-box">
+					<h2>Enter a name: </h2>
+					<input id="name" type="text" maxlength="20"></input></br>
+					<div class="button" onclick="sync()">
+					Submit Name
+					</div>
+				</div>
+			</div>	
+		</div>
 	</body>
 	<script src="js/gl-matrix-min.js"></script>
 	<script src="js/shaders.js"></script>
 	<script src="js/colour-picker.js"></script>
 	<script src="js/global.js"></script>
 	<script src="js/fill-bucket.js"></script>
+	<script src="js/tabs.js"></script>
 </html>
