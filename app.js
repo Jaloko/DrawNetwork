@@ -22,34 +22,6 @@ app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/index.html');
 });
 
-
-function pickRandom(room, socket) {
-	var rand = Math.floor(Math.random() * (room.users.length - 1));
-	if(socket.id == room.serverUsers[rand].id) {
-		pickRandom(room, socket);
-	} else {
-		return rand;
-	}
-}
-
-function getRoomIndex(socket) {
-	for(var i = 0; i < rooms.length; i++) {
-		if(socket.rooms[1] === rooms[i].id) {
-			return i;
-		}
-	}
-}
-
-function countRoomsOwnerOf(socket) {
-	var counter = 0;
-	for(var i = 0; i < rooms.length; i++) {
-		if(rooms[i].owner === socket.request.connection.remoteAddress) {
-			counter++;
-		}
-	}
-	return counter;
-}
-
 io.sockets.on('connection', function(socket) {
 
 	socket.on('create room', function() {
@@ -126,7 +98,10 @@ io.sockets.on('connection', function(socket) {
 			for(var i = 0; i < rooms[index].users.length; i++) {
 				if(rooms[index].users[i] != null) {
 					if(rooms[index].users[i].name == newData.name) {
-						rooms[index].users[i].colour = newData.colour;
+						if(rooms[index].users[i].colour != newData.colour) {
+							rooms[index].users[i].colour = newData.colour;
+							io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);
+						}
 						break;
 					}
 				}
@@ -138,6 +113,18 @@ io.sockets.on('connection', function(socket) {
 		}
 	});
 
+	socket.on('join room', function(data) {
+		var newData = {
+			id: data,
+		};
+		if(validateText(newData.id)) {
+			if(socket.rooms.length <= 1) {
+				socket.join(newData.id);
+				socket.emit('room verification');
+			}
+		}
+	});
+
 	socket.on('im online', function(data) {
 		var newData = {
 			id: data.id,
@@ -146,11 +133,10 @@ io.sockets.on('connection', function(socket) {
 		};
 		var index;
 		if(validateText(newData.id)) {
-			socket.join(newData.id);
 			index = getRoomIndex(socket);
 		}
 		if(index != null) {
-			if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)) {
+			if(validateText(newData.name) && newData.name.length <= 20 && validateHex(newData.colour)) {
 				var counter = 0;
 				for(var i = 0; i < rooms[index].users.length; i++) {
 					if(rooms[index].users[i] != null) {
@@ -209,6 +195,33 @@ io.sockets.on('connection', function(socket) {
 		}
 	});
 });
+
+function pickRandom(room, socket) {
+	var rand = Math.floor(Math.random() * (room.users.length - 1));
+	if(socket.id == room.serverUsers[rand].id) {
+		pickRandom(room, socket);
+	} else {
+		return rand;
+	}
+}
+
+function getRoomIndex(socket) {
+	for(var i = 0; i < rooms.length; i++) {
+		if(socket.rooms[1] === rooms[i].id) {
+			return i;
+		}
+	}
+}
+
+function countRoomsOwnerOf(socket) {
+	var counter = 0;
+	for(var i = 0; i < rooms.length; i++) {
+		if(rooms[i].owner === socket.request.connection.remoteAddress) {
+			counter++;
+		}
+	}
+	return counter;
+}
 
 function validateImOffline(room, newData) {
 	if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)) {

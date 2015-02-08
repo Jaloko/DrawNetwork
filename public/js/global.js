@@ -68,14 +68,18 @@ socket.on('room result', function(data) {
 function sync() {
 	if(hasSynced == false) {
 		name = document.getElementById('name').value;
-		var me = {
-			id: getURLParam('room'),
-			name : name,
-			colour: brush.colour
-		}
-		socket.emit('im online', me);
+		socket.emit('join room', getURLParam('room'));
 	}
 }
+
+socket.on('room verification', function() {
+	var me = {
+		id: getURLParam('room'),
+		name : name,
+		colour: brush.colour
+	}
+	socket.emit('im online', me);
+});
 
 socket.on('user validated', function() {
 	socket.emit('sync');
