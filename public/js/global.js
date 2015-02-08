@@ -11,7 +11,8 @@ var socket = io.connect();
 var hasSynced = false;
 var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
-context.imageSmoothingEnabled = false;
+var pointerCanvas = document.getElementById('pointer-canvas');
+var pointerContext = pointerCanvas.getContext('2d');
 
 var Brush = function(){
 	this.size = 30,
@@ -136,6 +137,23 @@ function clearCanvas() {
 	context.fillStyle = "white";
    	context.fillRect(0, 0, canvas.width, canvas.height);
    	socket.emit('clear canvas');
+}
+
+function drawBrushOutline(x, y) {
+	var cr = pointerCanvas.getBoundingClientRect();
+	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+    pointerContext.beginPath();
+    pointerContext.strokeStyle = 'white';
+    pointerContext.arc(x - cr.left, y - cr.top, brush.size / 2,0,2*Math.PI);
+    pointerContext.stroke();
+    pointerContext.beginPath();
+    pointerContext.strokeStyle = 'black';
+    pointerContext.arc(x - cr.left, y - cr.top, brush.size / 2,0,2*Math.PI);
+    pointerContext.stroke();
+    pointerContext.beginPath();
+    pointerContext.strokeStyle = 'white';
+    pointerContext.arc(x - cr.left, y - cr.top, brush.size / 2,0,2*Math.PI);
+    pointerContext.stroke();
 }
 
 function draw() {
@@ -291,6 +309,7 @@ function onColourChange(rgb) {
 document.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(evt);
+	drawBrushOutline(mousePos.x, mousePos.y);
 	if(mouseDown === true && brush.getBrushType() === "freeroam") {
 		if(hasSynced == true) {
 			if(mouseIsHoveringCanvas(canvas)) {

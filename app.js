@@ -7,6 +7,8 @@ var express = require('express'),
 var rooms = [];
 rooms.push(new Room("0", "admin"));
 
+var timer = new Date().getTime();
+
 function Room(id, owner) {
 	this.id = id,
 	this.owner = owner,
@@ -100,7 +102,10 @@ io.sockets.on('connection', function(socket) {
 					if(rooms[index].users[i].name == newData.name) {
 						if(rooms[index].users[i].colour != newData.colour) {
 							rooms[index].users[i].colour = newData.colour;
-							io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);
+							if(new Date().getTime() > timer + 100) {
+								timer+= 100;
+								io.sockets.in(rooms[i].id).emit('user list', rooms[i].users);	
+							}
 						}
 						break;
 					}

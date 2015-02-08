@@ -6,10 +6,10 @@ body {
 	padding:0; margin:0;
 	color: white;
 }
-canvas.dragged{
+/*canvas.dragged{
 	cursor: pointer;
 }
-
+*/
 /*---------------------------------
 	Layout
 ---------------------------------*/
@@ -31,6 +31,7 @@ canvas.dragged{
 
 #canvas-wrap {
 	display: block;
+	position: relative;
 	width: 100%;
 }
 
@@ -237,4 +238,8 @@ canvas.dragged{
 }
 #tool-rgb-val input{
 	width: 80px;
+}
+
+#canvas, #pointer-canvas {
+	cursor: none;
 }
