@@ -51,15 +51,34 @@ function setNameTextBox() {
 }
 
 function init() {
-	insertURLParam("room", "0");
 	context.fillStyle = "white";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	setNameTextBox();
 	webGLStart();
 }
 
+
 function createRoom() {
 	socket.emit('create room');
+}
+
+
+function joinRoom() {
+	insertURLParam("room", selectedRoom);
+}
+
+function searchRoom() {
+	var table = document.getElementById('room-list');
+	var row = table.rows;
+	var roomSearch = document.getElementById('room-search');
+	for(var i = 1; i < row.length; i++) {
+		row[i].className = "";
+		if(roomSearch.value != "") {
+			if(roomSearch.value != row[i].cells[0].innerHTML) {
+				 row[i].className = "invisible";
+			}
+		}
+	}
 }
 
 socket.on('room result', function(data) {
@@ -369,34 +388,3 @@ document.getElementById('colourDrop').addEventListener('click', function(evt){
 	brush.setBrushType('fillBucket');
 });
 */
-
-
-function getURLParam(name) {
-  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
-}
-
-function insertURLParam(key, value) {
-        key = escape(key); value = escape(value);
-
-        var kvp = document.location.search.substr(1).split('&');
-        if (kvp == '') {
-            document.location.search = '?' + key + '=' + value;
-        }
-        else {
-
-            var i = kvp.length; var x; while (i--) {
-                x = kvp[i].split('=');
-
-                if (x[0] == key) {
-                    x[1] = value;
-                    kvp[i] = x.join('=');
-                    break;
-                }
-            }
-
-            if (i < 0) { kvp[kvp.length] = [key, value].join('='); }
-
-            //this will reload the page, it's likely better to store this until finished
-/*            document.location.search = kvp.join('&');*/
-        }
-    }

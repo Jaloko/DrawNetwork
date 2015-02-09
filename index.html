@@ -2,91 +2,197 @@
 	<head>
 		<title>Coop Canvas</title>
  		<script src="/socket.io/socket.io.js"></script>
+ 		<script src="js/functions.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/global.css">
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 	</head>
 	<body onload="init()">
+		<div id="nav-bar">
+			<div class="content-box">
+				<a href="/" class="nav-opt">Home</a>
+			</div>
+		</div>
 		<div class="content-box" >
 			<div id="wrapper">
-				<div id="left-col">
-					<div id="canvas-wrap">
-					 	<canvas id="canvas" width="960" height="528"></canvas>
-					 	<canvas id="pointer-canvas" style="position:absolute; left: 0; top: 0;" width="960" height="528"></canvas>
-					</div>
-					<div id="tools">
-						<div class="button tool">
-						Brush
+				<div id="home-content">
+					<div class="col">
+						<div id="home-head">
+							<h1>Coop Canvas</h1>
 						</div>
-						<div id="colourDrop" class="button tool">
-						Colour dropper
+						<div class="home-row">
+							Coop Canvas is a free online cooperative drawing tool that allows you to draw in real time with other users. Why? Because its just more fun with other people. Simply create a room and share the unique URL to get started.
 						</div>
-						<div id="clearCanvas" class="button tool">
-						Clear
-						</div>
-						<input id="brushSelection" type="range" min="1" max="100" value="30"></input>
-						<div id="currentColour"></div>
-						<div class="clear">
+						<div class="home-row">
+							Features (comming soon)
 						</div>
 					</div>
+					<div class="col">
+						<div class="col-bar">
+							<div>
+								<div class="button" onclick="createRoom()">
+									Create Room
+								</div>
+								<input id="room-search" type="text" placeholder="Search..." onchange="searchRoom()"></input>
+								<div class="button" onclick="searchRoom()">
+									Search
+								</div>
+							</div>
+						</div>
+						<div id="room-container">
+							<table id="room-list">
+								<tr>
+									<th>Room ID</th>
+									<th>No. Users</th>
+								</tr>
+							</table>
+							<script>
+								var socket = io.connect();
+								var selectedRoom;
+								socket.emit('get room list');
+								socket.on('recieve room list', function(data) {
+									for(var i = 0; i < data.length; i++) {
+										var checked = false;
+										if(i == 0) {
+											checked = true;
+										}
+										createRadioElement("rooms", data[i].id, checked);
+									}
+									var table = document.getElementById("room-list");
+									for(var i = 0; i < data.length; i++) {
+										var row = table.insertRow(i + 1);
+										row.id = data[i].id;
+										row.onclick = function() {
+											selectedRoom = this.id;
+											var temp = document.getElementById(this.id + "-radio");
+											temp.checked = true;
+											var tableRows = document.getElementById("room-list").rows;
+											for(var i = 1; i < tableRows.length; i++) {
+												tableRows[i].cells[0].className = "";
+												tableRows[i].cells[1].className = "";
+											}
+											var temp2 = document.getElementById(this.id);
+											temp2.cells[0].className = "row-selected";
+											temp2.cells[1].className = "row-selected";
+										};
+										var cell1 = row.insertCell(0);
+										var cell2 = row.insertCell(1);
+										cell1.innerHTML = data[i].id;
+										cell2.innerHTML = data[i].users + "/10";
+										if(i == 0) {
+											selectedRoom = data[i].id;
+											cell1.className = "row-selected";
+											cell2.className = "row-selected";
+										}
+									}
+								});
+								function createRadioElement(name, value, checked) {
+								    var radioHtml = '<input id="' + value + '-radio" type="radio" name="' + name + '" value="' + value + '"';
+								    if ( checked ) {
+								        radioHtml += ' checked="checked"';
+								    }
+								    radioHtml += '/>';
 
-				</div>
-				<div id="right-col" onmousedown="return false">
-					<div id="colour-picker">
-						<div class="paletteLeftCol">
-							<canvas id="webgl-temp" width="255" height="255" style="display: none;"></canvas>
-							<canvas id="tint" width="255" height="255"></canvas>
-							<canvas id="tint-pointer" style="position:absolute; left: 0; top: 0;" width="255" height="255"></canvas>
-							<canvas id="hue" width="30" height="255"></canvas>
-						</div>
-						<div class="paletteArrowCol">
-							<div id="palette-arrow" class="arrow-left" style="position: absolute;"></div>
-						</div>
-						<div style="display: none;" class="paletteRightCol">
-							<span class="value">R:</span>  <input id="rValue" onchange="inputColourChange()" type="text"></input></br>
-							<span class="value">G:</span>	<input id="gValue" onchange="inputColourChange()" type="text"></input></br>
-							<span class="value">B:</span>	<input id="bValue" onchange="inputColourChange()" type="text"></input></br>
-							<span class="value">Hex:</span>	<input id="hexValue" onchange="onHexChange()" type="text"></input></br>
-							<div id="currentColour"></div>
+								    var radioFragment = document.getElementById('room-container');
+								    radioFragment.innerHTML += radioHtml;
+								}
+							</script>
+							<div id="join-room-container" class="center">
+								<div class="button" class="center" onclick="joinRoom()">
+									Join Room
+								</div>
+							</div>
 						</div>
 					</div>
-					<div id="user-tools">
-						<div id="user-tabs">
-							<div id="users-online-tab" class="tab selected">
-								Users Online
+					<div class="clear">
+					</div>
+				</div>
+				<script>
+					checkHomeState();
+				</script>
+				<div id="draw-content">
+					<div id="left-col">
+						<div id="canvas-wrap">
+						 	<canvas id="canvas" width="960" height="528"></canvas>
+						 	<canvas id="pointer-canvas" style="position:absolute; left: 0; top: 0;" width="960" height="528"></canvas>
+						</div>
+						<div id="tools">
+							<div class="button tool">
+							Brush
 							</div>
-							<div id="users-chat-tab" class="tab">
-								Chat
+							<div id="colourDrop" class="button tool">
+							Colour dropper
 							</div>
+							<div id="clearCanvas" class="button tool">
+							Clear
+							</div>
+							<input id="brushSelection" type="range" min="1" max="100" value="30"></input>
+							<div id="currentColour"></div>
 							<div class="clear">
 							</div>
 						</div>
-						<div id="tab-content">
-							<div id="users-online" class="visible">
-								<div id ="users" class="users-border">
+
+					</div>
+					<div id="right-col" onmousedown="return false">
+						<div id="colour-picker">
+							<div class="paletteLeftCol">
+								<canvas id="webgl-temp" width="255" height="255" style="display: none;"></canvas>
+								<canvas id="tint" width="255" height="255"></canvas>
+								<canvas id="tint-pointer" style="position:absolute; left: 0; top: 0;" width="255" height="255"></canvas>
+								<canvas id="hue" width="30" height="255"></canvas>
+							</div>
+							<div class="paletteArrowCol">
+								<div id="palette-arrow" class="arrow-left" style="position: absolute;"></div>
+							</div>
+							<div style="display: none;" class="paletteRightCol">
+								<span class="value">R:</span>  <input id="rValue" onchange="inputColourChange()" type="text"></input></br>
+								<span class="value">G:</span>	<input id="gValue" onchange="inputColourChange()" type="text"></input></br>
+								<span class="value">B:</span>	<input id="bValue" onchange="inputColourChange()" type="text"></input></br>
+								<span class="value">Hex:</span>	<input id="hexValue" onchange="onHexChange()" type="text"></input></br>
+								<div id="currentColour"></div>
+							</div>
+						</div>
+						<div id="user-tools">
+							<div id="user-tabs">
+								<div id="users-online-tab" class="tab selected">
+									Users Online
+								</div>
+								<div id="users-chat-tab" class="tab">
+									Chat
+								</div>
+								<div class="clear">
 								</div>
 							</div>
-							<div id="users-chat" class="invisible">
-								<div class="users-border">
-									This feature will be added in the near future.
+							<div id="tab-content">
+								<div id="users-online" class="visible">
+									<div id ="users" class="users-border">
+									</div>
+								</div>
+								<div id="users-chat" class="invisible">
+									<div class="users-border">
+										This feature will be added in the near future.
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-				<div class="clear">
-				</div>
-			</div>
-		</div>
-		<div id="name-wrap" class="table-visible">
-			<div id="name-box-wrap">
-				<div id="name-box">
-					<h2>Enter a name: </h2>
-					<input id="name" type="text" maxlength="20"></input></br>
-					<div class="button" onclick="sync()">
-					Submit Name
+					<div class="clear">
+					</div>
+					<div id="name-wrap" class="table-visible">
+						<div id="name-box-wrap">
+							<div id="name-box">
+								<h2>Enter a name: </h2>
+								<input id="name" type="text" maxlength="20"></input></br>
+								<div class="button" onclick="sync()">
+								Submit Name
+								</div>
+							</div>
+						</div>	
 					</div>
 				</div>
-			</div>	
+				<script>
+					checkPageState();
+				</script>
+			</div>
 		</div>
 	</body>
 	<script src="js/gl-matrix-min.js"></script>

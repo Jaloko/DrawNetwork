@@ -26,6 +26,18 @@ app.get('/', function(req, res) {
 
 io.sockets.on('connection', function(socket) {
 
+	socket.on('get room list', function() {
+		var theRooms = [];
+		for(var i = 0; i < rooms.length; i++) {
+			var obj = {
+				id: rooms[i].id,
+				users: rooms[i].users.length
+			};
+			theRooms.push(obj);
+		}
+		socket.emit('recieve room list', theRooms);
+	});
+
 	socket.on('create room', function() {
 		if(countRoomsOwnerOf(socket) < 5) {
 			var id = rooms.length + "";
