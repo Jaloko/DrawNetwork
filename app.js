@@ -5,7 +5,7 @@ var express = require('express'),
 	app.use(express.static('public'));
 
 var rooms = [];
-rooms.push(new Room("0", "admin"));
+rooms.push(new Room(generateId(), "admin"));
 
 var timer = new Date().getTime();
 
@@ -40,7 +40,7 @@ io.sockets.on('connection', function(socket) {
 
 	socket.on('create room', function() {
 		if(countRoomsOwnerOf(socket) < 5) {
-			var id = rooms.length + "";
+			var id = generateId();
 			var ip = socket.request.connection.remoteAddress;
 			rooms.push(new Room(id, ip));
 			socket.emit('room result', id);
@@ -109,22 +109,23 @@ io.sockets.on('connection', function(socket) {
 		if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)
 			&& validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.lastX)
 			&& validateNumber(newData.lastY) && validateNumber(newData.size)) {
-			for(var i = 0; i < rooms[index].users.length; i++) {
-				if(rooms[index].users[i] != null) {
-					if(rooms[index].users[i].name == newData.name) {
-						if(rooms[index].users[i].colour != newData.colour) {
-							rooms[index].users[i].colour = newData.colour;
-							if(new Date().getTime() > timer + 100) {
-								timer+= 100;
-								io.sockets.in(rooms[i].id).emit('user list', rooms[i].users);	
+			if(rooms[index].users.length != 0) {
+				for(var i = 0; i < rooms[index].users.length; i++) {
+					if(rooms[index].users[i] != null) {
+						if(rooms[index].users[i].name == newData.name) {
+							if(rooms[index].users[i].colour != newData.colour) {
+								rooms[index].users[i].colour = newData.colour;
+								if(new Date().getTime() > timer + 100) {
+									timer+= 100;
+									io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);	
+								}
 							}
+							break;
 						}
-						break;
 					}
 				}
+				socket.broadcast.to(rooms[index].id).emit('sync draw', newData);
 			}
-			socket.broadcast.to(rooms[index].id).emit('sync draw', newData);
-
 			//Old way
 /*			socket.broadcast.emit('sync draw', newData);*/
 		}
@@ -212,6 +213,26 @@ io.sockets.on('connection', function(socket) {
 		}
 	});
 });
+
+function generateId(){
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for(var i = 0; i < 6; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    var counter = 0;
+    for(var i = 0; i < rooms.length; i++) {
+    	if(text === rooms[i].id) {
+    		counter++;
+    	}
+    }
+    if(counter <= 0) {
+    	return text;
+    } else {
+    	generateId();
+    }
+
+}
 
 function pickRandom(room, socket) {
 	var rand = Math.floor(Math.random() * (room.users.length - 1));

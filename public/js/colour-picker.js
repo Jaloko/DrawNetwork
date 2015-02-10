@@ -257,11 +257,11 @@ function changeColour() {
     if(canMoveTintPointer == true) {
         var canvasRect = tintCanvas.getBoundingClientRect();
         if(mouseIsHoveringCanvas(tintCanvas)) {
-            tintPointer = getActualMousePos(tintCanvas);
+            tintPointer = mousePos;
             tintPointer.x -= canvasRect.left;
             tintPointer.y -= canvasRect.top;
         } else {
-            var pos = getActualMousePos(tintCanvas);
+            var pos = mousePos;
             if(pos.x < canvasRect.left && pos.y < canvasRect.top) {
                 tintPointer.x = 0;
                 tintPointer.y = 0;
@@ -302,9 +302,8 @@ function changeColour() {
         drawTintPointer();
     } else if(mouseIsHoveringCanvas(hueCanvas)) {
         var canvasRect = hueCanvas.getBoundingClientRect();
-        huePointer.y = getActualMousePos(hueCanvas).y;
-        huePointer.y -= canvasRect.top;
-        rgb = getColourOnCanvas(hueCanvas, hueCtx);
+        huePointer.y = mousePos.y - canvasRect.top;
+        rgb = getColourOnHueCanvas();
         pickedColour.r = rgb.r;
         pickedColour.g = rgb.g;
         pickedColour.b = rgb.b;
@@ -312,8 +311,8 @@ function changeColour() {
         var currentColour = document.getElementById('currentColour');
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         var paletteArrow = document.getElementById('palette-arrow');
-
-        paletteArrow.style.top = mousePos.y - 10 + "px";
+        var scrollY = getScrollAmount().y;
+        paletteArrow.style.top = huePointer.y - 10 + "px";
         assignHTMLValues();
         updateColourBuffer();
                 
@@ -359,17 +358,15 @@ function updateColour() {
     drawTintPointer();
 }
 
-function getActualMousePos(canvas) {
+function getScrollAmount() {
     var doc = document.documentElement;
     var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
     var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
-    var x = mousePos.x - left;
-    var y = mousePos.y - top;
-    return {x: x, y: y};
+    return {x: left, y: top}; 
 }
 
 function mouseIsHoveringCanvas(canvas) {
-    var pos = getActualMousePos(canvas);
+    var pos = mousePos;
     var canvasRect = canvas.getBoundingClientRect();
     if(pos.x >= canvasRect.left && pos.x <= canvasRect.right 
         && pos.y >= canvasRect.top && pos.y <= canvasRect.bottom) {
@@ -454,12 +451,6 @@ function getColourOnCanvas(canvas, ctx){
 /**
 ** Helper Functions
 **/
-function getMousePos(evt) {
-    return {
-        x: evt.clientX,
-        y: evt.clientY
-    };
-}
 
 function convertRGBToHex(red, green, blue){
     var r = red.toString(16);

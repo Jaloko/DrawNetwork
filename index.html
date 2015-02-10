@@ -116,21 +116,26 @@
 						 	<canvas id="pointer-canvas" style="position:absolute; left: 0; top: 0;" width="960" height="528"></canvas>
 						</div>
 						<div id="tools">
-							<div class="button tool">
-							Brush
+							<div id="brush" class="button bselect tool">
+								Brush
+							</div>
+							<div id="gradient-brush" class="button tool">
+								Gradient Brush
 							</div>
 							<div id="colourDrop" class="button tool">
-							Colour dropper
+								Colour dropper
 							</div>
 							<div id="clearCanvas" class="button tool">
-							Clear
+								Clear
+							</div>
+							<div id="saveCanvas" class="button tool">
+								Save
 							</div>
 							<input id="brushSelection" type="range" min="1" max="100" value="30"></input>
 							<div id="currentColour"></div>
 							<div class="clear">
 							</div>
 						</div>
-
 					</div>
 					<div id="right-col" onmousedown="return false">
 						<div id="colour-picker">

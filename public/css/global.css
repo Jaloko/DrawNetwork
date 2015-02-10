@@ -17,6 +17,7 @@ body {
 #nav-bar {
 	display: block;
 	width: 100%;
+	min-width: 1280px;
 	height: 60px;
 	background-color: #372f2d;
 }
@@ -162,6 +163,10 @@ input[type="radio"] {
 	line-height: 40px;
 	margin: 5px;
 	background-color: #998675;
+}
+
+.bselect {
+	background-color: #63574c;
 }
 
 .button:hover {
@@ -310,6 +315,8 @@ input[type="radio"] {
 	height: 30px;
 	color: #000000;
 	background-color: #888;
+	-webkit-appearance: none;
+	border: none;
 }
 
 #name-box input:focus {

@@ -13,6 +13,8 @@ var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
 var pointerCanvas = document.getElementById('pointer-canvas');
 var pointerContext = pointerCanvas.getContext('2d');
+var canDraw = false;
+var gradientTimer = 0;
 
 var Brush = function(){
 	this.size = 30,
@@ -74,7 +76,7 @@ function searchRoom() {
 	for(var i = 1; i < row.length; i++) {
 		row[i].className = "";
 		if(roomSearch.value != "") {
-			if(roomSearch.value != row[i].cells[0].innerHTML) {
+			if(row[i].cells[0].innerHTML.indexOf(roomSearch.value) == -1) {
 				 row[i].className = "invisible";
 			}
 		}
@@ -190,6 +192,36 @@ function draw() {
 	socket.emit('draw', json);
 }
 
+function gradientDraw(timer) {
+	var canvasRect = canvas.getBoundingClientRect();
+	var rgb = convertHexToRGB(brush.colour);
+	rgb.r -= timer;
+	rgb.g -= timer;
+	rgb.b -= timer;
+	if(rgb.r <= 0) {
+		rgb.r = 0;
+	}
+	if(rgb.g <= 0) {
+		rgb.g = 0;
+	}
+
+	if(rgb.b <= 0) {
+		rgb.b = 0;
+	}
+	var hex = convertRGBToHex(rgb.r, rgb.g, rgb.b);
+	var json = {
+		name: name,
+		x: mousePos.x - canvasRect.left,
+		y: mousePos.y - canvasRect.top,
+		lastX: lastPos.x - canvasRect.left,
+		lastY: lastPos.y - canvasRect.top,
+		size: brush.size,
+		colour: hex
+	}
+	drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+	socket.emit('draw', json);
+}
+
 function drawRect(x, y, colour) {
     context.fillStyle = colour;
 	context.fillRect(x, y, 15, 15);
@@ -264,13 +296,9 @@ function getRandomColor() {
 }
 
 function getMousePos(evt) {
-	// Scroll bar offsets
-	var doc = document.documentElement;
-	var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
-	var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
     return {
-        x: evt.clientX + left,
-       	y: evt.clientY + top
+        x: evt.clientX,
+       	y: evt.clientY
     };
 }
 
@@ -322,17 +350,24 @@ function onColourChange(rgb) {
 	};
 	updateColour();
 	brush.setColour(hex);
-	brush.setBrushType("freeroam");
 }
 
 document.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(evt);
 	drawBrushOutline(mousePos.x, mousePos.y);
-	if(mouseDown === true && brush.getBrushType() === "freeroam") {
+	if(mouseDown === true) {
 		if(hasSynced == true) {
-			if(mouseIsHoveringCanvas(canvas)) {
-				draw();
+			if(brush.getBrushType() === "freeroam") {
+				if(canDraw == true) {
+					draw();
+				}	
+			} else if(brush.getBrushType() === "gradient-brush") {
+				if(canDraw == true) {
+					gradientTimer++;
+					gradientDraw(gradientTimer);
+				}	
+
 			}
 			changeColour();
 		}
@@ -345,15 +380,33 @@ document.addEventListener("mousedown", function(evt) {
     	mouseDown = true;
     	if(mouseDown === true) {
     		// Located in colour-picker2.js
-		    if(canMoveTintPointer == false) {
-		        if(mouseIsHoveringCanvas(tintCanvas)) {
-		            canMoveTintPointer = true;
-		        }  
-		    }
     		if(hasSynced == true) {
-    			if(brush.brushType === "dropper"){
-    				var rgb = getColourOnCanvas(canvas, context);
-					onColourChange(rgb);
+	    		if(canMoveTintPointer == false) {
+			        if(mouseIsHoveringCanvas(tintCanvas)) {
+			            canMoveTintPointer = true;
+			            canDraw = false;
+			        }  
+			    }
+			    // To stop drawing when dragging tint pointer
+			    if(canDraw == false) {
+	    			if(mouseIsHoveringCanvas(canvas)) {
+						canDraw = true;
+					}
+	    		}
+			    if(brush.brushType === "freeroam") {
+			    	if(canDraw == true) {
+			    		draw();
+			    	}
+			    } else if(brush.brushType === "gradient-brush") {
+			    	if(canDraw == true) {
+			    		gradientTimer = 0;
+			    		gradientDraw(gradientTimer);
+	    			}
+			    } else if(brush.brushType === "dropper"){
+			    	if(mouseIsHoveringCanvas(canvas)) {
+	    				var rgb = getColourOnCanvas(canvas, context);
+						onColourChange(rgb);
+					}
 				} else if(brush.brushType === "fillBucket") {
 					fillBucket(context, brush.colour);
 					brush.setBrushType("freeroam");
@@ -373,6 +426,10 @@ document.addEventListener("mouseup", function(evt) {
 	    if(canMoveTintPointer == true) {
 	        canMoveTintPointer = false;
 	    }
+
+    	if(canDraw == true) {
+			canDraw = false;
+		}
 	}
 });
 
@@ -380,9 +437,34 @@ document.getElementById('clearCanvas').addEventListener('click', function(evt){
 	clearCanvas();
 })
 
+document.getElementById('brush').addEventListener('click', function(evt){
+	brush.setBrushType('freeroam');
+	resetTools();
+	this.className = "button bselect tool";
+});
+
 document.getElementById('colourDrop').addEventListener('click', function(evt){
 	brush.setBrushType('dropper');
+	resetTools();
+	this.className = "button bselect tool";
 });
+
+document.getElementById('gradient-brush').addEventListener('click', function(evt){
+	brush.setBrushType('gradient-brush');
+	resetTools();
+	this.className = "button bselect tool";
+
+});
+
+document.getElementById('saveCanvas').addEventListener('click', function(evt){
+	window.open(canvas.toDataURL());
+});
+
+function resetTools() {
+	document.getElementById('brush').className = "button tool";
+	document.getElementById('colourDrop').className = "button tool";
+	document.getElementById('gradient-brush').className = "button tool";
+}
 
 /*document.getElementById('fillBucket').addEventListener('click', function(evt){
 	brush.setBrushType('fillBucket');
