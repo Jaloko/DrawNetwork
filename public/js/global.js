@@ -15,6 +15,7 @@ var pointerCanvas = document.getElementById('pointer-canvas');
 var pointerContext = pointerCanvas.getContext('2d');
 var canDraw = false;
 var gradientTimer = 0;
+var clearSender = false;
 
 var Brush = function(){
 	this.size = 30,
@@ -40,6 +41,7 @@ var name;
 var randomNames = [
 "Beulah Wright", "Curtis Fox", "Levi Collins", "Gustavo	Russell", "Erica Lowe", "Sherri Mcbride", "Zachary Martin", "Preston Fletcher", "Jack Shaw", "Chris Carr", "Morris Goodwin", "Raquel Drake", "Sandy Pearson", "Francis Farmer", "Erika Haynes", "Edgar Warren", "Randal Love", "Lucas Cannon", "Ismael Terry", "Rex Alexander", "Russell Houston", "Kenneth Potter", "Ricky James", "Latoya Rivera", "Katherine Chapman", "Gerald Gomez", "Glenda Robinson", "Adrian Cox", "Maurice Barton", "Harold Hansen", "Nicole Townsend", "Jorge Waters", "Hugo Hampton", "Stephen Mcgee", "Marguerite Conner", "Bill Newman", "Rodney Cook", "Santiago Reid", "Toby Casey", "Mamie Allison", "Tami Lawrence", "Tim Crawford", "Paula Carpenter", "Flora Young", "Marian Ferguson","Lewis Carlson", "Nina Wise", "Elisa Hanson", "Shelly Lucas", "Gabriel Stevenson", "Elbert Reeves", "Vicky Jackson", "Cassandra Moreno", "Becky Todd", "Jimmy Soto", "Opal Hicks", "Darren Mendoza", "Reginald Watts", "Cesar Sutton", "Lionel Rodgers", "Christopher Robertson", "Terrance Byrd", "Kristy Garza", "Herbert Flowers", "Kirk Schmidt", "Dennis Thomas", "Essie Henry", "Abel Tucker", "Katrina Phelps", "Rolando Gonzalez", "Olga Howard", "Cecilia Cortez", "Tanya Cohen", "Juanita Rios", "Jeff Davis", "Marty Perkins", "Ian Ortiz", "Andy George", "Salvatore Hamilton", "Verna Barker", "Louise Frank", "April Nunez", "Bonnie Ramirez", "Kay Sherman", "Stacy Nelson", "Lorraine White", "Paul Glover", "Otis Woods", "Darrin Guerrero", "Whitney Underwood", "Henry Graves", "Eula Leonard", "Francis Sanchez", "Hubert Christensen", "Doug Stanley", "Neal Washington", "Everett Harvey", "Nicholas Hale", "Pedro Ramsey", "Sadie Stephens"];
 var connectedUsers;
+var currentlyVoting = false;
 
 function pickRandomName() {
 	var rand = Math.floor(Math.random() * randomNames.length);
@@ -149,15 +151,58 @@ socket.on('recieve clear canvas', function() {
    	context.fillRect(0, 0, canvas.width, canvas.height);
 });
 
+socket.on('send vote clear', function(data) {
+	currentlyVoting = true;
+	var clearVoteBox = document.getElementById('clear-canvas-vote-box');
+	clearVoteBox.className = "";
+	document.getElementById('timeRemain').innerHTML = data;
+	if(clearSender == true) {
+		document.getElementById('voteButtons').className = "invisible";
+	} else {
+		document.getElementById('voteButtons').className = "";	
+	}
+	clearSender = false;
+});
+
+socket.on('send clear vote timer', function(data) {
+	var clearVoteBox = document.getElementById('clear-canvas-vote-box');
+	clearVoteBox.className = "";
+	document.getElementById('clear-wrap').className ="table-visible";
+	document.getElementById('result').className = "invisible";
+	document.getElementById('time').className = "";
+	document.getElementById('timeRemain').innerHTML = data.timeRemaining;
+	document.getElementById('pYes').innerHTML = "Yes: " + data.yesVotes;
+	document.getElementById('pNo').innerHTML = "No: " + data.noVotes;
+	document.getElementById('pTotal').innerHTML = "Total Possible: " + data.total;
+	if(currentlyVoting == false) {
+		document.getElementById('voteButtons').className = "invisible";
+	}
+});
+
+socket.on('send clear vote result', function(data) {
+	document.getElementById('result').className = "";
+	document.getElementById('time').className = "invisible";
+	document.getElementById('resultData').innerHTML = data;
+});
+
+socket.on('unlock canvas', function(data) {
+	currentlyVoting = false;
+	document.getElementById('clear-wrap').className = "invisible";
+});
+
+function clearVote(vote) {
+	socket.emit('recieve clear vote', vote);
+	document.getElementById('voteButtons').className = "invisible";
+}
+
 
 /*
 	Canvas Methods
 */
 
 function clearCanvas() {
-	context.fillStyle = "white";
-   	context.fillRect(0, 0, canvas.width, canvas.height);
-   	socket.emit('clear canvas');
+   	socket.emit('vote clear');
+   	clearSender = true;
 }
 
 function drawBrushOutline(x, y) {
@@ -178,19 +223,22 @@ function drawBrushOutline(x, y) {
 }
 
 function draw() {
-	var canvasRect = canvas.getBoundingClientRect();
-	var json = {
-		name: name,
-		x: mousePos.x - canvasRect.left,
-		y: mousePos.y - canvasRect.top,
-		lastX: lastPos.x - canvasRect.left,
-		lastY: lastPos.y - canvasRect.top,
-		size: brush.size,
-		colour: brush.colour
+	if(currentlyVoting == false) {
+		var canvasRect = canvas.getBoundingClientRect();
+		var json = {
+			name: name,
+			x: mousePos.x - canvasRect.left,
+			y: mousePos.y - canvasRect.top,
+			lastX: lastPos.x - canvasRect.left,
+			lastY: lastPos.y - canvasRect.top,
+			size: brush.size,
+			colour: brush.colour
+		}
+		drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+		socket.emit('draw', json);
 	}
-	drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
-	socket.emit('draw', json);
 }
+
 
 function gradientDraw(timer) {
 	var canvasRect = canvas.getBoundingClientRect();

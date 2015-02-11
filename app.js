@@ -15,7 +15,16 @@ function Room(id, owner) {
 	this.users = [],
 	this.serverUsers = [],
 	this.usersConnected,
-	this.storedCanvas
+	this.storedCanvas,
+	this.clearVote = {
+		vote: false,
+		clearTimer: 0,
+		timeRemaining: 0,
+		timer: 0,
+		total: 0,
+		yes: 0,
+		no: 0
+	}
 }
 
 server.listen(3000);
@@ -106,29 +115,34 @@ io.sockets.on('connection', function(socket) {
 			size: data.size,
 			colour: data.colour
 		};
-		if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)
-			&& validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.lastX)
-			&& validateNumber(newData.lastY) && validateNumber(newData.size)) {
-			if(rooms[index].users.length != 0) {
-				for(var i = 0; i < rooms[index].users.length; i++) {
-					if(rooms[index].users[i] != null) {
-						if(rooms[index].users[i].name == newData.name) {
-							if(rooms[index].users[i].colour != newData.colour) {
-								rooms[index].users[i].colour = newData.colour;
-								if(new Date().getTime() > timer + 100) {
-									timer+= 100;
-									io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);	
+		if(index != null) {
+			if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)
+				&& validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.lastX)
+				&& validateNumber(newData.lastY) && validateNumber(newData.size)) {
+				if(rooms[index].users != null) {
+	/*				for(var i = 0; i < rooms[index].users.length; i++) {
+						if(rooms[index].users[i] != null) {
+							if(rooms[index].users[i].name == newData.name) {
+								if(rooms[index].users[i].colour != newData.colour) {
+									rooms[index].users[i].colour = newData.colour;
+									if(new Date().getTime() > timer + 100) {
+										timer+= 100;
+										io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);	
+									}
 								}
+								break;
 							}
-							break;
 						}
+					}*/
+					if(rooms[index].clearVote.vote == false) {
+						socket.broadcast.to(rooms[index].id).emit('sync draw', newData);
 					}
 				}
-				socket.broadcast.to(rooms[index].id).emit('sync draw', newData);
+				//Old way
+	/*			socket.broadcast.emit('sync draw', newData);*/
 			}
-			//Old way
-/*			socket.broadcast.emit('sync draw', newData);*/
 		}
+
 	});
 
 	socket.on('join room', function(data) {
@@ -168,13 +182,59 @@ io.sockets.on('connection', function(socket) {
 					var serverUser = {
 						id: socket.id,
 						hasSynced: false,
-						canSync: false
+						canSync: false,
+						hasVoted: false,
+						canVote: false
 					}
 					rooms[index].serverUsers.push(serverUser);
 					socket.emit('user validated');
 					io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);
 					//old
 	/*				io.sockets.emit('user list', users);*/
+				}
+			}
+		}
+	});
+
+	socket.on('vote clear', function() {
+		var index = getRoomIndex(socket);
+		if(rooms[index].clearVote.vote == false) {
+			rooms[index].clearVote.vote = true;
+			rooms[index].clearVote.total = rooms[index].users.length;
+			rooms[index].clearVote.yes = 0;
+			rooms[index].clearVote.no = 0;
+			rooms[index].clearVote.timeRemaining = 10;
+			for(var i = 0; i < rooms[index].serverUsers.length; i++) {
+				rooms[index].serverUsers[i].canVote = true;
+				if(socket.id == rooms[index].serverUsers[i].id) {
+					if(rooms[index].serverUsers[i].hasVoted == false) {
+						rooms[index].clearVote.yes++;
+						rooms[index].serverUsers[i].hasVoted = true;
+						break;
+					}
+				}
+			}
+			io.sockets.in(rooms[index].id).emit('send vote clear', rooms[index].clearVote.timeRemaining);
+			rooms[index].clearVote.timer = new Date().getTime();
+		}
+	});
+
+	socket.on('recieve clear vote', function(data) {
+		var index = getRoomIndex(socket);
+		if(rooms[index].clearVote.vote == true) {
+			if(typeof data == "boolean") {
+				for(var i = 0; i < rooms[index].serverUsers.length; i++) {
+					if(socket.id == rooms[index].serverUsers[i].id) {
+						if(rooms[index].serverUsers[i].hasVoted == false && rooms[index].serverUsers[i].canVote == true) {
+							if(data == true) {
+								rooms[index].clearVote.yes++;
+							} else {
+								rooms[index].clearVote.no++;
+							}
+							rooms[index].serverUsers[i].hasVoted = true;
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -189,13 +249,6 @@ io.sockets.on('connection', function(socket) {
 			};
 			validateImOffline(rooms[index], newData);
 		}
-	});
-
-	socket.on('clear canvas', function() {
-		var index = getRoomIndex(socket);
-		socket.broadcast.to(rooms[index].id).emit('recieve clear canvas');
-		// Old
-/*		socket.broadcast.emit('recieve clear canvas');*/
 	});
 
 	socket.on('im offline store canvas', function(data) {
@@ -213,6 +266,54 @@ io.sockets.on('connection', function(socket) {
 		}
 	});
 });
+
+setInterval(function() {
+	for(var i = 0; i < rooms.length; i++) {
+		if(rooms[i].clearVote.vote == true) {
+			if(rooms[i].clearVote.timeRemaining > 0 && (rooms[i].clearVote.yes + rooms[i].clearVote.no) < rooms[i].clearVote.total) {
+				if(new Date().getTime() > rooms[i].clearVote.timer + 1000) {
+					rooms[i].clearVote.timeRemaining--;
+					rooms[i].clearVote.timer += 1000;
+					var data = {
+						timeRemaining: rooms[i].clearVote.timeRemaining,
+						yesVotes: rooms[i].clearVote.yes,
+						noVotes: rooms[i].clearVote.no,
+						total: rooms[i].clearVote.total
+					};
+					io.sockets.in(rooms[i].id).emit('send clear vote timer', data);
+				}
+			} else {
+				var data = {
+					timeRemaining: rooms[i].clearVote.timeRemaining,
+					yesVotes: rooms[i].clearVote.yes,
+					noVotes: rooms[i].clearVote.no,
+					total: rooms[i].clearVote.total
+				};
+				io.sockets.in(rooms[i].id).emit('send clear vote timer', data);
+				if(rooms[i].clearVote.yes >= Math.floor(rooms[i].clearVote.total / 2) + 1) {
+					io.sockets.in(rooms[i].id).emit('send clear vote result', "Vote passed!");	
+					io.sockets.in(rooms[i].id).emit('recieve clear canvas');
+				} else {
+					io.sockets.in(rooms[i].id).emit('send clear vote result', "Vote failed!");	
+				}
+				rooms[i].clearVote.vote = false;
+				for(var ii = 0; ii < rooms[i].serverUsers.length; ii++) {
+					rooms[i].serverUsers[ii].hasVoted = false;
+					rooms[i].serverUsers[ii].canVote = true;
+				}
+				rooms[i].clearVote.clearTimer = new Date().getTime();
+			}
+		} else {
+			if(rooms[i].clearVote.clearTimer != 0) {
+				if(new Date().getTime() > rooms[i].clearVote.clearTimer + 1000) {
+					rooms[i].clearVote.clearTimer = 0;
+					io.sockets.in(rooms[i].id).emit('unlock canvas');	
+				}
+			}
+
+		}
+	}
+}, 1);
 
 function generateId(){
     var text = "";

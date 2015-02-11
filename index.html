@@ -193,6 +193,31 @@
 							</div>
 						</div>	
 					</div>
+					<div id="clear-wrap" class="invisible">
+						<div id="clear-box-wrap">
+							<div id="clear-canvas-vote-box" class="invisible">
+								<div>
+									<h2>Clear canvas vote</h2>
+									<div id="progress">
+										<p id="pYes"></p>
+										<p id="pNo"></p>
+										<p id="pTotal"></p>
+									</div>
+									<div id="time">
+										<p>Time remaining:</p>
+										<p id="timeRemain"></p>
+									</div>
+									<div id="result">
+										<p id="resultData"></p>
+									</div>
+								</div>
+								<div id="voteButtons">
+									<div class="button" onclick="clearVote(true);">Yes</div>
+									<div class="button" onclick="clearVote(false);">No</div>
+								</div>
+							</div>
+						</div>	
+					</div>
 				</div>
 				<script>
 					checkPageState();
