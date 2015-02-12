@@ -78,7 +78,6 @@ io.sockets.on('connection', function(socket) {
 				socket.emit('sync result', null);
 			}
 		}
-/*		socket.broadcast.emit('send canvas');*/
 	});
 
 	socket.on('recieve canvas', function(data) {
@@ -98,10 +97,31 @@ io.sockets.on('connection', function(socket) {
 				}
 			}
 		}
-/*		var newData = {
-			canvas: data
+	});
+
+	socket.on('update colour', function(data) {
+		if(validateHex(data)) {
+			var index = getRoomIndex(socket);
+			var newData = {
+				colour: data
+			};
+			if(index != null) {
+				for(var i = 0; i < rooms[index].users.length; i++) {
+					if(rooms[index].users[i] != null) {
+						if(rooms[index].serverUsers[i].id == socket.id) {
+							if(rooms[index].users[i].colour != newData.colour) {
+								if(new Date().getTime() > timer + 100) {
+									rooms[index].users[i].colour = newData.colour;
+									timer+= 100;
+									io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);	
+								}
+							}
+							break;
+						}
+					}
+				}
+			}
 		}
-		io.sockets.emit('sync result', newData);*/
 	});
 
 	socket.on('draw', function(data) {
@@ -120,26 +140,10 @@ io.sockets.on('connection', function(socket) {
 				&& validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.lastX)
 				&& validateNumber(newData.lastY) && validateNumber(newData.size)) {
 				if(rooms[index].users != null) {
-	/*				for(var i = 0; i < rooms[index].users.length; i++) {
-						if(rooms[index].users[i] != null) {
-							if(rooms[index].users[i].name == newData.name) {
-								if(rooms[index].users[i].colour != newData.colour) {
-									rooms[index].users[i].colour = newData.colour;
-									if(new Date().getTime() > timer + 100) {
-										timer+= 100;
-										io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);	
-									}
-								}
-								break;
-							}
-						}
-					}*/
 					if(rooms[index].clearVote.vote == false) {
 						socket.broadcast.to(rooms[index].id).emit('sync draw', newData);
 					}
 				}
-				//Old way
-	/*			socket.broadcast.emit('sync draw', newData);*/
 			}
 		}
 
@@ -189,8 +193,6 @@ io.sockets.on('connection', function(socket) {
 					rooms[index].serverUsers.push(serverUser);
 					socket.emit('user validated');
 					io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);
-					//old
-	/*				io.sockets.emit('user list', users);*/
 				}
 			}
 		}
@@ -198,24 +200,26 @@ io.sockets.on('connection', function(socket) {
 
 	socket.on('vote clear', function() {
 		var index = getRoomIndex(socket);
-		if(rooms[index].clearVote.vote == false) {
-			rooms[index].clearVote.vote = true;
-			rooms[index].clearVote.total = rooms[index].users.length;
-			rooms[index].clearVote.yes = 0;
-			rooms[index].clearVote.no = 0;
-			rooms[index].clearVote.timeRemaining = 10;
-			for(var i = 0; i < rooms[index].serverUsers.length; i++) {
-				rooms[index].serverUsers[i].canVote = true;
-				if(socket.id == rooms[index].serverUsers[i].id) {
-					if(rooms[index].serverUsers[i].hasVoted == false) {
-						rooms[index].clearVote.yes++;
-						rooms[index].serverUsers[i].hasVoted = true;
-						break;
+		if(index != null) {
+			if(rooms[index].clearVote.vote == false) {
+				rooms[index].clearVote.vote = true;
+				rooms[index].clearVote.total = rooms[index].users.length;
+				rooms[index].clearVote.yes = 0;
+				rooms[index].clearVote.no = 0;
+				rooms[index].clearVote.timeRemaining = 10;
+				for(var i = 0; i < rooms[index].serverUsers.length; i++) {
+					rooms[index].serverUsers[i].canVote = true;
+					if(socket.id == rooms[index].serverUsers[i].id) {
+						if(rooms[index].serverUsers[i].hasVoted == false) {
+							rooms[index].clearVote.yes++;
+							rooms[index].serverUsers[i].hasVoted = true;
+							break;
+						}
 					}
 				}
+				io.sockets.in(rooms[index].id).emit('send vote clear', rooms[index].clearVote.timeRemaining);
+				rooms[index].clearVote.timer = new Date().getTime();
 			}
-			io.sockets.in(rooms[index].id).emit('send vote clear', rooms[index].clearVote.timeRemaining);
-			rooms[index].clearVote.timer = new Date().getTime();
 		}
 	});
 
@@ -374,8 +378,6 @@ function validateImOffline(room, newData) {
 			}
 		}
 		io.sockets.in(room.id).emit('user list', room.users);
-		// Old
-/*		io.sockets.emit('user list', users);*/
 	}
 }
 

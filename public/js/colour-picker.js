@@ -326,6 +326,7 @@ function changeColour() {
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         assignHTMLValues();
     }
+    socket.emit('update colour', brush.colour);
 }
 
 function updateColour() {
