@@ -29,6 +29,7 @@ var huePointer = {
     y: 0
 }
 var canMoveTintPointer = false;
+var colourTimer = new Date().getTime();
 
 /**
 ** WebGL Functions
@@ -326,7 +327,10 @@ function changeColour() {
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         assignHTMLValues();
     }
-    socket.emit('update colour', brush.colour);
+    if(new Date().getTime() > colourTimer + 200) {
+        colourTimer = new Date().getTime();
+        socket.emit('update colour', brush.colour); 
+    }
 }
 
 function updateColour() {

@@ -100,23 +100,23 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('update colour', function(data) {
-		if(validateHex(data)) {
-			var index = getRoomIndex(socket);
-			var newData = {
-				colour: data
-			};
-			if(index != null) {
-				for(var i = 0; i < rooms[index].users.length; i++) {
-					if(rooms[index].users[i] != null) {
-						if(rooms[index].serverUsers[i].id == socket.id) {
-							if(rooms[index].users[i].colour != newData.colour) {
-								if(new Date().getTime() > timer + 100) {
+		if(new Date().getTime() > timer + 100) {
+			timer = new Date().getTime();
+			if(validateHex(data)) {
+				var index = getRoomIndex(socket);
+				var newData = {
+					colour: data
+				};
+				if(index != null) {
+					for(var i = 0; i < rooms[index].users.length; i++) {
+						if(rooms[index].users[i] != null) {
+							if(rooms[index].serverUsers[i].id == socket.id) {
+								if(rooms[index].users[i].colour != newData.colour) {
 									rooms[index].users[i].colour = newData.colour;
-									timer+= 100;
 									io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);	
 								}
+								break;
 							}
-							break;
 						}
 					}
 				}
