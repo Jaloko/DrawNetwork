@@ -27,7 +27,7 @@ function Room(id, owner) {
 	}
 }
 
-server.listen(3000);
+server.listen(8080);
 
 app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/index.html');
@@ -314,7 +314,13 @@ setInterval(function() {
 					io.sockets.in(rooms[i].id).emit('unlock canvas');	
 				}
 			}
-
+		}
+		// Boot users who have crashed.
+		for(var u = 0; u < rooms[i].serverUsers.length; u++) {
+			if(io.sockets.connected[rooms[i].serverUsers[u].id] == null) {
+				rooms[i].users.splice(u, 1);
+				rooms[i].serverUsers.splice(u, 1);
+			}
 		}
 	}
 }, 1);
