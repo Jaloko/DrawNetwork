@@ -58,6 +58,72 @@ body {
 	background-color: #4d3d2f;
 }
 
+.title-padding {
+	padding-bottom: 15px;
+}
+
+.feature-row {
+	display: block;
+	width: 100%;
+	padding-top: 15px;
+
+}
+
+.feature-icon {
+	float: left;
+	display: inline-block;
+	position: relative;
+	background-color: #998675;
+}
+
+#icon-people {
+	background: url("../img/icons/users6.png") center no-repeat;
+	background-size: 90%;
+	width: 60px;
+	height: 60px;
+}
+
+#icon-download {
+	background: url("../img/icons/download174.png") center no-repeat;
+	background-size: 90%;
+	width: 60px;
+	height: 60px;
+}
+
+#icon-lock {
+	background: url("../img/icons/lock77.png") center no-repeat;
+	background-size: 90%;
+	width: 60px;
+	height: 60px;
+}
+
+#icon-registration {
+	background: url("../img/icons/create1.png") center no-repeat;
+	background-size: 90%;
+	width: 60px;
+	height: 60px;
+}
+
+#icon-vote {
+	background: url("../img/icons/checklist4.png") center no-repeat;
+	background-size: 90%;
+	width: 60px;
+	height: 60px;
+}
+
+.feature-text {
+	float: left;
+	display: inline-block;
+	width: 475px;
+	padding-left: 10px;
+	padding-right: 10px;
+	position: relative;
+	line-height: 60px;
+	margin-left: 10px;
+	background-color: #998675;
+
+}
+
 input#room-search {
 	position: relative;
 	top: -2px;
@@ -330,6 +396,41 @@ input[type="radio"] {
 /*---------------------------------
 	Tools
 ---------------------------------*/
+
+#tool-brush-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/brush2.png") center;
+	background-size: 100%;
+}
+
+#tool-gradient-brush-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/artist.png") center;
+	background-size: 100%;
+}
+
+#tool-dropper-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/color8.png") center;
+	background-size: 100%;
+}
+
+#tool-clear-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/reload13.png") center;
+	background-size: 100%;
+}
+
+#tool-save-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/share1.png") center;
+	background-size: 100%;
+}
 #tool-col-pick{
 	margin: 10px;
 	border:2px solid #000;
