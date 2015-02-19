@@ -5,13 +5,14 @@ var express = require('express'),
 	app.use(express.static('public'));
 
 var rooms = [];
-rooms.push(new Room(generateId(), "admin"));
+rooms.push(new Room(generateId(), "admin", true));
 
 var timer = new Date().getTime();
 
-function Room(id, owner) {
+function Room(id, owner, public) {
 	this.id = id,
 	this.owner = owner,
+	this.public = public,
 	this.users = [],
 	this.serverUsers = [],
 	this.usersConnected,
@@ -38,22 +39,37 @@ io.sockets.on('connection', function(socket) {
 	socket.on('get room list', function() {
 		var theRooms = [];
 		for(var i = 0; i < rooms.length; i++) {
-			var obj = {
-				id: rooms[i].id,
-				users: rooms[i].users.length
-			};
-			theRooms.push(obj);
+			if(rooms[i].public === true) {
+				var obj = {
+					id: rooms[i].id,
+					users: rooms[i].users.length
+				};
+				theRooms.push(obj);
+			}
 		}
 		socket.emit('recieve room list', theRooms);
 	});
 
-	socket.on('create room', function() {
-		if(countRoomsOwnerOf(socket) < 5) {
-			var id = generateId();
-			var ip = socket.request.connection.remoteAddress;
-			rooms.push(new Room(id, ip));
-			socket.emit('room result', id);
-			console.log("Room: " + id + " created by: " + ip + "!");
+	socket.on('create room', function(data) {
+		var newData = {
+			isPublic: data
+		};
+		console.log(data);
+		if(validateBool(newData.isPublic) === true) {
+			if(countRoomsOwnerOf(socket) < 5) {
+				var id = generateId();
+				var ip = socket.request.connection.remoteAddress;
+				rooms.push(new Room(id, ip, newData.isPublic));
+				socket.emit('room result', id);
+				var isPublic;
+				if(newData.isPublic === true) {
+					isPublic = "public";
+				} else {
+					isPublic = "private";
+				}
+
+				console.log("Room: " + id + " (" + isPublic + ") created by: " + ip + "!");
+			}
 		}
 	});
 
@@ -408,6 +424,14 @@ function validateNumber(number) {
 		return true;
 	} else {
 		return false;
+	}
+}
+
+function validateBool(bool) {
+	if(bool === true || bool === false) {
+		return true;
+	} else {
+		return false
 	}
 }
 

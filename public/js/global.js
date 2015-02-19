@@ -63,7 +63,8 @@ function init() {
 
 
 function createRoom() {
-	socket.emit('create room');
+	var isPublic = document.getElementById('myonoffswitch').checked;
+	socket.emit('create room', isPublic);
 }
 
 
