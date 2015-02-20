@@ -204,7 +204,8 @@ io.sockets.on('connection', function(socket) {
 						hasSynced: false,
 						canSync: false,
 						hasVoted: false,
-						canVote: false
+						canVote: false,
+						voteTimer: 0
 					}
 					rooms[index].serverUsers.push(serverUser);
 					socket.emit('user validated');
@@ -218,23 +219,33 @@ io.sockets.on('connection', function(socket) {
 		var index = getRoomIndex(socket);
 		if(index != null) {
 			if(rooms[index].clearVote.vote == false) {
-				rooms[index].clearVote.vote = true;
-				rooms[index].clearVote.total = rooms[index].users.length;
-				rooms[index].clearVote.yes = 0;
-				rooms[index].clearVote.no = 0;
-				rooms[index].clearVote.timeRemaining = 10;
 				for(var i = 0; i < rooms[index].serverUsers.length; i++) {
-					rooms[index].serverUsers[i].canVote = true;
-					if(socket.id == rooms[index].serverUsers[i].id) {
-						if(rooms[index].serverUsers[i].hasVoted == false) {
-							rooms[index].clearVote.yes++;
-							rooms[index].serverUsers[i].hasVoted = true;
+					if(socket.id === rooms[index].serverUsers[i].id) {
+						if(new Date().getTime() > rooms[index].serverUsers[i].voteTimer + 30000) {
+							rooms[index].serverUsers[i].voteTimer = new Date().getTime();
+							rooms[index].clearVote.vote = true;
+							rooms[index].clearVote.total = rooms[index].users.length;
+							rooms[index].clearVote.yes = 0;
+							rooms[index].clearVote.no = 0;
+							rooms[index].clearVote.timeRemaining = 10;
+							for(var ii = 0; ii < rooms[index].serverUsers.length; ii++) {
+								rooms[index].serverUsers[ii].canVote = true;
+								if(socket.id === rooms[index].serverUsers[ii].id) {
+									if(rooms[index].serverUsers[ii].hasVoted === false) {
+										rooms[index].serverUsers[ii].voteTimer = new Date().getTime();
+										rooms[index].clearVote.yes++;
+										rooms[index].serverUsers[ii].hasVoted = true;
+									}
+								}
+							}
+							io.sockets.in(rooms[index].id).emit('send vote clear', rooms[index].clearVote.timeRemaining);
+							rooms[index].clearVote.timer = new Date().getTime();
 							break;
+						} else {
+							socket.emit('cannot start vote', (rooms[index].serverUsers[i].voteTimer + 30000 - new Date().getTime()) / 1000);
 						}
 					}
 				}
-				io.sockets.in(rooms[index].id).emit('send vote clear', rooms[index].clearVote.timeRemaining);
-				rooms[index].clearVote.timer = new Date().getTime();
 			}
 		}
 	});

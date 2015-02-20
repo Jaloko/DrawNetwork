@@ -157,15 +157,15 @@ socket.on('send vote clear', function(data) {
 	var clearVoteBox = document.getElementById('clear-canvas-vote-box');
 	clearVoteBox.className = "";
 	document.getElementById('timeRemain').innerHTML = data;
-	if(clearSender == true) {
+	document.getElementById('voteButtons').className = "";	
+	if(clearSender === true) {
 		document.getElementById('voteButtons').className = "invisible";
-	} else {
-		document.getElementById('voteButtons').className = "";	
 	}
 	clearSender = false;
 });
 
 socket.on('send clear vote timer', function(data) {
+
 	var clearVoteBox = document.getElementById('clear-canvas-vote-box');
 	clearVoteBox.className = "";
 	document.getElementById('clear-wrap').className ="table-visible";
@@ -186,6 +186,10 @@ socket.on('send clear vote result', function(data) {
 	document.getElementById('resultData').innerHTML = data;
 });
 
+socket.on('cannot start vote', function(data) {
+	alert("Cannot vote to clear for another: " + data + " seconds.");
+});
+
 socket.on('unlock canvas', function(data) {
 	currentlyVoting = false;
 	document.getElementById('clear-wrap').className = "invisible";
@@ -195,7 +199,6 @@ function clearVote(vote) {
 	socket.emit('recieve clear vote', vote);
 	document.getElementById('voteButtons').className = "invisible";
 }
-
 
 /*
 	Canvas Methods
