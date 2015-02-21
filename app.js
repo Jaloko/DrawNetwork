@@ -54,7 +54,6 @@ io.sockets.on('connection', function(socket) {
 		var newData = {
 			isPublic: data
 		};
-		console.log(data);
 		if(validateBool(newData.isPublic) === true) {
 			if(countRoomsOwnerOf(socket) < 5) {
 				var id = generateId();
@@ -336,7 +335,9 @@ io.sockets.on('connection', function(socket) {
 			};
 			validateImOffline(rooms[index], newData, socket);
 			if(rooms[index].users.length == 0) {
-				rooms[index].storedCanvas = newData.canvas;
+				if(newData.canvas.length <= 3000000) {
+					rooms[index].storedCanvas = newData.canvas;
+				}
 			}
 		}
 	});
@@ -345,7 +346,7 @@ io.sockets.on('connection', function(socket) {
 setInterval(function() {
 	for(var i = 0; i < rooms.length; i++) {
 		if(rooms[i].clearVote.vote == true) {
-			if(rooms[i].clearVote.timeRemaining > 0 && (rooms[i].clearVote.yes + rooms[i].clearVote.no) < rooms[i].clearVote.total) {
+			if(rooms[i].clearVote.timeRemaining > 0 && rooms[i].clearVote.yes < Math.floor(rooms[i].clearVote.total / 2) + 1) {
 				if(new Date().getTime() > rooms[i].clearVote.timer + 1000) {
 					rooms[i].clearVote.timeRemaining--;
 					rooms[i].clearVote.timer += 1000;

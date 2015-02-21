@@ -15,7 +15,6 @@ var pointerCanvas = document.getElementById('pointer-canvas');
 var pointerContext = pointerCanvas.getContext('2d');
 var canDraw = false;
 var gradientTimer = 0;
-var clearSender = false;
 
 var Brush = function(){
 	this.size = 30,
@@ -173,11 +172,6 @@ socket.on('send vote clear', function(data) {
 	var clearVoteBox = document.getElementById('clear-canvas-vote-box');
 	clearVoteBox.className = "";
 	document.getElementById('timeRemain').innerHTML = data;
-	document.getElementById('voteButtons').className = "";	
-	if(clearSender === true) {
-		document.getElementById('voteButtons').className = "invisible";
-	}
-	clearSender = false;
 });
 
 socket.on('send clear vote timer', function(data) {
@@ -202,12 +196,15 @@ socket.on('send clear vote result', function(data) {
 });
 
 socket.on('cannot start vote', function(data) {
+	// This fixes the invisible buttons bug for some reason
+	document.getElementById('voteButtons').className = "";	
 	alert("Cannot vote to clear for another: " + data + " seconds.");
 });
 
 socket.on('unlock canvas', function(data) {
 	currentlyVoting = false;
 	document.getElementById('clear-wrap').className = "invisible";
+	document.getElementById('voteButtons').className = "";	
 });
 
 function clearVote(vote) {
@@ -221,7 +218,7 @@ function clearVote(vote) {
 
 function clearCanvas() {
    	socket.emit('vote clear');
-   	clearSender = true;
+	document.getElementById('voteButtons').className = "invisible";
 }
 
 function drawBrushOutline(x, y) {
