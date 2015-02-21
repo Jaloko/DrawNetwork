@@ -162,7 +162,51 @@ io.sockets.on('connection', function(socket) {
 				}
 			}
 		}
+	});
 
+	socket.on('draw text', function(data) {
+		var index = getRoomIndex(socket);
+		var newData = {
+			x: data.x,
+			y: data.y,
+			font: data.font,
+			colour: data.colour,
+			text: data.text
+		};
+		if(index != null) {
+			if(validateNumber(newData.x) && validateNumber(newData.y) && validateHex(newData.colour)
+				&& validateText(newData.font) && validateText(newData.text)) {
+				if(rooms[index].users != null) {
+					if(rooms[index].clearVote.vote == false) {
+						socket.broadcast.to(rooms[index].id).emit('sync draw text', newData);
+					}
+				}
+			}
+		}
+
+	});
+
+	socket.on('erase', function(data) {
+		var index = getRoomIndex(socket);
+		var newData = {
+			name: data.name,
+			x: data.x,
+			y: data.y,
+			lastX: data.lastX,
+			lastY: data.lastY,
+			size: data.size
+		};
+		if(index != null) {
+			if(validateText(newData.name) && newData.name.length <= 30
+				&& validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.lastX)
+				&& validateNumber(newData.lastY) && validateNumber(newData.size)) {
+				if(rooms[index].users != null) {
+					if(rooms[index].clearVote.vote == false) {
+						socket.broadcast.to(rooms[index].id).emit('sync erase', newData);
+					}
+				}
+			}
+		}
 	});
 
 	socket.on('join room', function(data) {
@@ -221,7 +265,7 @@ io.sockets.on('connection', function(socket) {
 			if(rooms[index].clearVote.vote == false) {
 				for(var i = 0; i < rooms[index].serverUsers.length; i++) {
 					if(socket.id === rooms[index].serverUsers[i].id) {
-						if(new Date().getTime() > rooms[index].serverUsers[i].voteTimer + 30000) {
+						if(new Date().getTime() > rooms[index].serverUsers[i].voteTimer + 30000 || rooms[index].serverUsers.length === 1) {
 							rooms[index].serverUsers[i].voteTimer = new Date().getTime();
 							rooms[index].clearVote.vote = true;
 							rooms[index].clearVote.total = rooms[index].users.length;
@@ -240,10 +284,10 @@ io.sockets.on('connection', function(socket) {
 							}
 							io.sockets.in(rooms[index].id).emit('send vote clear', rooms[index].clearVote.timeRemaining);
 							rooms[index].clearVote.timer = new Date().getTime();
-							break;
 						} else {
 							socket.emit('cannot start vote', (rooms[index].serverUsers[i].voteTimer + 30000 - new Date().getTime()) / 1000);
 						}
+						break;
 					}
 				}
 			}

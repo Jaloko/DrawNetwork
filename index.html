@@ -187,15 +187,34 @@
 							<div id="colourDrop" class="button tool">
 								<div id="tool-dropper-img"></div>
 							</div>
+							<div id="text-tool" class="button tool">
+								<div id="tool-text-img"></div>
+							</div>
+							<div id="eraser" class="button tool">
+								<div id="tool-eraser-img"></div>
+							</div>
 							<div id="clearCanvas" class="button tool">
 								<div id="tool-clear-img"></div>
 							</div>
 							<div id="saveCanvas" class="button tool">
 								<div id="tool-save-img"></div>
 							</div>
-							<input id="brushSelection" type="range" min="1" max="100" value="30"></input>
 							<div id="currentColour"></div>
 							<div class="clear">
+							</div>
+						</div>
+						<div id="tool-settings">
+							<div id="brush-settings">
+								Size: <input id="brushSelection" type="range" min="1" max="100" value="30"></input>
+							</div>
+							<div id="dropper-settings" class="invisible">
+							</div>
+							<div id="text-settings" class="invisible">
+								Font: <input id="fontSel" type="text" onchange="changeFont(this)"></input>
+								Size: <input id="textSizeSel" type="range" min="1" max="100" value="30"></input>
+								<div class="button" onclick="applyText()">
+								Apply Text
+								</div>
 							</div>
 						</div>
 					</div>

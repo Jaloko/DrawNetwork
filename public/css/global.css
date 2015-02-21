@@ -135,6 +135,17 @@ input#room-search {
 	color: black;
 }
 
+input#fontSel {
+	position: relative;
+	top: -2px;
+	border: none;
+	-webkit-appearance: none;
+	height: 40px;
+	width: 150px;
+	outline: 0;
+	color: black;	
+}
+
 .col-bar {
 	display: block;
 	width: 100%;
@@ -208,6 +219,13 @@ input[type="radio"] {
 #tools {
 	display: block;
 	background-color: #362f2d;
+	width: 100%;
+	height: 50px;
+	float: left;
+}
+
+#tool-settings {
+	display: block;
 	width: 100%;
 	height: 50px;
 	float: left;
@@ -400,35 +418,49 @@ input[type="radio"] {
 #tool-brush-img {
 	width: 40px;
 	height: 40px;
-	background: url("../img/icons/brush2.png") center;
+	background: url("../img/icons/artist3.png") center no-repeat;
 	background-size: 100%;
 }
 
 #tool-gradient-brush-img {
 	width: 40px;
 	height: 40px;
-	background: url("../img/icons/artist.png") center;
+	background: url("../img/icons/brush2.png") center no-repeat;
 	background-size: 100%;
 }
 
 #tool-dropper-img {
 	width: 40px;
 	height: 40px;
-	background: url("../img/icons/color8.png") center;
+	background: url("../img/icons/color8.png") center no-repeat;
 	background-size: 100%;
+}
+
+#tool-eraser-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/erase2.png") center no-repeat;
+	background-size: 80%;
 }
 
 #tool-clear-img {
 	width: 40px;
 	height: 40px;
-	background: url("../img/icons/reload13.png") center;
-	background-size: 100%;
+	background: url("../img/icons/trash30.png") center no-repeat;
+	background-size: 80%;
 }
 
 #tool-save-img {
 	width: 40px;
 	height: 40px;
-	background: url("../img/icons/share1.png") center;
+	background: url("../img/icons/download174.png") center no-repeat;
+	background-size: 90%;
+}
+
+#tool-text-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/font13.png") center no-repeat;
 	background-size: 100%;
 }
 #tool-col-pick{

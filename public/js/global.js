@@ -42,6 +42,14 @@ var randomNames = [
 "Beulah Wright", "Curtis Fox", "Levi Collins", "Gustavo	Russell", "Erica Lowe", "Sherri Mcbride", "Zachary Martin", "Preston Fletcher", "Jack Shaw", "Chris Carr", "Morris Goodwin", "Raquel Drake", "Sandy Pearson", "Francis Farmer", "Erika Haynes", "Edgar Warren", "Randal Love", "Lucas Cannon", "Ismael Terry", "Rex Alexander", "Russell Houston", "Kenneth Potter", "Ricky James", "Latoya Rivera", "Katherine Chapman", "Gerald Gomez", "Glenda Robinson", "Adrian Cox", "Maurice Barton", "Harold Hansen", "Nicole Townsend", "Jorge Waters", "Hugo Hampton", "Stephen Mcgee", "Marguerite Conner", "Bill Newman", "Rodney Cook", "Santiago Reid", "Toby Casey", "Mamie Allison", "Tami Lawrence", "Tim Crawford", "Paula Carpenter", "Flora Young", "Marian Ferguson","Lewis Carlson", "Nina Wise", "Elisa Hanson", "Shelly Lucas", "Gabriel Stevenson", "Elbert Reeves", "Vicky Jackson", "Cassandra Moreno", "Becky Todd", "Jimmy Soto", "Opal Hicks", "Darren Mendoza", "Reginald Watts", "Cesar Sutton", "Lionel Rodgers", "Christopher Robertson", "Terrance Byrd", "Kristy Garza", "Herbert Flowers", "Kirk Schmidt", "Dennis Thomas", "Essie Henry", "Abel Tucker", "Katrina Phelps", "Rolando Gonzalez", "Olga Howard", "Cecilia Cortez", "Tanya Cohen", "Juanita Rios", "Jeff Davis", "Marty Perkins", "Ian Ortiz", "Andy George", "Salvatore Hamilton", "Verna Barker", "Louise Frank", "April Nunez", "Bonnie Ramirez", "Kay Sherman", "Stacy Nelson", "Lorraine White", "Paul Glover", "Otis Woods", "Darrin Guerrero", "Whitney Underwood", "Henry Graves", "Eula Leonard", "Francis Sanchez", "Hubert Christensen", "Doug Stanley", "Neal Washington", "Everett Harvey", "Nicholas Hale", "Pedro Ramsey", "Sadie Stephens"];
 var connectedUsers;
 var currentlyVoting = false;
+var readyForText = false;
+var textToRender = "";
+var textFont = "20px Arial";
+var textPos = {
+	x: 0,
+	y: 0
+}
+var stickyKeys = false;
 
 function pickRandomName() {
 	var rand = Math.floor(Math.random() * randomNames.length);
@@ -114,6 +122,14 @@ socket.on('user validated', function() {
 
 socket.on('sync draw', function(data) {
 	drawLine(data.x, data.y, data.lastX, data.lastY, data.size, data.colour);
+});
+
+socket.on('sync draw text', function(data) {
+	drawText(data.x, data.y, data.font, data.colour, data.text);
+});
+
+socket.on('sync erase', function(data) {
+	drawNormalLine(data.x, data.y, data.lastX, data.lastY, data.size);
 });
 
 socket.on('sync result', function(data) {
@@ -226,6 +242,23 @@ function drawBrushOutline(x, y) {
     pointerContext.stroke();
 }
 
+function drawEraserOutline(x, y) {
+	var cr = pointerCanvas.getBoundingClientRect();
+	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+	pointerContext.beginPath();
+    pointerContext.rect(x - cr.left - brush.size / 2, y - cr.top - brush.size / 2, brush.size, brush.size);
+    pointerContext.strokeStyle = 'white';
+    pointerContext.stroke();
+    pointerContext.beginPath();
+    pointerContext.rect(x - cr.left - brush.size / 2, y - cr.top - brush.size / 2, brush.size, brush.size);
+    pointerContext.strokeStyle = 'black';
+    pointerContext.stroke();
+    pointerContext.beginPath();
+    pointerContext.rect(x - cr.left - brush.size / 2, y - cr.top - brush.size / 2, brush.size, brush.size);
+    pointerContext.strokeStyle = 'white';
+    pointerContext.stroke();
+}
+
 function draw() {
 	if(currentlyVoting == false) {
 		var canvasRect = canvas.getBoundingClientRect();
@@ -243,35 +276,53 @@ function draw() {
 	}
 }
 
+function erase() {
+	if(currentlyVoting == false) {
+		var canvasRect = canvas.getBoundingClientRect();
+		var json = {
+			name: name,
+			x: mousePos.x - canvasRect.left,
+			y: mousePos.y - canvasRect.top,
+			lastX: lastPos.x - canvasRect.left,
+			lastY: lastPos.y - canvasRect.top,
+			size: brush.size,
+			colour: brush.colour
+		}
+		drawNormalLine(json.x, json.y, json.lastX, json.lastY, json.size);
+		socket.emit('erase', json);
+	}
+}
 
 function gradientDraw(timer) {
-	var canvasRect = canvas.getBoundingClientRect();
-	var rgb = convertHexToRGB(brush.colour);
-	rgb.r -= timer;
-	rgb.g -= timer;
-	rgb.b -= timer;
-	if(rgb.r <= 0) {
-		rgb.r = 0;
-	}
-	if(rgb.g <= 0) {
-		rgb.g = 0;
-	}
+	if(currentlyVoting == false) {
+		var canvasRect = canvas.getBoundingClientRect();
+		var rgb = convertHexToRGB(brush.colour);
+		rgb.r -= timer;
+		rgb.g -= timer;
+		rgb.b -= timer;
+		if(rgb.r <= 0) {
+			rgb.r = 0;
+		}
+		if(rgb.g <= 0) {
+			rgb.g = 0;
+		}
 
-	if(rgb.b <= 0) {
-		rgb.b = 0;
+		if(rgb.b <= 0) {
+			rgb.b = 0;
+		}
+		var hex = convertRGBToHex(rgb.r, rgb.g, rgb.b);
+		var json = {
+			name: name,
+			x: mousePos.x - canvasRect.left,
+			y: mousePos.y - canvasRect.top,
+			lastX: lastPos.x - canvasRect.left,
+			lastY: lastPos.y - canvasRect.top,
+			size: brush.size,
+			colour: hex
+		}
+		drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+		socket.emit('draw', json);
 	}
-	var hex = convertRGBToHex(rgb.r, rgb.g, rgb.b);
-	var json = {
-		name: name,
-		x: mousePos.x - canvasRect.left,
-		y: mousePos.y - canvasRect.top,
-		lastX: lastPos.x - canvasRect.left,
-		lastY: lastPos.y - canvasRect.top,
-		size: brush.size,
-		colour: hex
-	}
-	drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
-	socket.emit('draw', json);
 }
 
 function drawRect(x, y, colour) {
@@ -293,6 +344,16 @@ function drawLine(x, y, lastX, lastY, size, colour) {
 	context.strokeStyle = colour;
 	context.lineWidth = size;
 	context.lineCap = "round";
+	context.beginPath();
+	context.moveTo(lastX, lastY);
+	context.lineTo(x,y);
+	context.stroke();
+}
+
+function drawNormalLine(x, y, lastX, lastY, size) {
+	context.strokeStyle = "white";
+	context.lineWidth = size;
+	context.lineCap = "square";
 	context.beginPath();
 	context.moveTo(lastX, lastY);
 	context.lineTo(x,y);
@@ -369,6 +430,21 @@ brushSelection.addEventListener("input", function(evt){
 	brushSize(this.value);
 });
 
+var textSizeSel = document.getElementById('textSizeSel');
+textSizeSel.addEventListener("input", function(evt){
+	changeTextSize(this.value);
+});
+
+function changeFont(input) {
+	var split = textFont.split(" ");
+	textFont = split[0] + " " + input.value;
+	drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
+}
+function changeTextSize(newSize){
+	var split = textFont.split(" ");
+	textFont = newSize + "px " + split[1];
+	drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
+}
 
 function brushSize(newSize){
 	brush.size = newSize;
@@ -402,12 +478,324 @@ function onColourChange(rgb) {
 	};
 	updateColour();
 	brush.setColour(hex);
+	console.log(true);
+}
+
+function addLetter(e) {
+	switch(e.keyCode) {
+    	case 8:
+    		e.preventDefault();
+    		var split = textToRender.split("");
+    		textToRender = "";
+    		for(var i = 0; i < split.length - 1; i++) {
+    			textToRender += split[i];
+    		}
+    		break;
+    	case 16:
+    		stickyKeys = !stickyKeys;
+    		break;
+    	case 20:
+    		stickyKeys = !stickyKeys;
+    		break;
+    	case 32:
+    		textToRender += " ";
+    		break;
+    	case 48:
+    	   	if(stickyKeys == true) {
+    			textToRender += ")";
+    		} else {
+    			textToRender += "0";
+    		}
+    		break;
+    	case 49:
+    		if(stickyKeys == true) {
+    			textToRender += "!";
+    		} else {
+    			textToRender += "1";
+    		}
+    		break;
+    	case 50:
+			if(stickyKeys == true) {
+    			textToRender += "@";
+    		} else {
+    			textToRender += "2";
+    		}
+    		break;
+    	case 51:
+			if(stickyKeys == true) {
+    			textToRender += "#";
+    		} else {
+    			textToRender += "3";
+    		}
+    		break;
+    	case 52:
+			if(stickyKeys == true) {
+    			textToRender += "$";
+    		} else {
+    			textToRender += "4";
+    		}
+    		break;
+    	case 53:
+			if(stickyKeys == true) {
+    			textToRender += "%";
+    		} else {
+    			textToRender += "5";
+    		}
+    		break;
+    	case 54:
+			if(stickyKeys == true) {
+    			textToRender += "^";
+    		} else {
+    			textToRender += "6";
+    		}
+    		break;
+    	case 55:
+			if(stickyKeys == true) {
+    			textToRender += "&";
+    		} else {
+    			textToRender += "7";
+    		}
+    		break;
+    	case 56:
+			if(stickyKeys == true) {
+    			textToRender += "*";
+    		} else {
+    			textToRender += "8";
+    		}
+    		break;
+    	case 57:
+			if(stickyKeys == true) {
+    			textToRender += "9";
+    		} else {
+    			textToRender += "(";
+    		}
+    		break;
+    	case 65:
+			if(stickyKeys == true) {
+    			textToRender += "A";
+    		} else {
+    			textToRender += "a";
+    		}
+    		break;
+    	case 66:
+			if(stickyKeys == true) {
+    			textToRender += "B";
+    		} else {
+    			textToRender += "b";
+    		}
+    		break;
+    	case 67:
+			if(stickyKeys == true) {
+    			textToRender += "C";
+    		} else {
+    			textToRender += "c";
+    		}
+    		break;
+    	case 68:
+			if(stickyKeys == true) {
+    			textToRender += "D";
+    		} else {
+    			textToRender += "d";
+    		}
+    		break;
+    	case 69:
+			if(stickyKeys == true) {
+    			textToRender += "E";
+    		} else {
+    			textToRender += "e";
+    		}
+    		break;
+    	case 70:
+			if(stickyKeys == true) {
+    			textToRender += "F";
+    		} else {
+    			textToRender += "f";
+    		}
+    		break;
+    	case 71:
+			if(stickyKeys == true) {
+    			textToRender += "G";
+    		} else {
+    			textToRender += "g";
+    		}
+    		break;
+    	case 72:
+			if(stickyKeys == true) {
+    			textToRender += "H";
+    		} else {
+    			textToRender += "h";
+    		}
+    		break;
+    	case 73:
+			if(stickyKeys == true) {
+    			textToRender += "I";
+    		} else {
+    			textToRender += "i";
+    		}
+    		break;
+    	case 74:
+			if(stickyKeys == true) {
+    			textToRender += "J";
+    		} else {
+    			textToRender += "j";
+    		}
+    		break;
+    	case 75:
+			if(stickyKeys == true) {
+    			textToRender += "K";
+    		} else {
+    			textToRender += "k";
+    		}
+    		break;
+    	case 76:
+			if(stickyKeys == true) {
+    			textToRender += "L";
+    		} else {
+    			textToRender += "l";
+    		}
+    		break;
+    	case 77:
+			if(stickyKeys == true) {
+    			textToRender += "M";
+    		} else {
+    			textToRender += "m";
+    		}
+    		break;
+    	case 78:
+			if(stickyKeys == true) {
+    			textToRender += "N";
+    		} else {
+    			textToRender += "n";
+    		}
+    		break;
+    	case 79:
+			if(stickyKeys == true) {
+    			textToRender += "O";
+    		} else {
+    			textToRender += "o";
+    		}
+    		break;
+    	case 80:
+			if(stickyKeys == true) {
+    			textToRender += "P";
+    		} else {
+    			textToRender += "p";
+    		}
+    		break;
+    	case 81:
+			if(stickyKeys == true) {
+    			textToRender += "Q";
+    		} else {
+    			textToRender += "q";
+    		}
+    		break;
+    	case 82:
+			if(stickyKeys == true) {
+    			textToRender += "R";
+    		} else {
+    			textToRender += "r";
+    		}
+    		break;
+    	case 83:
+			if(stickyKeys == true) {
+    			textToRender += "S";
+    		} else {
+    			textToRender += "s";
+    		}
+    		break;
+    	case 84:
+			if(stickyKeys == true) {
+    			textToRender += "T";
+    		} else {
+    			textToRender += "t";
+    		}
+    		break;
+    	case 85:
+			if(stickyKeys == true) {
+    			textToRender += "U";
+    		} else {
+    			textToRender += "u";
+    		}
+    		break;	
+    	case 86:
+			if(stickyKeys == true) {
+    			textToRender += "V";
+    		} else {
+    			textToRender += "v";
+    		}
+    		break;
+    	case 87:
+			if(stickyKeys == true) {
+    			textToRender += "W";
+    		} else {
+    			textToRender += "w";
+    		}
+    		break;
+    	case 88:
+			if(stickyKeys == true) {
+    			textToRender += "X";
+    		} else {
+    			textToRender += "x";
+    		}
+    		break;
+    	case 89:
+			if(stickyKeys == true) {
+    			textToRender += "Y";
+    		} else {
+    			textToRender += "y";
+    		}
+    		break;
+    	case 90:
+			if(stickyKeys == true) {
+    			textToRender += "Z";
+    		} else {
+    			textToRender += "z";
+    		}
+    		break;
+    }
+}
+
+function drawText(x, y, font, colour, text) {
+	context.font=font;
+	context.fillStyle = colour;
+	context.fillText(text,x,y) ;
+}
+
+
+function drawTempText(x, y, font, colour, text) {
+	var cr = pointerCanvas.getBoundingClientRect();
+    pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+	pointerContext.font=font;
+	pointerContext.fillStyle = colour;
+	pointerContext.fillText(text,x - cr.left ,y - cr.top);
+}
+
+function applyText() {
+	if(readyForText == true) {
+		var cr = canvas.getBoundingClientRect();
+		var data = {
+			x: textPos.x - cr.left,
+			y: textPos.y - cr.top,
+			font: textFont,
+			colour: brush.colour,
+			text: textToRender
+		};
+		socket.emit('draw text', data);
+		drawText(data.x, data.y, textFont, data.colour, textToRender);
+		textToRender = "";
+		drawTempText(textPos.x, textPos.y, textFont, data.colour, textToRender);
+		readyForText = false;
+	}
 }
 
 document.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(evt);
-	drawBrushOutline(mousePos.x, mousePos.y);
+	if(brush.brushType === "freeroam" || brush.brushType === "gradient-brush" || brush.brushType === "dropper") {
+		drawBrushOutline(mousePos.x, mousePos.y);
+	} else if(brush.brushType === "eraser"){
+		drawEraserOutline(mousePos.x, mousePos.y);
+	}
 	if(mouseDown === true) {
 		if(hasSynced == true) {
 			if(brush.getBrushType() === "freeroam") {
@@ -420,6 +808,15 @@ document.addEventListener('mousemove', function(evt) {
 					gradientDraw(gradientTimer);
 				}	
 
+			} else if(brush.brushType === "eraser"){
+		    	if(canDraw === true) {
+		    		erase();
+				}
+			} else if(brush.brushType === "text"){
+		    	if(canDraw === true) {
+		    		textPos = mousePos;
+				}
+				drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
 			}
 			changeColour();
 		}
@@ -432,25 +829,26 @@ document.addEventListener("mousedown", function(evt) {
     	mouseDown = true;
     	if(mouseDown === true) {
     		// Located in colour-picker2.js
-    		if(hasSynced == true) {
-	    		if(canMoveTintPointer == false) {
+    		if(hasSynced === true) {
+	    		if(canMoveTintPointer === false) {
 			        if(mouseIsHoveringCanvas(tintCanvas)) {
 			            canMoveTintPointer = true;
 			            canDraw = false;
 			        }  
 			    }
 			    // To stop drawing when dragging tint pointer
-			    if(canDraw == false) {
+			    if(canDraw === false) {
 	    			if(mouseIsHoveringCanvas(canvas)) {
 						canDraw = true;
 					}
 	    		}
+	    						changeColour();
 			    if(brush.brushType === "freeroam") {
-			    	if(canDraw == true) {
+			    	if(canDraw === true) {
 			    		draw();
 			    	}
 			    } else if(brush.brushType === "gradient-brush") {
-			    	if(canDraw == true) {
+			    	if(canDraw === true) {
 			    		gradientTimer = 0;
 			    		gradientDraw(gradientTimer);
 	    			}
@@ -459,11 +857,20 @@ document.addEventListener("mousedown", function(evt) {
 	    				var rgb = getColourOnCanvas(canvas, context);
 						onColourChange(rgb);
 					}
+				} else if(brush.brushType === "text"){
+			    	if(canDraw === true) {
+			    		readyForText = true;
+			    		textPos = mousePos;
+					}
+					drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
+				} else if(brush.brushType === "eraser"){
+			    	if(canDraw === true) {
+		    			erase();
+					}
 				} else if(brush.brushType === "fillBucket") {
 					fillBucket(context, brush.colour);
 					brush.setBrushType("freeroam");
 				}
-				changeColour();
     		}
     	}
 	} else {
@@ -485,6 +892,28 @@ document.addEventListener("mouseup", function(evt) {
 	}
 });
 
+document.body.addEventListener("keydown", function(e) {
+	if(readyForText == true) {
+		if(document.activeElement != document.getElementById('fontSel')) {
+			addLetter(e);
+			drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
+	    	if(e.keyCode == 13) {
+	    		applyText();
+	    	}
+		}
+	}
+});
+ 
+document.body.addEventListener("keyup", function(e) {
+	if(readyForText == true) {
+		switch(e.keyCode) {
+	    	case 16:
+	    		stickyKeys = !stickyKeys;
+	    		break;
+	    }
+	}
+});
+
 document.getElementById('clearCanvas').addEventListener('click', function(evt){
 	clearCanvas();
 })
@@ -493,29 +922,59 @@ document.getElementById('brush').addEventListener('click', function(evt){
 	brush.setBrushType('freeroam');
 	resetTools();
 	this.className = "button bselect tool";
+	document.getElementById('brush-settings').className = "";
 });
 
 document.getElementById('colourDrop').addEventListener('click', function(evt){
 	brush.setBrushType('dropper');
 	resetTools();
 	this.className = "button bselect tool";
+	document.getElementById('dropper-settings').className = "";
 });
 
 document.getElementById('gradient-brush').addEventListener('click', function(evt){
 	brush.setBrushType('gradient-brush');
 	resetTools();
 	this.className = "button bselect tool";
-
+	document.getElementById('brush-settings').className = "";
 });
 
 document.getElementById('saveCanvas').addEventListener('click', function(evt){
 	window.open(canvas.toDataURL());
 });
 
+document.getElementById('text-tool').addEventListener('click', function(evt){
+	brush.setBrushType('text');
+	resetTools();
+	this.className = "button bselect tool";
+	document.getElementById('canvas').style.cursor = "text";
+	document.getElementById('pointer-canvas').style.cursor = "text";
+	document.getElementById('text-settings').className = "";
+});
+
+document.getElementById('eraser').addEventListener('click', function(evt){
+	brush.setBrushType('eraser');
+	resetTools();
+	this.className = "button bselect tool";
+	document.getElementById('brush-settings').className = "";
+});
+
 function resetTools() {
+	textToRender = "";
+	readyForText = false;
+	// Tools
 	document.getElementById('brush').className = "button tool";
 	document.getElementById('colourDrop').className = "button tool";
 	document.getElementById('gradient-brush').className = "button tool";
+	document.getElementById('text-tool').className = "button tool";
+	document.getElementById('eraser').className = "button tool";
+	// Tool Settings
+	document.getElementById('brush-settings').className = "invisible";
+	document.getElementById('dropper-settings').className = "invisible";
+	document.getElementById('text-settings').className = "invisible";
+	// Canvases
+	document.getElementById('canvas').style.cursor = "none";
+	document.getElementById('pointer-canvas').style.cursor = "none";
 }
 
 /*document.getElementById('fillBucket').addEventListener('click', function(evt){
