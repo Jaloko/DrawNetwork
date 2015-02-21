@@ -565,9 +565,9 @@ function addLetter(e) {
     		break;
     	case 57:
 			if(stickyKeys == true) {
-    			textToRender += "9";
-    		} else {
     			textToRender += "(";
+    		} else {
+    			textToRender += "9";
     		}
     		break;
     	case 65:
