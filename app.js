@@ -236,7 +236,7 @@ io.sockets.on('connection', function(socket) {
 				var counter = 0;
 				for(var i = 0; i < rooms[index].users.length; i++) {
 					if(rooms[index].users[i] != null) {
-						if(rooms[index].users[i].name == newData.name) {
+						if(rooms[index].users[i].name === newData.name) {
 							counter++;
 						}
 					}
@@ -322,7 +322,7 @@ io.sockets.on('connection', function(socket) {
 				name: data.name,
 				colour : data.colour
 			};
-			validateImOffline(rooms[index], newData);
+			validateImOffline(rooms[index], newData, socket);
 		}
 	});
 
@@ -334,7 +334,7 @@ io.sockets.on('connection', function(socket) {
 				colour: data.colour,
 				canvas: data.canvas
 			};
-			validateImOffline(rooms[index], newData);
+			validateImOffline(rooms[index], newData, socket);
 			if(rooms[index].users.length == 0) {
 				rooms[index].storedCanvas = newData.canvas;
 			}
@@ -443,11 +443,11 @@ function countRoomsOwnerOf(socket) {
 	return counter;
 }
 
-function validateImOffline(room, newData) {
+function validateImOffline(room, newData, socket) {
 	if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)) {
 		for(var i = 0; i < room.users.length; i++) {
 			if(room.users[i] != null) {
-				if(room.users[i].name == newData.name) {
+				if(room.users[i].name === newData.name && room.serverUsers[i].id === socket.id) {
 					room.users.splice(i, 1);
 					room.serverUsers.splice(i, 1);
 					break;

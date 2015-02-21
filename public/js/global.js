@@ -181,7 +181,6 @@ socket.on('send vote clear', function(data) {
 });
 
 socket.on('send clear vote timer', function(data) {
-
 	var clearVoteBox = document.getElementById('clear-canvas-vote-box');
 	clearVoteBox.className = "";
 	document.getElementById('clear-wrap').className ="table-visible";
@@ -191,7 +190,7 @@ socket.on('send clear vote timer', function(data) {
 	document.getElementById('pYes').innerHTML = "Yes: " + data.yesVotes;
 	document.getElementById('pNo').innerHTML = "No: " + data.noVotes;
 	document.getElementById('pTotal').innerHTML = "Total Possible: " + data.total;
-	if(currentlyVoting == false) {
+	if(currentlyVoting === false) {
 		document.getElementById('voteButtons').className = "invisible";
 	}
 });
@@ -478,7 +477,6 @@ function onColourChange(rgb) {
 	};
 	updateColour();
 	brush.setColour(hex);
-	console.log(true);
 }
 
 function addLetter(e) {
@@ -490,12 +488,6 @@ function addLetter(e) {
     		for(var i = 0; i < split.length - 1; i++) {
     			textToRender += split[i];
     		}
-    		break;
-    	case 16:
-    		stickyKeys = !stickyKeys;
-    		break;
-    	case 20:
-    		stickyKeys = !stickyKeys;
     		break;
     	case 32:
     		textToRender += " ";
@@ -893,6 +885,14 @@ document.addEventListener("mouseup", function(evt) {
 });
 
 document.body.addEventListener("keydown", function(e) {
+	switch(e.keyCode) {
+		case 16:
+			stickyKeys = !stickyKeys;
+			break;
+	   	case 20:
+			stickyKeys = !stickyKeys;
+			break;
+	}
 	if(readyForText == true) {
 		if(document.activeElement != document.getElementById('fontSel')) {
 			addLetter(e);
