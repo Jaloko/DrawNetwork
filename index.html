@@ -5,8 +5,12 @@
  		<script src="js/functions.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/global.css">
 		<link rel="stylesheet" type="text/css" href="css/extras.css">
+		<link rel="stylesheet" type="text/css" href="css/fonts.css">
 	</head>
 	<body onload="init()">
+		<div class="font_preload" style="opacity: 0">
+		    <span style="font-family: 'Open Sans', 'Roboto', 'Ubuntu', 'Sigmar One', 'Droid Serif', 'Pacifico';"></span>
+		</div>
 		<div id="nav-bar">
 			<div class="content-box">
 				<a href="/" class="nav-opt">Home</a>
@@ -210,7 +214,15 @@
 							<div id="dropper-settings" class="invisible">
 							</div>
 							<div id="text-settings" class="invisible">
-								Font: <input id="fontSel" type="text" onchange="changeFont(this)"></input>
+								Font: 
+								<select id="fontSel" onchange="changeFont()">
+								  	<option value="Open Sans">Open Sans</option>
+								  	<option value="Roboto">Roboto</option>
+								  	<option value="Ubuntu">Ubuntu</option>
+								  	<option value="Sigmar One">Sigmar One</option>
+								  	<option value="Droid Serif">Droid Serif</option>
+								  	<option value="Pacifico">Pacifico</option>
+								</select>
 								Size: <input id="textSizeSel" type="range" min="1" max="100" value="30"></input>
 								<div class="button" onclick="applyText()">
 								Apply Text

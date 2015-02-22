@@ -135,15 +135,16 @@ input#room-search {
 	color: black;
 }
 
-input#fontSel {
+#fontSel {
 	position: relative;
 	top: -2px;
 	border: none;
-	-webkit-appearance: none;
-	height: 40px;
-	width: 150px;
 	outline: 0;
 	color: black;	
+}
+
+#fontSel option {
+	color:black;
 }
 
 .col-bar {

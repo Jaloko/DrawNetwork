@@ -431,14 +431,17 @@ textSizeSel.addEventListener("input", function(evt){
 	changeTextSize(this.value);
 });
 
-function changeFont(input) {
+function changeFont() {
+	var e = document.getElementById("fontSel");
+	var font = e.options[e.selectedIndex].value;
 	var split = textFont.split(" ");
-	textFont = split[0] + " " + input.value;
+	textFont = split[0] + " " + font;
 	drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
 }
 function changeTextSize(newSize){
-	var split = textFont.split(" ");
-	textFont = newSize + "px " + split[1];
+	var e = document.getElementById("fontSel");
+	var font = e.options[e.selectedIndex].value;
+	textFont = newSize + "px " + font;
 	drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
 }
 
