@@ -48,7 +48,6 @@ var textPos = {
 	x: 0,
 	y: 0
 }
-var stickyKeys = false;
 
 function pickRandomName() {
 	var rand = Math.floor(Math.random() * randomNames.length);
@@ -479,274 +478,6 @@ function onColourChange(rgb) {
 	brush.setColour(hex);
 }
 
-function addLetter(e) {
-	switch(e.keyCode) {
-    	case 8:
-    		e.preventDefault();
-    		var split = textToRender.split("");
-    		textToRender = "";
-    		for(var i = 0; i < split.length - 1; i++) {
-    			textToRender += split[i];
-    		}
-    		break;
-    	case 32:
-    		textToRender += " ";
-    		break;
-    	case 48:
-    	   	if(stickyKeys == true) {
-    			textToRender += ")";
-    		} else {
-    			textToRender += "0";
-    		}
-    		break;
-    	case 49:
-    		if(stickyKeys == true) {
-    			textToRender += "!";
-    		} else {
-    			textToRender += "1";
-    		}
-    		break;
-    	case 50:
-			if(stickyKeys == true) {
-    			textToRender += "@";
-    		} else {
-    			textToRender += "2";
-    		}
-    		break;
-    	case 51:
-			if(stickyKeys == true) {
-    			textToRender += "#";
-    		} else {
-    			textToRender += "3";
-    		}
-    		break;
-    	case 52:
-			if(stickyKeys == true) {
-    			textToRender += "$";
-    		} else {
-    			textToRender += "4";
-    		}
-    		break;
-    	case 53:
-			if(stickyKeys == true) {
-    			textToRender += "%";
-    		} else {
-    			textToRender += "5";
-    		}
-    		break;
-    	case 54:
-			if(stickyKeys == true) {
-    			textToRender += "^";
-    		} else {
-    			textToRender += "6";
-    		}
-    		break;
-    	case 55:
-			if(stickyKeys == true) {
-    			textToRender += "&";
-    		} else {
-    			textToRender += "7";
-    		}
-    		break;
-    	case 56:
-			if(stickyKeys == true) {
-    			textToRender += "*";
-    		} else {
-    			textToRender += "8";
-    		}
-    		break;
-    	case 57:
-			if(stickyKeys == true) {
-    			textToRender += "(";
-    		} else {
-    			textToRender += "9";
-    		}
-    		break;
-    	case 65:
-			if(stickyKeys == true) {
-    			textToRender += "A";
-    		} else {
-    			textToRender += "a";
-    		}
-    		break;
-    	case 66:
-			if(stickyKeys == true) {
-    			textToRender += "B";
-    		} else {
-    			textToRender += "b";
-    		}
-    		break;
-    	case 67:
-			if(stickyKeys == true) {
-    			textToRender += "C";
-    		} else {
-    			textToRender += "c";
-    		}
-    		break;
-    	case 68:
-			if(stickyKeys == true) {
-    			textToRender += "D";
-    		} else {
-    			textToRender += "d";
-    		}
-    		break;
-    	case 69:
-			if(stickyKeys == true) {
-    			textToRender += "E";
-    		} else {
-    			textToRender += "e";
-    		}
-    		break;
-    	case 70:
-			if(stickyKeys == true) {
-    			textToRender += "F";
-    		} else {
-    			textToRender += "f";
-    		}
-    		break;
-    	case 71:
-			if(stickyKeys == true) {
-    			textToRender += "G";
-    		} else {
-    			textToRender += "g";
-    		}
-    		break;
-    	case 72:
-			if(stickyKeys == true) {
-    			textToRender += "H";
-    		} else {
-    			textToRender += "h";
-    		}
-    		break;
-    	case 73:
-			if(stickyKeys == true) {
-    			textToRender += "I";
-    		} else {
-    			textToRender += "i";
-    		}
-    		break;
-    	case 74:
-			if(stickyKeys == true) {
-    			textToRender += "J";
-    		} else {
-    			textToRender += "j";
-    		}
-    		break;
-    	case 75:
-			if(stickyKeys == true) {
-    			textToRender += "K";
-    		} else {
-    			textToRender += "k";
-    		}
-    		break;
-    	case 76:
-			if(stickyKeys == true) {
-    			textToRender += "L";
-    		} else {
-    			textToRender += "l";
-    		}
-    		break;
-    	case 77:
-			if(stickyKeys == true) {
-    			textToRender += "M";
-    		} else {
-    			textToRender += "m";
-    		}
-    		break;
-    	case 78:
-			if(stickyKeys == true) {
-    			textToRender += "N";
-    		} else {
-    			textToRender += "n";
-    		}
-    		break;
-    	case 79:
-			if(stickyKeys == true) {
-    			textToRender += "O";
-    		} else {
-    			textToRender += "o";
-    		}
-    		break;
-    	case 80:
-			if(stickyKeys == true) {
-    			textToRender += "P";
-    		} else {
-    			textToRender += "p";
-    		}
-    		break;
-    	case 81:
-			if(stickyKeys == true) {
-    			textToRender += "Q";
-    		} else {
-    			textToRender += "q";
-    		}
-    		break;
-    	case 82:
-			if(stickyKeys == true) {
-    			textToRender += "R";
-    		} else {
-    			textToRender += "r";
-    		}
-    		break;
-    	case 83:
-			if(stickyKeys == true) {
-    			textToRender += "S";
-    		} else {
-    			textToRender += "s";
-    		}
-    		break;
-    	case 84:
-			if(stickyKeys == true) {
-    			textToRender += "T";
-    		} else {
-    			textToRender += "t";
-    		}
-    		break;
-    	case 85:
-			if(stickyKeys == true) {
-    			textToRender += "U";
-    		} else {
-    			textToRender += "u";
-    		}
-    		break;	
-    	case 86:
-			if(stickyKeys == true) {
-    			textToRender += "V";
-    		} else {
-    			textToRender += "v";
-    		}
-    		break;
-    	case 87:
-			if(stickyKeys == true) {
-    			textToRender += "W";
-    		} else {
-    			textToRender += "w";
-    		}
-    		break;
-    	case 88:
-			if(stickyKeys == true) {
-    			textToRender += "X";
-    		} else {
-    			textToRender += "x";
-    		}
-    		break;
-    	case 89:
-			if(stickyKeys == true) {
-    			textToRender += "Y";
-    		} else {
-    			textToRender += "y";
-    		}
-    		break;
-    	case 90:
-			if(stickyKeys == true) {
-    			textToRender += "Z";
-    		} else {
-    			textToRender += "z";
-    		}
-    		break;
-    }
-}
-
 function drawText(x, y, font, colour, text) {
 	context.font=font;
 	context.fillStyle = colour;
@@ -775,8 +506,10 @@ function applyText() {
 		socket.emit('draw text', data);
 		drawText(data.x, data.y, textFont, data.colour, textToRender);
 		textToRender = "";
+		document.getElementById('text-tool-text').value = "";
 		drawTempText(textPos.x, textPos.y, textFont, data.colour, textToRender);
 		readyForText = false;
+		document.getElementById('text-tool-text').blur();
 	}
 }
 
@@ -834,7 +567,7 @@ document.addEventListener("mousedown", function(evt) {
 						canDraw = true;
 					}
 	    		}
-	    						changeColour();
+	    		changeColour();
 			    if(brush.brushType === "freeroam") {
 			    	if(canDraw === true) {
 			    		draw();
@@ -885,32 +618,19 @@ document.addEventListener("mouseup", function(evt) {
 });
 
 document.body.addEventListener("keydown", function(e) {
-	switch(e.keyCode) {
-		case 16:
-			stickyKeys = !stickyKeys;
-			break;
-	   	case 20:
-			stickyKeys = !stickyKeys;
-			break;
-	}
-	if(readyForText == true) {
-		if(document.activeElement != document.getElementById('fontSel')) {
-			addLetter(e);
-			drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
-	    	if(e.keyCode == 13) {
-	    		applyText();
-	    	}
-		}
+	if(readyForText === true) {
+		document.getElementById('text-tool-text').focus();
+		drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
+		if(e.keyCode == 13) {
+	    	applyText();
+	    }
 	}
 });
  
 document.body.addEventListener("keyup", function(e) {
-	if(readyForText == true) {
-		switch(e.keyCode) {
-	    	case 16:
-	    		stickyKeys = !stickyKeys;
-	    		break;
-	    }
+	if(readyForText === true) {
+		textToRender = document.getElementById('text-tool-text').value;
+		drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);	
 	}
 });
 
