@@ -257,6 +257,7 @@ function drawEraserOutline(x, y) {
 
 function draw() {
 	if(currentlyVoting == false) {
+		canvasRect = canvas.getBoundingClientRect();
 		var json = {
 			name: name,
 			x: mousePos.x - canvasRect.left,
@@ -273,6 +274,7 @@ function draw() {
 
 function erase() {
 	if(currentlyVoting == false) {
+		canvasRect = canvas.getBoundingClientRect();
 		var json = {
 			name: name,
 			x: mousePos.x - canvasRect.left,
@@ -327,7 +329,6 @@ function angleBetween(point1, point2) {
 }
 
 function drawRect(curX, curY, lastX, lastY, size, colour) {
-	canvasRect = canvas.getBoundingClientRect();
 	var lastP = {
 		x: lastX,
 		y: lastY
@@ -347,7 +348,6 @@ function drawRect(curX, curY, lastX, lastY, size, colour) {
 }
 
 function drawCircle(curX, curY, lastX, lastY, size, colour) {
-	canvasRect = canvas.getBoundingClientRect();
 	var lastP = {
 		x: lastX,
 		y: lastY
