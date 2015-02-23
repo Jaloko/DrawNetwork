@@ -48,6 +48,7 @@ var textPos = {
 	x: 0,
 	y: 0
 }
+var canvasRect = canvas.getBoundingClientRect();
 
 function pickRandomName() {
 	var rand = Math.floor(Math.random() * randomNames.length);
@@ -119,7 +120,7 @@ socket.on('user validated', function() {
 });
 
 socket.on('sync draw', function(data) {
-	drawLine(data.x, data.y, data.lastX, data.lastY, data.size, data.colour);
+	drawCircle(data.x, data.y, data.lastX, data.lastY, data.size, data.colour);
 });
 
 socket.on('sync draw text', function(data) {
@@ -127,7 +128,7 @@ socket.on('sync draw text', function(data) {
 });
 
 socket.on('sync erase', function(data) {
-	drawNormalLine(data.x, data.y, data.lastX, data.lastY, data.size);
+	drawRect(data.x, data.y, data.lastX, data.lastY, data.size, "white");
 });
 
 socket.on('sync result', function(data) {
@@ -256,7 +257,6 @@ function drawEraserOutline(x, y) {
 
 function draw() {
 	if(currentlyVoting == false) {
-		var canvasRect = canvas.getBoundingClientRect();
 		var json = {
 			name: name,
 			x: mousePos.x - canvasRect.left,
@@ -266,14 +266,13 @@ function draw() {
 			size: brush.size,
 			colour: brush.colour
 		}
-		drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+		drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
 		socket.emit('draw', json);
 	}
 }
 
 function erase() {
 	if(currentlyVoting == false) {
-		var canvasRect = canvas.getBoundingClientRect();
 		var json = {
 			name: name,
 			x: mousePos.x - canvasRect.left,
@@ -283,14 +282,14 @@ function erase() {
 			size: brush.size,
 			colour: brush.colour
 		}
-		drawNormalLine(json.x, json.y, json.lastX, json.lastY, json.size);
+		drawRect(json.x, json.y, json.lastX, json.lastY, json.size, "white");
 		socket.emit('erase', json);
 	}
 }
 
 function gradientDraw(timer) {
+	canvasRect = canvas.getBoundingClientRect();
 	if(currentlyVoting == false) {
-		var canvasRect = canvas.getBoundingClientRect();
 		var rgb = convertHexToRGB(brush.colour);
 		rgb.r -= timer;
 		rgb.g -= timer;
@@ -320,19 +319,54 @@ function gradientDraw(timer) {
 	}
 }
 
-function drawRect(x, y, colour) {
-    context.fillStyle = colour;
-	context.fillRect(x, y, 15, 15);
+function distanceBetween(point1, point2) {
+  return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
+}
+function angleBetween(point1, point2) {
+  return Math.atan2( point2.x - point1.x, point2.y - point1.y );
 }
 
-function drawCircle(x, y, size, colour) {
-	//draw a circle
-	context.lineTo(x, y);
-	context.fillStyle = colour;
-	context.beginPath();
-	context.arc(x, y, size, 0, Math.PI*2, true); 
-	context.closePath();
-	context.fill();
+function drawRect(curX, curY, lastX, lastY, size, colour) {
+	canvasRect = canvas.getBoundingClientRect();
+	var lastP = {
+		x: lastX,
+		y: lastY
+	},
+	curP = {
+		x: curX,
+		y: curY
+	}
+	var dist = distanceBetween(lastP, curP);
+  	var angle = angleBetween(lastP, curP);
+    for (var i = 0; i < dist; i+=5) {
+	    x = lastP.x + (Math.sin(angle) * i);
+	    y = lastP.y + (Math.cos(angle) * i);
+	    context.fillStyle = colour;
+		context.fillRect(x - size / 2, y - size / 2, size, size);
+    }
+}
+
+function drawCircle(curX, curY, lastX, lastY, size, colour) {
+	canvasRect = canvas.getBoundingClientRect();
+	var lastP = {
+		x: lastX,
+		y: lastY
+	},
+	curP = {
+		x: curX,
+		y: curY
+	}
+	var dist = distanceBetween(lastP, curP);
+  	var angle = angleBetween(lastP, curP);
+    for (var i = 0; i < dist; i+=5) {
+	    x = lastP.x + (Math.sin(angle) * i);
+	    y = lastP.y + (Math.cos(angle) * i);
+	    context.beginPath();
+	   	context.fillStyle = colour;
+	    context.arc(x, y, size / 2, false, Math.PI * 2, false);
+	    context.closePath();
+	    context.fill();
+    }
 }
 
 function drawLine(x, y, lastX, lastY, size, colour) {
