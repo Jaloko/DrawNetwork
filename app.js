@@ -25,7 +25,8 @@ function Room(id, owner, public) {
 		total: 0,
 		yes: 0,
 		no: 0
-	}
+	},
+	this.activity = new Date().getTime()
 }
 
 server.listen(8080);
@@ -66,7 +67,6 @@ io.sockets.on('connection', function(socket) {
 				} else {
 					isPublic = "private";
 				}
-
 				console.log("Room: " + id + " (" + isPublic + ") created by: " + ip + "!");
 			}
 		}
@@ -232,27 +232,32 @@ io.sockets.on('connection', function(socket) {
 		}
 		if(index != null) {
 			if(validateText(newData.name) && newData.name.length <= 20 && validateHex(newData.colour)) {
-				var counter = 0;
-				for(var i = 0; i < rooms[index].users.length; i++) {
-					if(rooms[index].users[i] != null) {
-						if(rooms[index].users[i].name === newData.name) {
-							counter++;
+				if(rooms[index].users.length < 10) {
+					var counter = 0;
+					for(var i = 0; i < rooms[index].users.length; i++) {
+						if(rooms[index].users[i] != null) {
+							if(rooms[index].users[i].name === newData.name) {
+								counter++;
+							}
 						}
 					}
-				}
-				if(counter <= 0) {
-					rooms[index].users.push(newData);
-					var serverUser = {
-						id: socket.id,
-						hasSynced: false,
-						canSync: false,
-						hasVoted: false,
-						canVote: false,
-						voteTimer: 0
+					if(counter <= 0) {
+						rooms[index].users.push(newData);
+						var serverUser = {
+							id: socket.id,
+							hasSynced: false,
+							canSync: false,
+							hasVoted: false,
+							canVote: false,
+							voteTimer: 0
+						}
+						rooms[index].serverUsers.push(serverUser);
+						rooms[index].activity = new Date().getTime();
+						socket.emit('user validated');
+						io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);
 					}
-					rooms[index].serverUsers.push(serverUser);
-					socket.emit('user validated');
-					io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);
+				} else {
+					socket.emit('room full');
 				}
 			}
 		}
@@ -322,6 +327,7 @@ io.sockets.on('connection', function(socket) {
 				colour : data.colour
 			};
 			validateImOffline(rooms[index], newData, socket);
+			rooms[index].activity = new Date().getTime();
 		}
 	});
 
@@ -334,6 +340,7 @@ io.sockets.on('connection', function(socket) {
 				canvas: data.canvas
 			};
 			validateImOffline(rooms[index], newData, socket);
+			rooms[index].activity = new Date().getTime();
 			if(rooms[index].users.length == 0) {
 				if(newData.canvas.length <= 3000000) {
 					rooms[index].storedCanvas = newData.canvas;
@@ -345,6 +352,12 @@ io.sockets.on('connection', function(socket) {
 
 setInterval(function() {
 	for(var i = 0; i < rooms.length; i++) {
+		if(rooms[i].users.length === 0 && rooms[i].owner != "admin") {
+			if(new Date().getTime() > rooms[i].activity + 259200000) {
+				rooms.splice(i, 1);
+				continue;
+			}
+		}
 		if(rooms[i].clearVote.vote == true) {
 			if(rooms[i].clearVote.timeRemaining > 0 && rooms[i].clearVote.yes < Math.floor(rooms[i].clearVote.total / 2) + 1) {
 				if(new Date().getTime() > rooms[i].clearVote.timer + 1000) {

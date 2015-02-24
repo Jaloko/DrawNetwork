@@ -110,6 +110,7 @@ socket.on('room verification', function() {
 		name : name,
 		colour: brush.colour
 	}
+	document.getElementById('room-full').className = "invisible";
 	socket.emit('im online', me);
 });
 
@@ -117,6 +118,10 @@ socket.on('user validated', function() {
 	socket.emit('sync');
 	// Hide enter name box
 	document.getElementById('name-wrap').className = "invisible";
+});
+
+socket.on('room full', function() {
+	document.getElementById('room-full').className = "";
 });
 
 socket.on('sync draw', function(data) {
@@ -316,7 +321,7 @@ function gradientDraw(timer) {
 			size: brush.size,
 			colour: hex
 		}
-		drawLine(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+		drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
 		socket.emit('draw', json);
 	}
 }
@@ -339,7 +344,7 @@ function drawRect(curX, curY, lastX, lastY, size, colour) {
 	}
 	var dist = distanceBetween(lastP, curP);
   	var angle = angleBetween(lastP, curP);
-    for (var i = 0; i < dist; i+=5) {
+    for (var i = 0; i < dist; i+=1) {
 	    x = lastP.x + (Math.sin(angle) * i);
 	    y = lastP.y + (Math.cos(angle) * i);
 	    context.fillStyle = colour;
@@ -358,7 +363,7 @@ function drawCircle(curX, curY, lastX, lastY, size, colour) {
 	}
 	var dist = distanceBetween(lastP, curP);
   	var angle = angleBetween(lastP, curP);
-    for (var i = 0; i < dist; i+=5) {
+    for (var i = 0; i < dist; i+=1) {
 	    x = lastP.x + (Math.sin(angle) * i);
 	    y = lastP.y + (Math.cos(angle) * i);
 	    context.beginPath();
