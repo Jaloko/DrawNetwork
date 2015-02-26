@@ -58,6 +58,8 @@ var shapeEndPos = {
 	x: 0,
 	y: 0
 };
+var rainbowPointer = 0;
+var rainbowSpeed = 1;
 var canvasRect = canvas.getBoundingClientRect();
 
 function setShapeType(ele, shape) {
@@ -320,8 +322,8 @@ function erase() {
 }
 
 function gradientDraw(timer) {
-	canvasRect = canvas.getBoundingClientRect();
 	if(currentlyVoting == false) {
+		canvasRect = canvas.getBoundingClientRect();
 		var rgb = convertHexToRGB(brush.colour);
 		rgb.r -= timer;
 		rgb.g -= timer;
@@ -337,6 +339,30 @@ function gradientDraw(timer) {
 			rgb.b = 0;
 		}
 		var hex = convertRGBToHex(rgb.r, rgb.g, rgb.b);
+		var json = {
+			name: name,
+			x: mousePos.x - canvasRect.left,
+			y: mousePos.y - canvasRect.top,
+			lastX: lastPos.x - canvasRect.left,
+			lastY: lastPos.y - canvasRect.top,
+			size: brush.size,
+			colour: hex
+		}
+		drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+		socket.emit('draw', json);
+	}
+}
+
+function rainbowDraw() {
+	if(currentlyVoting == false) {
+		canvasRect = canvas.getBoundingClientRect();
+		var rgb = convertHexToRGB(brush.colour);
+		huePointer = {
+			x: 0,
+			y: rainbowPointer
+		}
+		var rgba = getColourOnHueCanvas();
+		var hex = convertRGBToHex(rgba.r, rgba.g, rgba.b);
 		var json = {
 			name: name,
 			x: mousePos.x - canvasRect.left,
@@ -489,6 +515,11 @@ brushSelection.addEventListener("input", function(evt){
 	brushSize(this.value);
 });
 
+speedSelection.addEventListener("input", function(evt){
+
+	rainbowSpeed = parseInt(this.value);
+});
+
 var textSizeSel = document.getElementById('textSizeSel');
 textSizeSel.addEventListener("input", function(evt){
 	changeTextSize(this.value);
@@ -621,23 +652,31 @@ function applyText() {
 document.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(evt);
-	if(brush.brushType === "freeroam" || brush.brushType === "gradient-brush" || brush.brushType === "dropper") {
+	if(brush.brushType === "freeroam" || brush.brushType === "gradient-brush" || brush.brushType === "dropper" || brush.brushType === "rainbow-brush") {
 		drawBrushOutline(mousePos.x, mousePos.y);
 	} else if(brush.brushType === "eraser"){
 		drawEraserOutline(mousePos.x, mousePos.y);
 	}
 	if(mouseDown === true) {
-		if(hasSynced == true) {
+		if(hasSynced === true) {
 			if(brush.getBrushType() === "freeroam") {
-				if(canDraw == true) {
+				if(canDraw === true) {
 					draw();
 				}	
 			} else if(brush.getBrushType() === "gradient-brush") {
-				if(canDraw == true) {
+				if(canDraw === true) {
 					gradientTimer++;
 					gradientDraw(gradientTimer);
 				}	
-
+			}  else if(brush.brushType === "rainbow-brush") {
+		    	if(canDraw === true) {
+		    		rainbowPointer+=rainbowSpeed;
+		    		console.log(rainbowPointer);
+		    		if(rainbowPointer >= 255) {
+		    			rainbowPointer = 0;
+		    		}
+		    		rainbowDraw();
+    			}
 			} else if(brush.brushType === "eraser"){
 		    	if(canDraw === true) {
 		    		erase();
@@ -693,6 +732,10 @@ document.addEventListener("mousedown", function(evt) {
 			    	if(canDraw === true) {
 			    		gradientTimer = 0;
 			    		gradientDraw(gradientTimer);
+	    			}
+			    } else if(brush.brushType === "rainbow-brush") {
+			    	if(canDraw === true) {
+			    		rainbowDraw();
 	    			}
 			    } else if(brush.brushType === "dropper"){
 			    	if(mouseIsHoveringCanvas(canvas)) {
@@ -803,6 +846,14 @@ document.getElementById('gradient-brush').addEventListener('click', function(evt
 	document.getElementById('brush-settings').className = "";
 });
 
+document.getElementById('rainbow-brush').addEventListener('click', function(evt){
+	brush.setBrushType('rainbow-brush');
+	resetTools();
+	this.className = "button bselect tool";
+	document.getElementById('brush-settings').className = "";
+	document.getElementById('rainbow-settings').className = "inline-block";
+});
+
 document.getElementById('saveCanvas').addEventListener('click', function(evt){
 	window.open(canvas.toDataURL());
 });
@@ -839,11 +890,13 @@ function resetTools() {
 	document.getElementById('brush').className = "button tool";
 	document.getElementById('colourDrop').className = "button tool";
 	document.getElementById('gradient-brush').className = "button tool";
+	document.getElementById('rainbow-brush').className = "button tool";
 	document.getElementById('text-tool').className = "button tool";
 	document.getElementById('shape-tool').className = "button tool";
 	document.getElementById('eraser').className = "button tool";
 	// Tool Settings
 	document.getElementById('brush-settings').className = "invisible";
+	document.getElementById('rainbow-settings').className = "invisible";
 	document.getElementById('dropper-settings').className = "invisible";
 	document.getElementById('text-settings').className = "invisible";
 	document.getElementById('shape-settings').className = "invisible";

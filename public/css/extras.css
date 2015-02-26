@@ -36,6 +36,10 @@ span.value {
 	clear: both;
 }
 
+.inline-block {
+	display: inline-block;
+}
+
 /**
 ** On and Off CSS Switch
 **/

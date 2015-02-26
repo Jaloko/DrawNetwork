@@ -441,6 +441,13 @@ input[type="radio"] {
 	width: 40px;
 	height: 40px;
 	background: url("../img/icons/square194.png") center no-repeat;
+	background-size: 70%;
+}
+
+#tool-rainbow-brush-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/star42.png") center no-repeat;
 	background-size: 80%;
 }
 
