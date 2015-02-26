@@ -379,6 +379,7 @@ input[type="radio"] {
 	min-height: 720px;
 	background-color: #111;
 	background-color: rgba(25,25,25,0.8);
+	z-index: 40;
 }
 
 #name-box-wrap, #clear-box-wrap {
@@ -415,6 +416,41 @@ input[type="radio"] {
 /*---------------------------------
 	Tools
 ---------------------------------*/
+/* Tool Tip */
+
+[data-tip] {
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+}
+
+[data-tip]:before,
+[data-tip]:after {
+  	visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+[data-tip]:before {
+    position: absolute;
+    bottom: 50px;
+    right: -160%;
+    padding: 10px;
+    width: 170px;
+    font-size: 12pt;
+    line-height: 1;
+    text-align: center;
+    background-color: #675039;
+    color: #fff;
+    content: attr(data-tip);
+}
+
+/* Show tooltip content on hover */
+[data-tip]:hover:before,
+[data-tip]:hover:after {
+    visibility: visible;
+    opacity: 1;
+}
 
 #tool-brush-img {
 	width: 40px;
