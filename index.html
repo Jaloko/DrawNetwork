@@ -206,24 +206,34 @@
 							<div id="shape-tool" class="button tool">
 								<div id="tool-shape-img" data-tip="Shape Tool"></div>
 							</div>
+							<div id="line-tool" class="button tool">
+								<div id="tool-line-img" data-tip="Line Tool"></div>
+							</div>
 							<div id="eraser" class="button tool">
 								<div id="tool-eraser-img" data-tip="Eraser Tool"></div>
 							</div>
 							<div id="clearCanvas" class="button tool">
-								<div id="tool-clear-img" data-tip="Clear - Voting"></div>
+								<div id="tool-clear-img" data-tip="Vote To Clear"></div>
 							</div>
 							<div id="saveCanvas" class="button tool">
-								<div id="tool-save-img" data-tip="Save to data-url"></div>
+								<div id="tool-save-img" data-tip="Save Image"></div>
 							</div>
 							<div id="currentColour" data-tip="Current Colour"></div>
 							<div class="clear">
 							</div>
 						</div>
-						<div id="tool-settings">
+						<div id="tool-settings" >
 							<div id="brush-settings">
 								Size: <input id="brushSelection" type="range" min="1" max="100" value="30"></input>
 								<div id="rainbow-settings" class="invisible">
 									Speed: <input id="speedSelection" type="range" min="1" max="20" value="1"></input>
+								</div>
+								<div id="line-settings" class="invisible">
+									Line Tip: 			
+									<select id="lineTip" onchange="changeLineTip()">
+									  	<option value="round">Rounded</option>
+									  	<option value="square">Flat</option>
+									</select>
 								</div>
 							</div>
 
@@ -254,9 +264,9 @@
 							</div>
 						</div>
 					</div>
-					<div id="right-col" onmousedown="return false">
+					<div id="right-col">
 						<div id="colour-picker">
-							<div class="paletteLeftCol">
+							<div class="paletteLeftCol" onmousedown="return false">
 								<canvas id="webgl-temp" width="255" height="255" style="display: none;"></canvas>
 								<canvas id="tint" width="255" height="255"></canvas>
 								<canvas id="tint-pointer" style="position:absolute; left: 0; top: 0;" width="255" height="255"></canvas>
@@ -291,7 +301,13 @@
 								</div>
 								<div id="users-chat" class="invisible">
 									<div class="users-border">
-										This feature will be added in the near future.
+										<div id="chat-box">
+											<div class="chat-row">
+												<div class="message">Welcome to the chat!</div>
+											</div>
+										</div>
+										<input id="chat-message" type="text" placeholder="Message..." maxlength="300"></input>
+										<div class="message button" onclick="sendChatMessage();">Send</div>
 									</div>
 								</div>
 							</div>

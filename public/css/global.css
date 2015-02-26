@@ -135,7 +135,7 @@ input#room-search {
 	color: black;
 }
 
-#fontSel {
+#fontSel, #lineTip {
 	position: relative;
 	top: -2px;
 	border: none;
@@ -143,7 +143,7 @@ input#room-search {
 	color: black;	
 }
 
-#fontSel option {
+#fontSel option, #lineTip option {
 	color:black;
 }
 
@@ -248,6 +248,11 @@ input[type="radio"] {
 	line-height: 40px;
 	margin: 5px;
 	background-color: #998675;
+}
+
+.message {
+	margin-left: 0px;
+	margin-right: 0px;
 }
 
 .bselect {
@@ -480,6 +485,13 @@ input[type="radio"] {
 	background-size: 70%;
 }
 
+#tool-line-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/divide4.png") center no-repeat;
+	background-size: 70%;
+}
+
 #tool-rainbow-brush-img {
 	width: 40px;
 	height: 40px;
@@ -540,4 +552,27 @@ input[type="radio"] {
 
 #canvas, #pointer-canvas {
 	cursor: none;
+}
+
+/*---------------------------------
+	Chat
+---------------------------------*/
+#chat-box {
+	height:276px;
+	width:306px;
+	border:0px solid #ccc;
+	overflow:auto;
+	background-color: #4d3d2f;
+	padding: 2px;
+}
+
+#chat-message {
+	position: relative;
+	top: -2px;
+	border: none;
+	-webkit-appearance: none;
+	height: 40px;
+	width: 253px;
+	outline: 0;
+	color: black;
 }

@@ -60,6 +60,7 @@ var shapeEndPos = {
 };
 var rainbowPointer = 0;
 var rainbowSpeed = 1;
+var lineTip = "round";
 var canvasRect = canvas.getBoundingClientRect();
 
 function setShapeType(ele, shape) {
@@ -67,6 +68,27 @@ function setShapeType(ele, shape) {
 	document.getElementById('shapeCircle').className = "button tool";
 	ele.className = "button bselect tool";
 	shapeType = shape;
+}
+
+function sendChatMessage() {
+	var data = {
+		name: name,
+		message: document.getElementById('chat-message').value
+	}
+	if(data.message.length > 0) {
+		document.getElementById('chat-message').value = "";
+		addChatMessage(data);
+		socket.emit('chat message', data);
+	}
+}
+
+document.getElementById('chat-message').onkeypress = function(e){
+    if (!e) e = window.event;
+    var keyCode = e.keyCode || e.which;
+    if (keyCode == '13'){
+     	sendChatMessage();
+      	return false;
+    }
 }
 
 function pickRandomName() {
@@ -159,6 +181,10 @@ socket.on('sync draw circle', function(data) {
 	drawShapeCircle(data.x, data.y, data.endX, data.endY, data.colour);
 });
 
+socket.on('sync draw line', function(data) {
+	drawShapeLine(data.x, data.y, data.endX, data.endY, data.colour, data.size, data.lineTip);
+});
+
 socket.on('sync erase', function(data) {
 	drawRect(data.x, data.y, data.lastX, data.lastY, data.size, "white");
 });
@@ -239,6 +265,25 @@ socket.on('unlock canvas', function(data) {
 	document.getElementById('voteButtons').className = "";	
 });
 
+socket.on('sync chat message', function(data) {
+	addChatMessage(data);
+
+});
+
+function addChatMessage(data) {
+	var chat = document.getElementById('chat-box');
+	var theName = data.name;
+	if(data.name === name) {
+		theName = "You";
+	}
+	var newMesage = '<div class="chat-row">' +
+						'<div class="name" style="font-weight: bold;">' + theName + ': ' + '</div>' +
+						'<div class="message">' + data.message + '</div>' +
+					'</div>';
+	chat.innerHTML += newMesage;
+	chat.scrollTop = chat.scrollHeight;
+}
+
 function clearVote(vote) {
 	socket.emit('recieve clear vote', vote);
 	document.getElementById('voteButtons').className = "invisible";
@@ -256,6 +301,8 @@ function clearCanvas() {
 function drawBrushOutline(x, y) {
 	var cr = pointerCanvas.getBoundingClientRect();
 	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+	pointerContext.lineWidth = 1;
+	pointerContext.lineCap = "round";
     pointerContext.beginPath();
     pointerContext.strokeStyle = 'white';
     pointerContext.arc(x - cr.left, y - cr.top, brush.size / 2,0,2*Math.PI);
@@ -273,6 +320,8 @@ function drawBrushOutline(x, y) {
 function drawEraserOutline(x, y) {
 	var cr = pointerCanvas.getBoundingClientRect();
 	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+	pointerContext.lineWidth = 1;
+	pointerContext.lineCap = "round";
 	pointerContext.beginPath();
     pointerContext.rect(x - cr.left - brush.size / 2, y - cr.top - brush.size / 2, brush.size, brush.size);
     pointerContext.strokeStyle = 'white';
@@ -516,7 +565,6 @@ brushSelection.addEventListener("input", function(evt){
 });
 
 speedSelection.addEventListener("input", function(evt){
-
 	rainbowSpeed = parseInt(this.value);
 });
 
@@ -532,6 +580,12 @@ function changeFont() {
 	textFont = split[0] + " " + font;
 	drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
 }
+
+function changeLineTip() {
+	var e = document.getElementById("lineTip");
+	lineTip = e.options[e.selectedIndex].value;
+}
+
 function changeTextSize(newSize){
 	var e = document.getElementById("fontSel");
 	var font = e.options[e.selectedIndex].value;
@@ -540,7 +594,7 @@ function changeTextSize(newSize){
 }
 
 function brushSize(newSize){
-	brush.size = newSize;
+	brush.size = parseInt(newSize);
 }
 
 function inputColourChange() {
@@ -597,7 +651,7 @@ function drawTempRect(x, y, endX, endY) {
 
 function drawShapeRect(x, y, endX, endY, colour) {
     context.fillStyle = colour;
-	context.fillRect(x - canvasRect.left, y - canvasRect.top, (endX - x), (endY - y));
+	context.fillRect(x, y, (endX - x), (endY - y));
 }
 
 function drawTempCircle(x, y, endX, endY, colour) {
@@ -623,9 +677,31 @@ function drawShapeCircle(x, y, endX, endY, colour) {
 	} else {
 		radius = Math.abs((endY - y));
 	}
-	context.arc(x - canvasRect.left, y - canvasRect.top, radius, 0, 2 * Math.PI, false);
+	context.arc(x, y, radius, 0, 2 * Math.PI, false);
 	context.fillStyle = colour;
 	context.fill();
+}
+
+function drawTempLine(x, y, endX, endY, colour, size, lineTip) {
+	var cr = pointerCanvas.getBoundingClientRect();
+	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+	pointerContext.strokeStyle = colour;
+	pointerContext.lineWidth = size;
+	pointerContext.lineCap = lineTip;
+	pointerContext.beginPath();
+	pointerContext.moveTo(x - cr.left, y - cr.top);
+	pointerContext.lineTo(endX - cr.left,endY - cr.top);
+	pointerContext.stroke();
+}
+
+function drawShapeLine(x, y, endX, endY, colour, size, lineTip) {
+	context.strokeStyle = colour;
+	context.lineWidth = size;
+	context.lineCap = lineTip;
+	context.beginPath();
+	context.moveTo(x, y);
+	context.lineTo(endX,endY);
+	context.stroke();
 }
 
 
@@ -671,7 +747,6 @@ document.addEventListener('mousemove', function(evt) {
 			}  else if(brush.brushType === "rainbow-brush") {
 		    	if(canDraw === true) {
 		    		rainbowPointer+=rainbowSpeed;
-		    		console.log(rainbowPointer);
 		    		if(rainbowPointer >= 255) {
 		    			rainbowPointer = 0;
 		    		}
@@ -695,8 +770,14 @@ document.addEventListener('mousemove', function(evt) {
 		    			} else if(shapeType === "circle") {
 		    				drawTempCircle(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, brush.colour);
 		    			}
-
 		    		}
+				}
+			} else if(brush.brushType === "line"){
+			    if(canDraw === true) {
+			    	if(readyForShape === true) {
+			    		shapeEndPos = mousePos;
+			    		drawTempLine(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, brush.colour, brush.size, lineTip);
+			    	}
 				}
 			}
 			changeColour();
@@ -755,6 +836,13 @@ document.addEventListener("mousedown", function(evt) {
 			    			shapePos = mousePos;
 			    		}
 					}
+				} else if(brush.brushType === "line"){
+			    	if(canDraw === true) {
+			    		if(readyForShape === false) {
+			    			readyForShape = true;
+			    			shapePos = mousePos;
+			    		}
+					}
 				} else if(brush.brushType === "eraser"){
 			    	if(canDraw === true) {
 		    			erase();
@@ -775,21 +863,35 @@ document.addEventListener("mouseup", function(evt) {
     	mouseDown = false;
     	if(readyForShape === true) {
     		pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
-    		var shapeData = {
-    			x: shapePos.x,
-    			y: shapePos.y,
-    			endX: shapeEndPos.x,
-    			endY: shapeEndPos.y,
-    			colour: brush.colour
+    		canvasRect = canvas.getBoundingClientRect();
+    		if(brush.brushType === "shape"){
+	    		var shapeData = {
+	    			x: shapePos.x - canvasRect.left,
+	    			y: shapePos.y - canvasRect.top,
+	    			endX: shapeEndPos.x - canvasRect.left,
+	    			endY: shapeEndPos.y - canvasRect.top,
+	    			colour: brush.colour
+	    		}
+	    		if(shapeType === "rectangle") {
+		    		drawShapeRect(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
+		    		socket.emit('draw rect', shapeData);
+	    		} else if(shapeType === "circle") {
+		    		drawShapeCircle(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
+		    		socket.emit('draw circle', shapeData);
+    			}
+    		} else if(brush.brushType === "line") {
+    			var lineData = {
+	    			x: shapePos.x - canvasRect.left,
+	    			y: shapePos.y - canvasRect.top,
+	    			endX: shapeEndPos.x - canvasRect.left,
+	    			endY: shapeEndPos.y - canvasRect.top,
+	    			lineTip: lineTip,
+	    			size: brush.size,
+	    			colour: brush.colour
+	    		};
+		    	drawShapeLine(lineData.x, lineData.y, lineData.endX, lineData.endY, lineData.colour, lineData.size, lineData.lineTip);
+		    	socket.emit('draw line', lineData);
     		}
-    		if(shapeType === "rectangle") {
-	    		drawShapeRect(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, shapeData.colour);
-	    		socket.emit('draw rect', shapeData);
-    		} else if(shapeType === "circle") {
-	    		drawShapeCircle(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, shapeData.colour);
-	    		socket.emit('draw circle', shapeData);
-    		}
-
     		readyForShape = false;
     	}
     	readyForShape = false;
@@ -876,6 +978,16 @@ document.getElementById('shape-tool').addEventListener('click', function(evt){
 	document.getElementById('shape-settings').className = "";
 });
 
+document.getElementById('line-tool').addEventListener('click', function(evt){
+	brush.setBrushType('line');
+	resetTools();
+	this.className = "button bselect tool";
+	document.getElementById('canvas').style.cursor = "pointer";
+	document.getElementById('pointer-canvas').style.cursor = "pointer";
+	document.getElementById('brush-settings').className = "";
+	document.getElementById('line-settings').className = "inline-block";
+});
+
 document.getElementById('eraser').addEventListener('click', function(evt){
 	brush.setBrushType('eraser');
 	resetTools();
@@ -893,6 +1005,7 @@ function resetTools() {
 	document.getElementById('rainbow-brush').className = "button tool";
 	document.getElementById('text-tool').className = "button tool";
 	document.getElementById('shape-tool').className = "button tool";
+	document.getElementById('line-tool').className = "button tool";
 	document.getElementById('eraser').className = "button tool";
 	// Tool Settings
 	document.getElementById('brush-settings').className = "invisible";
@@ -900,6 +1013,7 @@ function resetTools() {
 	document.getElementById('dropper-settings').className = "invisible";
 	document.getElementById('text-settings').className = "invisible";
 	document.getElementById('shape-settings').className = "invisible";
+	document.getElementById('line-settings').className = "invisible";
 	// Canvases
 	document.getElementById('canvas').style.cursor = "none";
 	document.getElementById('pointer-canvas').style.cursor = "none";

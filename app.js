@@ -153,7 +153,8 @@ io.sockets.on('connection', function(socket) {
 		if(index != null) {
 			if(validateText(newData.name) && newData.name.length <= 30 && validateHex(newData.colour)
 				&& validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.lastX)
-				&& validateNumber(newData.lastY) && validateNumber(newData.size)) {
+				&& validateNumber(newData.lastY) && validateNumber(newData.size)
+				&& newData.size > 0 && newData.size <= 100) {
 				if(rooms[index].users != null) {
 					if(rooms[index].clearVote.vote == false) {
 						socket.broadcast.to(rooms[index].id).emit('sync draw', newData);
@@ -227,6 +228,30 @@ io.sockets.on('connection', function(socket) {
 		}
 	});
 
+	socket.on('draw line', function(data) {
+		var index = getRoomIndex(socket);
+		var newData = {
+			x: data.x,
+			y: data.y,
+			endX: data.endX,
+			endY: data.endY,
+			lineTip: data.lineTip,
+			size: data.size,
+			colour: data.colour
+		};
+		if(index != null) {
+			if(validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.endX) 
+				&& validateNumber(newData.endY) && validateText(newData.lineTip) && validateNumber(newData.size)
+				 && validateHex(newData.colour) && newData.size > 0 && newData.size <= 100) {
+				if(rooms[index].users != null) {
+					if(rooms[index].clearVote.vote == false) {
+						socket.broadcast.to(rooms[index].id).emit('sync draw line', newData);
+					}
+				}
+			}
+		}
+	});
+
 	socket.on('erase', function(data) {
 		var index = getRoomIndex(socket);
 		var newData = {
@@ -240,10 +265,37 @@ io.sockets.on('connection', function(socket) {
 		if(index != null) {
 			if(validateText(newData.name) && newData.name.length <= 30
 				&& validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.lastX)
-				&& validateNumber(newData.lastY) && validateNumber(newData.size)) {
+				&& validateNumber(newData.lastY) && validateNumber(newData.size) && newData.size > 0 && newData.size <= 100) {
 				if(rooms[index].users != null) {
 					if(rooms[index].clearVote.vote == false) {
 						socket.broadcast.to(rooms[index].id).emit('sync erase', newData);
+					}
+				}
+			}
+		}
+	});
+
+	socket.on('chat message', function(data) {
+		var index = getRoomIndex(socket);
+		var newData = {
+			name: data.name,
+			message: data.message
+		};
+		if(index != null) {
+			if(validateText(newData.name) && validateText(newData.message) && newData.message.length <= 300 &&
+				newData.message.length > 0) {
+				if(rooms[index].users != null) {
+					if(rooms[index].clearVote.vote == false) {
+						for(var i = 0; i < rooms[index].users.length; i++) {
+							if(rooms[index].users[i] != null) {
+								if(rooms[index].users[i].name === newData.name) {
+									if(rooms[index].serverUsers[i].id === socket.id) {
+										socket.broadcast.to(rooms[index].id).emit('sync chat message', newData);
+										break;
+									}
+								}
+							}
+						}
 					}
 				}
 			}
