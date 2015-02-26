@@ -200,6 +200,9 @@
 							<div id="text-tool" class="button tool">
 								<div id="tool-text-img"></div>
 							</div>
+							<div id="shape-tool" class="button tool">
+								<div id="tool-shape-img"></div>
+							</div>
 							<div id="eraser" class="button tool">
 								<div id="tool-eraser-img"></div>
 							</div>
@@ -232,6 +235,14 @@
 								Size: <input id="textSizeSel" type="range" min="1" max="100" value="30"></input>
 								<div class="button" onclick="applyText()">
 								Apply Text
+								</div>
+							</div>
+							<div id="shape-settings" class="invisible">
+								<div id="shapeRect" class="button bselect tool" onclick="setShapeType(this, 'rectangle')">
+								Rectangle
+								</div>
+								<div id="shapeCircle" class="button tool" onclick="setShapeType(this, 'circle')">
+								Circle
 								</div>
 							</div>
 						</div>

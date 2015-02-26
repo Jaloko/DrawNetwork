@@ -47,8 +47,25 @@ var textFont = "20px Arial";
 var textPos = {
 	x: 0,
 	y: 0
-}
+};
+var readyForShape = false;
+var shapeType = "rectangle";
+var shapePos = {
+	x: 0,
+	y: 0
+};
+var shapeEndPos = {
+	x: 0,
+	y: 0
+};
 var canvasRect = canvas.getBoundingClientRect();
+
+function setShapeType(ele, shape) {
+	document.getElementById('shapeRect').className = "button tool";
+	document.getElementById('shapeCircle').className = "button tool";
+	ele.className = "button bselect tool";
+	shapeType = shape;
+}
 
 function pickRandomName() {
 	var rand = Math.floor(Math.random() * randomNames.length);
@@ -130,6 +147,14 @@ socket.on('sync draw', function(data) {
 
 socket.on('sync draw text', function(data) {
 	drawText(data.x, data.y, data.font, data.colour, data.text);
+});
+
+socket.on('sync draw rect', function(data) {
+	drawShapeRect(data.x, data.y, data.endX, data.endY, data.colour);
+});
+
+socket.on('sync draw circle', function(data) {
+	drawShapeCircle(data.x, data.y, data.endX, data.endY, data.colour);
 });
 
 socket.on('sync erase', function(data) {
@@ -532,6 +557,47 @@ function drawTempText(x, y, font, colour, text) {
 	pointerContext.fillText(text,x - cr.left ,y - cr.top);
 }
 
+function drawTempRect(x, y, endX, endY) {
+	var cr = pointerCanvas.getBoundingClientRect();
+	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+    pointerContext.fillStyle = brush.colour;
+	pointerContext.fillRect(x - cr.left, y - cr.top, (endX - x), (endY - y));
+}
+
+function drawShapeRect(x, y, endX, endY, colour) {
+    context.fillStyle = colour;
+	context.fillRect(x - canvasRect.left, y - canvasRect.top, (endX - x), (endY - y));
+}
+
+function drawTempCircle(x, y, endX, endY, colour) {
+	var cr = pointerCanvas.getBoundingClientRect();
+	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+	pointerContext.beginPath();
+	var radius = 0;
+	if(Math.abs((endX - x)) > Math.abs((endY - y))) {
+		radius = Math.abs((endX - x));
+	} else {
+		radius = Math.abs((endY - y));
+	}
+	pointerContext.arc(x - cr.left, y - cr.top, radius, 0, 2 * Math.PI, false);
+	pointerContext.fillStyle = colour;
+	pointerContext.fill();
+}
+
+function drawShapeCircle(x, y, endX, endY, colour) {
+	context.beginPath();
+	var radius = 0;
+	if(Math.abs((endX - x)) > Math.abs((endY - y))) {
+		radius = Math.abs((endX - x));
+	} else {
+		radius = Math.abs((endY - y));
+	}
+	context.arc(x - canvasRect.left, y - canvasRect.top, radius, 0, 2 * Math.PI, false);
+	context.fillStyle = colour;
+	context.fill();
+}
+
+
 function applyText() {
 	if(readyForText == true) {
 		var cr = canvas.getBoundingClientRect();
@@ -581,6 +647,18 @@ document.addEventListener('mousemove', function(evt) {
 		    		textPos = mousePos;
 				}
 				drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
+			} else if(brush.brushType === "shape"){
+		    	if(canDraw === true) {
+		    		if(readyForShape === true) {
+		    			shapeEndPos = mousePos;
+		    			if(shapeType === "rectangle") {
+		    				drawTempRect(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, brush.colour);
+		    			} else if(shapeType === "circle") {
+		    				drawTempCircle(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, brush.colour);
+		    			}
+
+		    		}
+				}
 			}
 			changeColour();
 		}
@@ -627,6 +705,13 @@ document.addEventListener("mousedown", function(evt) {
 			    		textPos = mousePos;
 					}
 					drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
+				} else if(brush.brushType === "shape"){
+			    	if(canDraw === true) {
+			    		if(readyForShape === false) {
+			    			readyForShape = true;
+			    			shapePos = mousePos;
+			    		}
+					}
 				} else if(brush.brushType === "eraser"){
 			    	if(canDraw === true) {
 		    			erase();
@@ -645,6 +730,26 @@ document.addEventListener("mouseup", function(evt) {
 	canvas.className = ""; // Reverts to no classname
 	if(evt.button === 0) {
     	mouseDown = false;
+    	if(readyForShape === true) {
+    		pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+    		var shapeData = {
+    			x: shapePos.x,
+    			y: shapePos.y,
+    			endX: shapeEndPos.x,
+    			endY: shapeEndPos.y,
+    			colour: brush.colour
+    		}
+    		if(shapeType === "rectangle") {
+	    		drawShapeRect(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, shapeData.colour);
+	    		socket.emit('draw rect', shapeData);
+    		} else if(shapeType === "circle") {
+	    		drawShapeCircle(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, shapeData.colour);
+	    		socket.emit('draw circle', shapeData);
+    		}
+
+    		readyForShape = false;
+    	}
+    	readyForShape = false;
 	   // Located in colour-picker2.js
 	    if(canMoveTintPointer == true) {
 	        canMoveTintPointer = false;
@@ -658,8 +763,8 @@ document.addEventListener("mouseup", function(evt) {
 
 document.body.addEventListener("keydown", function(e) {
 	if(readyForText === true) {
-		document.getElementById('text-tool-text').focus();
 		drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
+		document.getElementById('text-tool-text').focus();
 		if(e.keyCode == 13) {
 	    	applyText();
 	    }
@@ -668,8 +773,8 @@ document.body.addEventListener("keydown", function(e) {
  
 document.body.addEventListener("keyup", function(e) {
 	if(readyForText === true) {
-		textToRender = document.getElementById('text-tool-text').value;
-		drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);	
+		drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
+		textToRender = document.getElementById('text-tool-text').value;	
 	}
 });
 
@@ -711,6 +816,15 @@ document.getElementById('text-tool').addEventListener('click', function(evt){
 	document.getElementById('text-settings').className = "";
 });
 
+document.getElementById('shape-tool').addEventListener('click', function(evt){
+	brush.setBrushType('shape');
+	resetTools();
+	this.className = "button bselect tool";
+	document.getElementById('canvas').style.cursor = "pointer";
+	document.getElementById('pointer-canvas').style.cursor = "pointer";
+	document.getElementById('shape-settings').className = "";
+});
+
 document.getElementById('eraser').addEventListener('click', function(evt){
 	brush.setBrushType('eraser');
 	resetTools();
@@ -726,11 +840,13 @@ function resetTools() {
 	document.getElementById('colourDrop').className = "button tool";
 	document.getElementById('gradient-brush').className = "button tool";
 	document.getElementById('text-tool').className = "button tool";
+	document.getElementById('shape-tool').className = "button tool";
 	document.getElementById('eraser').className = "button tool";
 	// Tool Settings
 	document.getElementById('brush-settings').className = "invisible";
 	document.getElementById('dropper-settings').className = "invisible";
 	document.getElementById('text-settings').className = "invisible";
+	document.getElementById('shape-settings').className = "invisible";
 	// Canvases
 	document.getElementById('canvas').style.cursor = "none";
 	document.getElementById('pointer-canvas').style.cursor = "none";

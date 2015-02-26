@@ -185,6 +185,48 @@ io.sockets.on('connection', function(socket) {
 
 	});
 
+	socket.on('draw rect', function(data) {
+		var index = getRoomIndex(socket);
+		var newData = {
+			x: data.x,
+			y: data.y,
+			endX: data.endX,
+			endY: data.endY,
+			colour: data.colour
+		};
+		if(index != null) {
+			if(validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.endX) 
+				&& validateNumber(newData.endY) && validateHex(newData.colour)) {
+				if(rooms[index].users != null) {
+					if(rooms[index].clearVote.vote == false) {
+						socket.broadcast.to(rooms[index].id).emit('sync draw rect', newData);
+					}
+				}
+			}
+		}
+	});
+
+	socket.on('draw circle', function(data) {
+		var index = getRoomIndex(socket);
+		var newData = {
+			x: data.x,
+			y: data.y,
+			endX: data.endX,
+			endY: data.endY,
+			colour: data.colour
+		};
+		if(index != null) {
+			if(validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.endX) 
+				&& validateNumber(newData.endY) && validateHex(newData.colour)) {
+				if(rooms[index].users != null) {
+					if(rooms[index].clearVote.vote == false) {
+						socket.broadcast.to(rooms[index].id).emit('sync draw circle', newData);
+					}
+				}
+			}
+		}
+	});
+
 	socket.on('erase', function(data) {
 		var index = getRoomIndex(socket);
 		var newData = {
