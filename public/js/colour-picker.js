@@ -29,6 +29,7 @@ var huePointer = {
     y: 0
 }
 var canMoveTintPointer = false;
+var canMoveHuePointer = false;
 var colourTimer = new Date().getTime();
 
 /**
@@ -256,36 +257,36 @@ function changeColour() {
         b: 0
     };
     if(canMoveTintPointer == true) {
-        var canvasRect = tintCanvas.getBoundingClientRect();
+        var tintRect = tintCanvas.getBoundingClientRect();
         if(mouseIsHoveringCanvas(tintCanvas)) {
             tintPointer = mousePos;
-            tintPointer.x -= canvasRect.left;
-            tintPointer.y -= canvasRect.top;
+            tintPointer.x -= tintRect.left;
+            tintPointer.y -= tintRect.top;
         } else {
             var pos = mousePos;
-            if(pos.x < canvasRect.left && pos.y < canvasRect.top) {
+            if(pos.x < tintRect.left && pos.y < tintRect.top) {
                 tintPointer.x = 0;
                 tintPointer.y = 0;
-            } else if(pos.x >= canvasRect.right && pos.y < canvasRect.top) {
+            } else if(pos.x >= tintRect.right && pos.y < tintRect.top) {
                 tintPointer.x = 255;
                 tintPointer.y = 0;
-            } else if(pos.x >= canvasRect.right && pos.y >= canvasRect.bottom) {
+            } else if(pos.x >= tintRect.right && pos.y >= tintRect.bottom) {
                 tintPointer.x = 255; 
                 tintPointer.y = 255;
-            } else if(pos.x < canvasRect.left && pos.y >= canvasRect.bottom) {
+            } else if(pos.x < tintRect.left && pos.y >= tintRect.bottom) {
                 tintPointer.x = 0;
                 tintPointer.y = 255;
-            } else if(pos.x < canvasRect.left) {
+            } else if(pos.x < tintRect.left) {
                 tintPointer.x = 0;
-                tintPointer.y = pos.y - canvasRect.top;
-            }  else if(pos.x >= canvasRect.right) {
+                tintPointer.y = pos.y - tintRect.top;
+            }  else if(pos.x >= tintRect.right) {
                 tintPointer.x = 255;
-                tintPointer.y = pos.y - canvasRect.top;
-            } else if(pos.y < canvasRect.top) {
-                tintPointer.x = pos.x - canvasRect.left;
+                tintPointer.y = pos.y - tintRect.top;
+            } else if(pos.y < tintRect.top) {
+                tintPointer.x = pos.x - tintRect.left;
                 tintPointer.y = 0; 
-            } else if(pos.y >= canvasRect.bottom) {
-                tintPointer.x = pos.x - canvasRect.left;
+            } else if(pos.y >= tintRect.bottom) {
+                tintPointer.x = pos.x - tintRect.left;
                 tintPointer.y = 255; 
             }
         }
@@ -301,9 +302,38 @@ function changeColour() {
 
         // Draw the tint pointer because it has moved
         drawTintPointer();
-    } else if(mouseIsHoveringCanvas(hueCanvas)) {
-        var canvasRect = hueCanvas.getBoundingClientRect();
-        huePointer.y = mousePos.y - canvasRect.top;
+    } else if(canMoveHuePointer === true) {
+        var hueRect = hueCanvas.getBoundingClientRect();
+        if(mouseIsHoveringCanvas(hueCanvas)) {
+            huePointer.y = mousePos.y - hueRect.top;
+        } else {
+            var pos = mousePos;
+            if(pos.x < hueRect.left && pos.y < hueRect.top) {
+                huePointer.x = 0;
+                huePointer.y = 0;
+            } else if(pos.x >= hueRect.right && pos.y < hueRect.top) {
+                huePointer.x = 0;
+                huePointer.y = 0;
+            } else if(pos.x >= hueRect.right && pos.y >= hueRect.bottom) {
+                huePointer.x = 0; 
+                huePointer.y = 255;
+            } else if(pos.x < hueRect.left && pos.y >= hueRect.bottom) {
+                huePointer.x = 0;
+                huePointer.y = 255;
+            } else if(pos.x < hueRect.left) {
+                huePointer.x = 0;
+                huePointer.y = pos.y - hueRect.top;
+            }  else if(pos.x >= hueRect.right) {
+                huePointer.x = 0;
+                huePointer.y = pos.y - hueRect.top;
+            } else if(pos.y < hueRect.top) {
+                huePointer.x = pos.x - hueRect.left;
+                huePointer.y = 0; 
+            } else if(pos.y >= hueRect.bottom) {
+                huePointer.x = pos.x - hueRect.left;
+                huePointer.y = 255; 
+            }
+        }
         rgb = getColourOnHueCanvas();
         pickedColour.r = rgb.r;
         pickedColour.g = rgb.g;
@@ -312,7 +342,6 @@ function changeColour() {
         var currentColour = document.getElementById('currentColour');
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         var paletteArrow = document.getElementById('palette-arrow');
-        var scrollY = getScrollAmount().y;
         paletteArrow.style.top = huePointer.y - 10 + "px";
         assignHTMLValues();
         updateColourBuffer();
@@ -334,11 +363,7 @@ function changeColour() {
 }
 
 function updateColour() {
-    var doc = document.documentElement;
-    var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
-    var canvasRect = hueCanvas.getBoundingClientRect();
     rgb = getColourOnHueCanvas();
-    huePointer.y += canvasRect.top + top;
     pickedColour.r = rgb.r;
     pickedColour.g = rgb.g;
     pickedColour.b = rgb.b;
@@ -372,7 +397,7 @@ function getScrollAmount() {
 
 function mouseIsHoveringCanvas(canvas) {
     var pos = mousePos;
-    var canvasRect = canvas.getBoundingClientRect();
+    canvasRect = canvas.getBoundingClientRect();
     if(pos.x >= canvasRect.left && pos.x <= canvasRect.right 
         && pos.y >= canvasRect.top && pos.y <= canvasRect.bottom) {
         return true;
@@ -439,8 +464,8 @@ function getColourOnCanvas(canvas, ctx){
     var doc = document.documentElement;
     var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
     var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
-    var x = mousePos.x - left - rect.left;
-    var y = mousePos.y - top - rect.top;
+    var x = mousePos.x - rect.left;
+    var y = mousePos.y - rect.top;
 
     var data = ctx.getImageData(x, y, 1, 1);
     var pixels = data.data;

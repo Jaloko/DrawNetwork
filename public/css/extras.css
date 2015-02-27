@@ -15,7 +15,7 @@ h1 {
 	height: 0; 
 	border-top: 10px solid transparent;
 	border-bottom: 10px solid transparent; 
-	border-right:10px solid gray; 
+	border-right:10px solid #ccc; 
 }
 
 .paletteLeftCol, .paletteArrowCol, .paletteRightCol {

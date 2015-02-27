@@ -61,6 +61,8 @@ var shapeEndPos = {
 var rainbowPointer = 0;
 var rainbowSpeed = 1;
 var lineTip = "round";
+var gradientSwitch = false;
+var gradientSpeed = 1;
 var canvasRect = canvas.getBoundingClientRect();
 
 function setShapeType(ele, shape) {
@@ -566,6 +568,7 @@ brushSelection.addEventListener("input", function(evt){
 
 speedSelection.addEventListener("input", function(evt){
 	rainbowSpeed = parseInt(this.value);
+	gradientSpeed = parseInt(this.value);
 });
 
 var textSizeSel = document.getElementById('textSizeSel');
@@ -728,7 +731,7 @@ function applyText() {
 document.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(evt);
-	if(brush.brushType === "freeroam" || brush.brushType === "gradient-brush" || brush.brushType === "dropper" || brush.brushType === "rainbow-brush") {
+	if(brush.brushType === "freeroam" || brush.brushType === "gradient-brush" || brush.brushType === "rainbow-brush") {
 		drawBrushOutline(mousePos.x, mousePos.y);
 	} else if(brush.brushType === "eraser"){
 		drawEraserOutline(mousePos.x, mousePos.y);
@@ -741,7 +744,18 @@ document.addEventListener('mousemove', function(evt) {
 				}	
 			} else if(brush.getBrushType() === "gradient-brush") {
 				if(canDraw === true) {
-					gradientTimer++;
+					if(gradientTimer >= 255) {
+						gradientSwitch = true;
+					} else if(gradientTimer <= 0) {
+						gradientSwitch = false;
+					}
+
+					if(gradientSwitch === true) {
+						gradientTimer -= gradientSpeed;
+					} else {
+						gradientTimer += gradientSpeed;
+					}
+
 					gradientDraw(gradientTimer);
 				}	
 			}  else if(brush.brushType === "rainbow-brush") {
@@ -752,6 +766,11 @@ document.addEventListener('mousemove', function(evt) {
 		    		}
 		    		rainbowDraw();
     			}
+			} else if(brush.brushType === "dropper"){
+		    	if(mouseIsHoveringCanvas(canvas)) {
+    				var rgb = getColourOnCanvas(canvas, context);
+					onColourChange(rgb);
+				}
 			} else if(brush.brushType === "eraser"){
 		    	if(canDraw === true) {
 		    		erase();
@@ -796,7 +815,10 @@ document.addEventListener("mousedown", function(evt) {
 			        if(mouseIsHoveringCanvas(tintCanvas)) {
 			            canMoveTintPointer = true;
 			            canDraw = false;
-			        }  
+			        }  else if(mouseIsHoveringCanvas(hueCanvas)) {
+			        	canMoveHuePointer = true;
+			        	canDraw = false;
+			        } 
 			    }
 			    // To stop drawing when dragging tint pointer
 			    if(canDraw === false) {
@@ -895,12 +917,16 @@ document.addEventListener("mouseup", function(evt) {
     		readyForShape = false;
     	}
     	readyForShape = false;
-	   // Located in colour-picker2.js
-	    if(canMoveTintPointer == true) {
+	    // Located in colour-picker2.js
+	    if(canMoveTintPointer === true) {
 	        canMoveTintPointer = false;
 	    }
 
-    	if(canDraw == true) {
+	    if(canMoveHuePointer === true) {
+	    	canMoveHuePointer = false;
+	    }
+
+    	if(canDraw === true) {
 			canDraw = false;
 		}
 	}
@@ -938,6 +964,7 @@ document.getElementById('colourDrop').addEventListener('click', function(evt){
 	brush.setBrushType('dropper');
 	resetTools();
 	this.className = "button bselect tool";
+	document.getElementById('pointer-canvas').style.cursor = "crosshair";
 	document.getElementById('dropper-settings').className = "";
 });
 
@@ -946,6 +973,7 @@ document.getElementById('gradient-brush').addEventListener('click', function(evt
 	resetTools();
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "";
+	document.getElementById('rainbow-settings').className = "inline-block";
 });
 
 document.getElementById('rainbow-brush').addEventListener('click', function(evt){

@@ -439,7 +439,6 @@ input[type="radio"] {
 [data-tip]:before {
     position: absolute;
     bottom: 50px;
-    right: -160%;
     padding: 10px;
     width: 170px;
     font-size: 12pt;
