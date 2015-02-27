@@ -32,6 +32,7 @@ function checkHomeState() {
 	if(getURLParam('room') != null) {
 		var home = document.getElementById('home-content');
 		home.className = "invisible";
+        document.getElementById('save-canvas').className = "nav-opt save";
 	}
 }
 

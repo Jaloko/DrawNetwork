@@ -35,6 +35,11 @@ body {
 	background-color: #998675; 
 }
 
+.save {
+	float: right;
+	cursor: pointer;
+}
+
 .col {
 	float: left;
 	display: inline-block;
@@ -374,7 +379,7 @@ input[type="radio"] {
 	max-width: 1280px;
 }
 
-#name-wrap, #clear-wrap {
+#name-wrap, #clear-wrap, #save-wrap {	
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -387,12 +392,12 @@ input[type="radio"] {
 	z-index: 40;
 }
 
-#name-box-wrap, #clear-box-wrap {
+#name-box-wrap, #clear-box-wrap, #save-box-wrap {
 	display: table-cell;
 	vertical-align: middle;
 }
 
-#name-box, #clear-canvas-vote-box {
+#name-box, #clear-canvas-vote-box, #save-box {
 	margin-left: auto;
 	margin-right: auto;
 	text-align: center;

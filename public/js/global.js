@@ -294,6 +294,13 @@ socket.on('sync chat message', function(data) {
 		messageCounter = 0;
 	}
 });
+socket.on('canvas saved', function(data) {
+	cSavedTimer = new Date().getTime();
+	document.getElementById('save-wrap').className = "table-visible";
+	setTimeout(function() {
+		document.getElementById('save-wrap').className ="invisible";
+	}, 1500)
+});
 
 function clearChatNotifs() {
 	messageCounter = 0;
@@ -539,9 +546,21 @@ myEvent(chkevent, function(e) { // For >=IE7, Chrome, Firefox
 		name: name,
 		colour: brush.colour
 	};
-	me.canvas = canvas.toDataURL();
-	socket.emit('im offline store canvas', me);
+	if(connectedUsers <= 1) {
+		me.canvas = canvas.toDataURL();
+		socket.emit('im offline store canvas', me);	
+	} else {
+		socket.emit('im offline', me);	
+	}
 });
+
+function saveCanvas() {
+	var me = {
+		canvas: canvas.toDataURL()
+	};
+
+	socket.emit('store canvas', me);
+}
 
 function clearUsers() {
 	var users = document.getElementById('users');

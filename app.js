@@ -435,8 +435,24 @@ io.sockets.on('connection', function(socket) {
 			};
 			validateImOffline(rooms[index], newData, socket);
 			rooms[index].activity = new Date().getTime();
+			if(rooms[index].users.length <= 0) {
+				if(newData.canvas.length <= 9999999) {
+					rooms[index].storedCanvas = newData.canvas;
+				}
+			}
+		}
+	});
+
+	socket.on('store canvas', function(data) {
+		var index = getRoomIndex(socket);
+		if(index != null) {
+			var newData = {
+				canvas: data.canvas
+			};
+			rooms[index].activity = new Date().getTime();
 			if(newData.canvas.length <= 9999999) {
 				rooms[index].storedCanvas = newData.canvas;
+				socket.emit('canvas saved');
 			}
 		}
 	});
