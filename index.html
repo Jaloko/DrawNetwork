@@ -286,10 +286,10 @@
 						<div id="user-tools">
 							<div id="user-tabs">
 								<div id="users-online-tab" class="tab selected">
-									Users Online
+									<a>Users Online</a>
 								</div>
 								<div id="users-chat-tab" class="tab">
-									Chat
+									<a>Chat</a>
 								</div>
 								<div class="clear">
 								</div>
@@ -318,11 +318,19 @@
 					<div id="name-wrap" class="table-visible">
 						<div id="name-box-wrap">
 							<div id="name-box">
-								<h2>Enter a name: </h2>
-								<a id="room-full" class="invisible" style="color: red;">Room is full!</a>
-								<input id="name" type="text" maxlength="20"></input></br>
-								<div class="button" onclick="sync()">
-								Submit Name
+								<div id="name-content">
+									<h2>Enter a name: </h2>
+									<a id="room-full" class="invisible" style="color: red;">Room is full!</a>
+									<input id="name" type="text" maxlength="20"></input></br>
+									<div class="button" onclick="sync()">
+									Submit Name
+									</div>
+								</div>
+								<div id="currently-syncing" class="invisible">
+									<h3>Sync in progress</h3>
+									<div class="progress-bar purple stripes">
+									    <span style="width: 100%"></span>
+									</div>
 								</div>
 							</div>
 						</div>	

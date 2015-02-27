@@ -63,6 +63,8 @@ var rainbowSpeed = 1;
 var lineTip = "round";
 var gradientSwitch = false;
 var gradientSpeed = 1;
+var messageCounter = 0;
+var userJoinCounter = 0;
 var canvasRect = canvas.getBoundingClientRect();
 
 function setShapeType(ele, shape) {
@@ -158,9 +160,10 @@ socket.on('room verification', function() {
 });
 
 socket.on('user validated', function() {
+	document.getElementById('name-content').className = "invisible";
+	document.getElementById('currently-syncing').className = "";
 	socket.emit('sync');
 	// Hide enter name box
-	document.getElementById('name-wrap').className = "invisible";
 });
 
 socket.on('room full', function() {
@@ -192,6 +195,7 @@ socket.on('sync erase', function(data) {
 });
 
 socket.on('sync result', function(data) {
+	document.getElementById('name-wrap').className = "invisible";
 	if(data != null) {
 		var img = new Image();
 		img.onload = function(){
@@ -218,6 +222,16 @@ socket.on('user list', function(data) {
 					addUser(data[i].name, data[i].colour);
 				}
 			}
+		}
+		var ele = document.getElementById('users-online-tab');
+		if(ele.className != "tab selected") {
+			userJoinCounter++;
+			ele.innerHTML = '<a>Users Online</a>' +
+					'<div class="orange-notification">' +
+							userJoinCounter +
+					'</div>';
+		} else {
+			userJoinCounter = 0;
 		}
 	}
 });
@@ -269,8 +283,27 @@ socket.on('unlock canvas', function(data) {
 
 socket.on('sync chat message', function(data) {
 	addChatMessage(data);
-
+	var ele = document.getElementById('users-chat-tab');
+	if(ele.className != "tab selected") {
+		messageCounter++;
+		ele.innerHTML = '<a>Chat</a>' +
+				'<div class="orange-notification">' +
+						messageCounter +
+				'</div>';
+	} else {
+		messageCounter = 0;
+	}
 });
+
+function clearChatNotifs() {
+	messageCounter = 0;
+	document.getElementById('users-chat-tab').innerHTML = '<a>Chat</a>';
+}
+
+function clearUserCounter() {
+	userJoinCounter = 0;
+	document.getElementById('users-online-tab').innerHTML = '<a>Users Online</a>';
+}
 
 function addChatMessage(data) {
 	var chat = document.getElementById('chat-box');
@@ -506,12 +539,8 @@ myEvent(chkevent, function(e) { // For >=IE7, Chrome, Firefox
 		name: name,
 		colour: brush.colour
 	};
-	if(connectedUsers == 1) {
-		me.canvas = canvas.toDataURL();
-		socket.emit('im offline store canvas', me);
-	} else {
-		socket.emit('im offline', me);
-	}
+	me.canvas = canvas.toDataURL();
+	socket.emit('im offline store canvas', me);
 });
 
 function clearUsers() {

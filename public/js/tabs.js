@@ -10,6 +10,7 @@ usersOnlineTab.onclick = function() {
 	usersOnline.className = "visible";
 	var usersChat = document.getElementById('users-chat');
 	usersChat.className = "invisible";
+	clearUserCounter();
 };
 usersChatTab.onclick = function() {
 	usersChatTab.className = "tab selected";
@@ -18,4 +19,5 @@ usersChatTab.onclick = function() {
 	usersChat.className = "visible";
 	var usersOnline = document.getElementById('users-online');
 	usersOnline.className = "invisible";
+	clearChatNotifs();
 };
