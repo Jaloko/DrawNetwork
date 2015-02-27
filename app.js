@@ -435,7 +435,7 @@ io.sockets.on('connection', function(socket) {
 			};
 			validateImOffline(rooms[index], newData, socket);
 			rooms[index].activity = new Date().getTime();
-			if(newData.canvas.length <= 3000000) {
+			if(newData.canvas.length <= 9999999) {
 				rooms[index].storedCanvas = newData.canvas;
 			}
 		}
