@@ -128,7 +128,7 @@ io.sockets.on('connection', function(socket) {
 							if(rooms[index].serverUsers[i].id == socket.id) {
 								if(rooms[index].users[i].colour != newData.colour) {
 									rooms[index].users[i].colour = newData.colour;
-									io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);	
+									io.sockets.in(rooms[index].id).emit('sync user colour', rooms[index].users);	
 								}
 								break;
 							}
@@ -467,7 +467,8 @@ setInterval(function() {
 			}
 		}
 		if(rooms[i].clearVote.vote == true) {
-			if(rooms[i].clearVote.timeRemaining > 0 && rooms[i].clearVote.yes < Math.floor(rooms[i].clearVote.total / 2) + 1) {
+			if(rooms[i].clearVote.timeRemaining > 0 && rooms[i].clearVote.yes < Math.floor(rooms[i].clearVote.total / 2) + 1 &&
+			rooms[i].clearVote.total - rooms[i].clearVote.no >= Math.floor(rooms[i].clearVote.total / 2) + 1 && rooms[i].clearVote.yes + rooms[i].clearVote.no < rooms[i].clearVote.total) {
 				if(new Date().getTime() > rooms[i].clearVote.timer + 1000) {
 					rooms[i].clearVote.timeRemaining--;
 					rooms[i].clearVote.timer += 1000;

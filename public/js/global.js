@@ -42,6 +42,7 @@ var randomNames = [
 var connectedUsers;
 var currentlyVoting = false;
 var readyForText = false;
+var currentlySaving = false;
 var textToRender = "";
 var textFont = "20px Arial";
 var textPos = {
@@ -236,6 +237,27 @@ socket.on('user list', function(data) {
 	}
 });
 
+socket.on('sync user colour', function(data) {
+	if(data.length != 0) {
+		for(var i = 0; i < data.length; i++) {
+			var user;
+			if(data[i].name === name) {
+				user = document.getElementById(data[i].name + " (you)");
+				if(user != null) {
+					user.innerHTML = '<div class="user-colour" style="background-color:' + data[i].colour + '"></div>' +
+								 '<div class="user-name">' + data[i].name + ' (you)</div>';
+				}
+			} else {
+				user = document.getElementById(data[i].name);
+				if(user != null) {
+					user.innerHTML = '<div class="user-colour" style="background-color:' + data[i].colour + '"></div>' +
+							     	'<div class="user-name">' + data[i].name + '</div>';
+				}
+			}
+		}
+	}	
+});
+
 socket.on('recieve clear canvas', function() {
 	context.fillStyle = "white";
    	context.fillRect(0, 0, canvas.width, canvas.height);
@@ -296,9 +318,13 @@ socket.on('sync chat message', function(data) {
 });
 socket.on('canvas saved', function(data) {
 	cSavedTimer = new Date().getTime();
-	document.getElementById('save-wrap').className = "table-visible";
+	document.getElementById('save-complete').className = "";
+	document.getElementById('save-progress').className = "invisible";
 	setTimeout(function() {
 		document.getElementById('save-wrap').className ="invisible";
+		document.getElementById('save-complete').className = "invisible";
+		document.getElementById('save-progress').className = "";
+		currentlySaving = false;
 	}, 1500)
 });
 
@@ -379,7 +405,7 @@ function drawEraserOutline(x, y) {
 }
 
 function draw() {
-	if(currentlyVoting == false) {
+	if(currentlyVoting === false && currentlySaving === false) {
 		canvasRect = canvas.getBoundingClientRect();
 		var json = {
 			name: name,
@@ -396,7 +422,7 @@ function draw() {
 }
 
 function erase() {
-	if(currentlyVoting == false) {
+	if(currentlyVoting === false && currentlySaving === false) {
 		canvasRect = canvas.getBoundingClientRect();
 		var json = {
 			name: name,
@@ -413,7 +439,7 @@ function erase() {
 }
 
 function gradientDraw(timer) {
-	if(currentlyVoting == false) {
+	if(currentlyVoting === false && currentlySaving === false) {
 		canvasRect = canvas.getBoundingClientRect();
 		var rgb = convertHexToRGB(brush.colour);
 		rgb.r -= timer;
@@ -445,7 +471,7 @@ function gradientDraw(timer) {
 }
 
 function rainbowDraw() {
-	if(currentlyVoting == false) {
+	if(currentlyVoting === false && currentlySaving === false) {
 		canvasRect = canvas.getBoundingClientRect();
 		var rgb = convertHexToRGB(brush.colour);
 		huePointer = {
@@ -555,10 +581,12 @@ myEvent(chkevent, function(e) { // For >=IE7, Chrome, Firefox
 });
 
 function saveCanvas() {
+	currentlySaving = true;
+	document.getElementById('save-wrap').className = "table-visible";
+	document.getElementById('save-progress').className = "";
 	var me = {
 		canvas: canvas.toDataURL()
 	};
-
 	socket.emit('store canvas', me);
 }
 
@@ -816,8 +844,10 @@ document.addEventListener('mousemove', function(evt) {
     			}
 			} else if(brush.brushType === "dropper"){
 		    	if(mouseIsHoveringCanvas(canvas)) {
-    				var rgb = getColourOnCanvas(canvas, context);
-					onColourChange(rgb);
+		    		if(currentlyVoting === false && currentlySaving === false) {
+	    				var rgb = getColourOnCanvas(canvas, context);
+						onColourChange(rgb);
+					}
 				}
 			} else if(brush.brushType === "eraser"){
 		    	if(canDraw === true) {
@@ -831,19 +861,23 @@ document.addEventListener('mousemove', function(evt) {
 			} else if(brush.brushType === "shape"){
 		    	if(canDraw === true) {
 		    		if(readyForShape === true) {
-		    			shapeEndPos = mousePos;
-		    			if(shapeType === "rectangle") {
-		    				drawTempRect(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, brush.colour);
-		    			} else if(shapeType === "circle") {
-		    				drawTempCircle(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, brush.colour);
+		    			if(currentlyVoting === false && currentlySaving === false) {
+			    			shapeEndPos = mousePos;
+			    			if(shapeType === "rectangle") {
+			    				drawTempRect(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, brush.colour);
+			    			} else if(shapeType === "circle") {
+			    				drawTempCircle(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, brush.colour);
+			    			}
 		    			}
 		    		}
 				}
 			} else if(brush.brushType === "line"){
 			    if(canDraw === true) {
 			    	if(readyForShape === true) {
-			    		shapeEndPos = mousePos;
-			    		drawTempLine(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, brush.colour, brush.size, lineTip);
+			    		if(currentlyVoting === false && currentlySaving === false) {
+			    			shapeEndPos = mousePos;
+			    			drawTempLine(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, brush.colour, brush.size, lineTip);
+			    		}
 			    	}
 				}
 			}
@@ -890,27 +924,35 @@ document.addEventListener("mousedown", function(evt) {
 	    			}
 			    } else if(brush.brushType === "dropper"){
 			    	if(mouseIsHoveringCanvas(canvas)) {
-	    				var rgb = getColourOnCanvas(canvas, context);
-						onColourChange(rgb);
+			    		if(currentlyVoting === false && currentlySaving === false) {
+		    				var rgb = getColourOnCanvas(canvas, context);
+							onColourChange(rgb);
+						}
 					}
 				} else if(brush.brushType === "text"){
 			    	if(canDraw === true) {
-			    		readyForText = true;
-			    		textPos = mousePos;
+			    		if(currentlyVoting === false && currentlySaving === false) {
+				    		readyForText = true;
+				    		textPos = mousePos;
+			    		}
 					}
 					drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
 				} else if(brush.brushType === "shape"){
 			    	if(canDraw === true) {
 			    		if(readyForShape === false) {
-			    			readyForShape = true;
-			    			shapePos = mousePos;
+			    			if(currentlyVoting === false && currentlySaving === false) {
+				    			readyForShape = true;
+				    			shapePos = mousePos;
+			    			}
 			    		}
 					}
 				} else if(brush.brushType === "line"){
 			    	if(canDraw === true) {
 			    		if(readyForShape === false) {
-			    			readyForShape = true;
-			    			shapePos = mousePos;
+			    			if(currentlyVoting === false && currentlySaving === false) {
+				    			readyForShape = true;
+				    			shapePos = mousePos;
+				    		}
 			    		}
 					}
 				} else if(brush.brushType === "eraser"){
@@ -935,32 +977,36 @@ document.addEventListener("mouseup", function(evt) {
     		pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
     		canvasRect = canvas.getBoundingClientRect();
     		if(brush.brushType === "shape"){
-	    		var shapeData = {
-	    			x: shapePos.x - canvasRect.left,
-	    			y: shapePos.y - canvasRect.top,
-	    			endX: shapeEndPos.x - canvasRect.left,
-	    			endY: shapeEndPos.y - canvasRect.top,
-	    			colour: brush.colour
-	    		}
-	    		if(shapeType === "rectangle") {
-		    		drawShapeRect(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
-		    		socket.emit('draw rect', shapeData);
-	    		} else if(shapeType === "circle") {
-		    		drawShapeCircle(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
-		    		socket.emit('draw circle', shapeData);
+    			if(currentlyVoting === false && currentlySaving === false) {
+		    		var shapeData = {
+		    			x: shapePos.x - canvasRect.left,
+		    			y: shapePos.y - canvasRect.top,
+		    			endX: shapeEndPos.x - canvasRect.left,
+		    			endY: shapeEndPos.y - canvasRect.top,
+		    			colour: brush.colour
+		    		}
+		    		if(shapeType === "rectangle") {
+			    		drawShapeRect(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
+			    		socket.emit('draw rect', shapeData);
+		    		} else if(shapeType === "circle") {
+			    		drawShapeCircle(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
+			    		socket.emit('draw circle', shapeData);
+	    			}
     			}
     		} else if(brush.brushType === "line") {
-    			var lineData = {
-	    			x: shapePos.x - canvasRect.left,
-	    			y: shapePos.y - canvasRect.top,
-	    			endX: shapeEndPos.x - canvasRect.left,
-	    			endY: shapeEndPos.y - canvasRect.top,
-	    			lineTip: lineTip,
-	    			size: brush.size,
-	    			colour: brush.colour
-	    		};
-		    	drawShapeLine(lineData.x, lineData.y, lineData.endX, lineData.endY, lineData.colour, lineData.size, lineData.lineTip);
-		    	socket.emit('draw line', lineData);
+  				if(currentlyVoting === false && currentlySaving === false) {
+	    			var lineData = {
+		    			x: shapePos.x - canvasRect.left,
+		    			y: shapePos.y - canvasRect.top,
+		    			endX: shapeEndPos.x - canvasRect.left,
+		    			endY: shapeEndPos.y - canvasRect.top,
+		    			lineTip: lineTip,
+		    			size: brush.size,
+		    			colour: brush.colour
+		    		};
+			    	drawShapeLine(lineData.x, lineData.y, lineData.endX, lineData.endY, lineData.colour, lineData.size, lineData.lineTip);
+			    	socket.emit('draw line', lineData);
+		    	}
     		}
     		readyForShape = false;
     	}
@@ -982,18 +1028,22 @@ document.addEventListener("mouseup", function(evt) {
 
 document.body.addEventListener("keydown", function(e) {
 	if(readyForText === true) {
-		drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
-		document.getElementById('text-tool-text').focus();
-		if(e.keyCode == 13) {
-	    	applyText();
-	    }
+		if(currentlyVoting === false && currentlySaving === false) {
+			drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
+			document.getElementById('text-tool-text').focus();
+			if(e.keyCode == 13) {
+		    	applyText();
+		    }
+		}
 	}
 });
  
 document.body.addEventListener("keyup", function(e) {
 	if(readyForText === true) {
-		drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
-		textToRender = document.getElementById('text-tool-text').value;	
+		if(currentlyVoting === false && currentlySaving === false) {
+			drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
+			textToRender = document.getElementById('text-tool-text').value;	
+		}
 	}
 });
 
