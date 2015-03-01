@@ -13,6 +13,7 @@ var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
 var pointerCanvas = document.getElementById('pointer-canvas');
 var pointerContext = pointerCanvas.getContext('2d');
+
 var canDraw = false;
 
 var tool = new ToolSet();
@@ -369,52 +370,6 @@ function clearVote(vote) {
 function clearCanvas() {
    	socket.emit('vote clear');
 	document.getElementById('voteButtons').className = "invisible";
-}
-
-function drawBrushOutline(x, y) {
-	var cr = pointerCanvas.getBoundingClientRect();
-	var outSize = tool.brush.size / 2;
-	if(outSize <= 1.5) {
-		outSize = 1.5;
-	}
-	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
-	pointerContext.lineWidth = 1;
-	pointerContext.lineCap = "round";
-    pointerContext.beginPath();
-    pointerContext.strokeStyle = 'white';
-    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(outSize + 1) ,0,2*Math.PI);
-    pointerContext.stroke();
-    pointerContext.beginPath();
-    pointerContext.strokeStyle = 'black';
-    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(outSize),0,2*Math.PI);
-    pointerContext.stroke();
-    pointerContext.beginPath();
-    pointerContext.strokeStyle = 'white';
-    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(outSize - 1),0,2*Math.PI);
-    pointerContext.stroke();
-}
-
-function drawEraserOutline(x, y) {
-	var cr = pointerCanvas.getBoundingClientRect();
-	var outSize = tool.brush.size / 2;
-	if(outSize <= 1.5) {
-		outSize = 1.5;
-	}
-	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
-	pointerContext.lineWidth = 1;
-	pointerContext.lineCap = "round";
-	pointerContext.beginPath();
-    pointerContext.rect(x - cr.left - outSize - 1, y - cr.top - outSize - 1, outSize * 2 + 2, outSize * 2 + 2);
-    pointerContext.strokeStyle = 'white';
-    pointerContext.stroke();
-    pointerContext.beginPath();
-    pointerContext.rect(x - cr.left - outSize, y - cr.top - outSize, outSize * 2, outSize * 2);
-    pointerContext.strokeStyle = 'black';
-    pointerContext.stroke();
-    pointerContext.beginPath();
-    pointerContext.rect(x - cr.left - outSize + 1, y - cr.top - outSize + 1, outSize * 2 - 2, outSize * 2 - 2);
-    pointerContext.strokeStyle = 'white';
-    pointerContext.stroke();
 }
 
 function draw() {
@@ -823,9 +778,9 @@ document.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(evt);
 	if(tool.getBrushType() === "freeroam" || tool.getBrushType() === "gradient-brush" || tool.getBrushType() === "rainbow-brush") {
-		drawBrushOutline(mousePos.x, mousePos.y);
+		tool.brush.drawBrushOutline(mousePos.x, mousePos.y);
 	} else if(tool.getBrushType() === "eraser"){
-		drawEraserOutline(mousePos.x, mousePos.y);
+		tool.brush.drawEraserOutline(mousePos.x, mousePos.y);
 	}
 	if(mouseDown === true) {
 		if(hasSynced === true) {
