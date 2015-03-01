@@ -24,8 +24,6 @@ var connectedUsers;
 var currentlyVoting = false;
 var readyForText = false;
 var currentlySaving = false;
-var textToRender = "";
-var textFont = "20px Arial";
 var textPos = {
 	x: 0,
 	y: 0
@@ -182,7 +180,7 @@ socket.on('sync draw', function(data) {
 });
 
 socket.on('sync draw text', function(data) {
-	drawText(data.x, data.y, data.font, data.colour, data.text);
+	tool.textTool.drawText(data.x, data.y, data.font, data.colour, data.text);
 });
 
 socket.on('sync draw rect', function(data) {
@@ -519,29 +517,13 @@ speedSelection.addEventListener("input", function(evt){
 
 var textSizeSel = document.getElementById('textSizeSel');
 textSizeSel.addEventListener("input", function(evt){
-	changeTextSize(this.value);
+	tool.textTool.changeTextSize(this.value);
 });
-
-function changeFont() {
-	var e = document.getElementById("fontSel");
-	var font = e.options[e.selectedIndex].value;
-	var split = textFont.split(" ");
-	textFont = split[0] + " " + font;
-	drawTempText(textPos.x, textPos.y, textFont, tool.brush.colour, textToRender);
-}
 
 function changeLineTip() {
 	var e = document.getElementById("lineTip");
 	tool.brush.lineTip = e.options[e.selectedIndex].value;
 }
-
-function changeTextSize(newSize){
-	var e = document.getElementById("fontSel");
-	var font = e.options[e.selectedIndex].value;
-	textFont = newSize + "px " + font;
-	drawTempText(textPos.x, textPos.y, textFont, tool.brush.colour, textToRender);
-}
-
 
 
 function inputColourChange() {
@@ -572,21 +554,6 @@ function onColourChange(rgb) {
 	};
 	updateColour();
 	tool.brush.setColour(hex);
-}
-
-function drawText(x, y, font, colour, text) {
-	context.font=font;
-	context.fillStyle = colour;
-	context.fillText(text,x,y) ;
-}
-
-
-function drawTempText(x, y, font, colour, text) {
-	var cr = pointerCanvas.getBoundingClientRect();
-    pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
-	pointerContext.font=font;
-	pointerContext.fillStyle = colour;
-	pointerContext.fillText(text,x - cr.left ,y - cr.top);
 }
 
 function drawTempRect(x, y, endX, endY) {
@@ -658,15 +625,15 @@ function applyText() {
 		var data = {
 			x: textPos.x - cr.left,
 			y: textPos.y - cr.top,
-			font: textFont,
+			font: tool.textTool.textFont,
 			colour: tool.brush.colour,
-			text: textToRender
+			text: tool.textTool.textToRender
 		};
 		socket.emit('draw text', data);
-		drawText(data.x, data.y, textFont, data.colour, textToRender);
-		textToRender = "";
+		tool.textTool.drawText(data.x, data.y, tool.textTool.textFont, data.colour, tool.textTool.textToRender);
+		tool.textTool.textToRender = "";
 		document.getElementById('text-tool-text').value = "";
-		drawTempText(textPos.x, textPos.y, textFont, data.colour, textToRender);
+		tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, data.colour, tool.textTool.textToRender);
 		readyForText = false;
 		document.getElementById('text-tool-text').blur();
 	}
@@ -713,7 +680,7 @@ document.addEventListener('mousemove', function(evt) {
 		    	tool.brush.erase();
 			} else if(tool.getBrushType() === "text"){
 				textPos = mousePos;
-				drawTempText(textPos.x, textPos.y, textFont, tool.brush.colour, textToRender);
+				tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 			} else if(tool.getBrushType() === "shape"){
 		    	if(readyForShape === true) {
 		    		if(currentlyVoting === false && currentlySaving === false) {
@@ -780,7 +747,7 @@ document.addEventListener("mousedown", function(evt) {
 					    	readyForText = true;
 					    	textPos = mousePos;
 				    	}
-						drawTempText(textPos.x, textPos.y, textFont, tool.brush.colour, textToRender);
+						tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 					} else if(tool.getBrushType() === "shape"){
 				    	if(readyForShape === false) {
 				    		if(currentlyVoting === false && currentlySaving === false) {
@@ -866,8 +833,8 @@ document.addEventListener("mouseup", function(evt) {
 document.body.addEventListener("keydown", function(e) {
 	if(readyForText === true) {
 		if(currentlyVoting === false && currentlySaving === false) {
-			textToRender = document.getElementById('text-tool-text').value;	
-			drawTempText(textPos.x, textPos.y, textFont, tool.brush.colour, textToRender);
+			tool.textTool.textToRender = document.getElementById('text-tool-text').value;	
+			tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 			document.getElementById('text-tool-text').focus();
 			if(e.keyCode == 13) {
 		    	applyText();
@@ -879,8 +846,8 @@ document.body.addEventListener("keydown", function(e) {
 document.body.addEventListener("keyup", function(e) {
 	if(readyForText === true) {
 		if(currentlyVoting === false && currentlySaving === false) {
-			textToRender = document.getElementById('text-tool-text').value;	
-			drawTempText(textPos.x, textPos.y, textFont, tool.brush.colour, textToRender);
+			tool.textTool.textToRender = document.getElementById('text-tool-text').value;	
+			tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 		}
 	}
 });
@@ -959,8 +926,12 @@ document.getElementById('eraser').addEventListener('click', function(evt){
 	document.getElementById('brush-settings').className = "";
 });
 
+document.getElementById('fontSel').addEventListener('change', function(evt){
+	tool.textTool.changeFont();
+})
+
 function resetTools() {
-	textToRender = "";
+	tool.textTool.textToRender = "";
 	readyForText = false;
 	// Tools
 	document.getElementById('brush').className = "button tool";
