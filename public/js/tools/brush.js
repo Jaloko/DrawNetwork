@@ -142,4 +142,39 @@ var Brush = function(){
 			socket.emit('draw', json);
 		}
 	}
+
+	this.draw = function() {
+		if(currentlyVoting === false && currentlySaving === false) {
+			canvasRect = canvas.getBoundingClientRect();
+			var json = {
+				name: name,
+				x: mousePos.x - canvasRect.left,
+				y: mousePos.y - canvasRect.top,
+				lastX: lastPos.x - canvasRect.left,
+				lastY: lastPos.y - canvasRect.top,
+				size: tool.brush.size,
+				colour: tool.brush.colour
+			}
+			drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+			socket.emit('draw', json);
+		}
+	}
+
+	this.erase = function() {
+		if(currentlyVoting === false && currentlySaving === false) {
+			canvasRect = canvas.getBoundingClientRect();
+			var json = {
+				name: name,
+				x: mousePos.x - canvasRect.left,
+				y: mousePos.y - canvasRect.top,
+				lastX: lastPos.x - canvasRect.left,
+				lastY: lastPos.y - canvasRect.top,
+				size: tool.brush.size,
+				colour: tool.brush.colour
+			}
+			drawRect(json.x, json.y, json.lastX, json.lastY, json.size, "white");
+			socket.emit('erase', json);
+		}
+	}
+
 };

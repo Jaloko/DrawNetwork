@@ -372,40 +372,6 @@ function clearCanvas() {
 	document.getElementById('voteButtons').className = "invisible";
 }
 
-function draw() {
-	if(currentlyVoting === false && currentlySaving === false) {
-		canvasRect = canvas.getBoundingClientRect();
-		var json = {
-			name: name,
-			x: mousePos.x - canvasRect.left,
-			y: mousePos.y - canvasRect.top,
-			lastX: lastPos.x - canvasRect.left,
-			lastY: lastPos.y - canvasRect.top,
-			size: tool.brush.size,
-			colour: tool.brush.colour
-		}
-		drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
-		socket.emit('draw', json);
-	}
-}
-
-function erase() {
-	if(currentlyVoting === false && currentlySaving === false) {
-		canvasRect = canvas.getBoundingClientRect();
-		var json = {
-			name: name,
-			x: mousePos.x - canvasRect.left,
-			y: mousePos.y - canvasRect.top,
-			lastX: lastPos.x - canvasRect.left,
-			lastY: lastPos.y - canvasRect.top,
-			size: tool.brush.size,
-			colour: tool.brush.colour
-		}
-		drawRect(json.x, json.y, json.lastX, json.lastY, json.size, "white");
-		socket.emit('erase', json);
-	}
-}
-
 function distanceBetween(point1, point2) {
   return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
 }
@@ -542,17 +508,7 @@ function getMousePos(evt) {
 }
 
 
-//  Can be removed as it has been potentially replaced with brushSelection
-
-// **
-// Brushes
-//
-
-// Brush Lines 
-// note: doesnt support other browsers gl
-var brushSelection = document.getElementById('brushSelection');
-
-brushSelection.addEventListener("input", function(evt){
+document.getElementById('brushSelection').addEventListener("input", function(evt){
 	tool.brush.setBrushSize(this.value);
 });
 
@@ -726,7 +682,7 @@ document.addEventListener('mousemove', function(evt) {
 	}
 	if(mouseDown === true && hasSynced === true && canDraw === true) {
 		if(tool.getBrushType() === "freeroam") {
-			draw();
+			tool.brush.draw();
 		} else if(tool.getBrushType() === "gradient-brush") {
 			if(tool.brush.gradientTimer >= 255) {
 				tool.brush.gradientSwitch = true;
@@ -754,7 +710,7 @@ document.addEventListener('mousemove', function(evt) {
 					}
 				}
 			} else if(tool.getBrushType() === "eraser"){
-		    	erase();
+		    	tool.brush.erase();
 			} else if(tool.getBrushType() === "text"){
 				textPos = mousePos;
 				drawTempText(textPos.x, textPos.y, textFont, tool.brush.colour, textToRender);
@@ -806,7 +762,7 @@ document.addEventListener("mousedown", function(evt) {
 	    		changeColour();
 	    		if(canDraw === true) {
 				    if(tool.getBrushType() === "freeroam") {
-				    	draw();
+				    	tool.brush.draw();
 				    } else if(tool.getBrushType() === "gradient-brush") {
 			    		tool.brush.gradientTimer = 0;
 			    		tool.brush.gradientDraw();
@@ -840,7 +796,7 @@ document.addEventListener("mousedown", function(evt) {
 				    		}
 				    	}
 					} else if(tool.getBrushType() === "eraser"){
-			    		erase();
+			    		tool.brush.erase();
 					} else if(tool.getBrushType() === "fillBucket") {
 						fillBucket(context, tool.brush.colour);
 						tool.brush.setBrushType("freeroam");
