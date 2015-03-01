@@ -32,7 +32,7 @@ function checkHomeState() {
 	if(getURLParam('room') != null) {
 		var home = document.getElementById('home-content');
 		home.className = "invisible";
-        document.getElementById('save-canvas').className = "nav-opt save";
+        document.getElementById('save-room').className = "nav-opt save";
 	}
 }
 
@@ -40,8 +40,10 @@ function checkPageState() {
 	if(getURLParam('room') != null) {
 		var home = document.getElementById('home-content');
 		home.className = "invisible";
+        return true;
 	} else {
 		var drawContent = document.getElementById('draw-content');
 		drawContent.className = "invisible";
+        return false;
 	}
 }

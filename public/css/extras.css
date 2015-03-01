@@ -10,6 +10,10 @@ h1 {
 	margin-top: 10px;
 }
 
+#name-taken, #room-full {
+	color: red;
+}
+
 #users-chat-tab a, #users-online-tab a {
 	padding-right: 5px;
 }

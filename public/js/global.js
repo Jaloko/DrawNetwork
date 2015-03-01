@@ -18,7 +18,7 @@ var gradientTimer = 0;
 
 var Brush = function(){
 	this.size = 30,
-	this.colour = getRandomColor(),
+	this.colour = "#ff0000",
 	this.brushType = "freeroam",
 
 	this.setBrushType = function(type){
@@ -35,10 +35,9 @@ var Brush = function(){
 };
 
 var brush = new Brush();
-
+	
 var name;
-var randomNames = [
-"Beulah Wright", "Curtis Fox", "Levi Collins", "Gustavo	Russell", "Erica Lowe", "Sherri Mcbride", "Zachary Martin", "Preston Fletcher", "Jack Shaw", "Chris Carr", "Morris Goodwin", "Raquel Drake", "Sandy Pearson", "Francis Farmer", "Erika Haynes", "Edgar Warren", "Randal Love", "Lucas Cannon", "Ismael Terry", "Rex Alexander", "Russell Houston", "Kenneth Potter", "Ricky James", "Latoya Rivera", "Katherine Chapman", "Gerald Gomez", "Glenda Robinson", "Adrian Cox", "Maurice Barton", "Harold Hansen", "Nicole Townsend", "Jorge Waters", "Hugo Hampton", "Stephen Mcgee", "Marguerite Conner", "Bill Newman", "Rodney Cook", "Santiago Reid", "Toby Casey", "Mamie Allison", "Tami Lawrence", "Tim Crawford", "Paula Carpenter", "Flora Young", "Marian Ferguson","Lewis Carlson", "Nina Wise", "Elisa Hanson", "Shelly Lucas", "Gabriel Stevenson", "Elbert Reeves", "Vicky Jackson", "Cassandra Moreno", "Becky Todd", "Jimmy Soto", "Opal Hicks", "Darren Mendoza", "Reginald Watts", "Cesar Sutton", "Lionel Rodgers", "Christopher Robertson", "Terrance Byrd", "Kristy Garza", "Herbert Flowers", "Kirk Schmidt", "Dennis Thomas", "Essie Henry", "Abel Tucker", "Katrina Phelps", "Rolando Gonzalez", "Olga Howard", "Cecilia Cortez", "Tanya Cohen", "Juanita Rios", "Jeff Davis", "Marty Perkins", "Ian Ortiz", "Andy George", "Salvatore Hamilton", "Verna Barker", "Louise Frank", "April Nunez", "Bonnie Ramirez", "Kay Sherman", "Stacy Nelson", "Lorraine White", "Paul Glover", "Otis Woods", "Darrin Guerrero", "Whitney Underwood", "Henry Graves", "Eula Leonard", "Francis Sanchez", "Hubert Christensen", "Doug Stanley", "Neal Washington", "Everett Harvey", "Nicholas Hale", "Pedro Ramsey", "Sadie Stephens"];
+var randomNames;
 var connectedUsers;
 var currentlyVoting = false;
 var readyForText = false;
@@ -96,6 +95,15 @@ document.getElementById('chat-message').onkeypress = function(e){
     }
 }
 
+document.getElementById('name').onkeypress = function(e){
+    if (!e) e = window.event;
+    var keyCode = e.keyCode || e.which;
+    if (keyCode == '13'){
+     	sync();
+      	return false;
+    }
+}
+
 function pickRandomName() {
 	var rand = Math.floor(Math.random() * randomNames.length);
 	return randomNames[rand];
@@ -110,8 +118,24 @@ function setNameTextBox() {
 function init() {
 	context.fillStyle = "white";
 	context.fillRect(0, 0, canvas.width, canvas.height);
-	setNameTextBox();
 	webGLStart();
+	getNameList();
+}
+
+function getNameList() {
+	var txtFile = new XMLHttpRequest();
+	txtFile.open("GET", "/files/names.txt", true);
+	txtFile.onreadystatechange = function() {
+		if (txtFile.readyState === 4) {  // document is ready to parse.
+		    if (txtFile.status === 200) {  // file is found
+		      	allText = txtFile.responseText; 
+		      	lines = txtFile.responseText.split("\n");
+		      	randomNames = lines;
+		      	setNameTextBox();
+		    }
+		}
+	}
+	txtFile.send(null);
 }
 
 
@@ -119,7 +143,6 @@ function createRoom() {
 	var isPublic = document.getElementById('myonoffswitch').checked;
 	socket.emit('create room', isPublic);
 }
-
 
 function joinRoom() {
 	insertURLParam("room", selectedRoom);
@@ -139,29 +162,34 @@ function searchRoom() {
 	}
 }
 
+socket.on('cannot create room', function(data) {
+	alert(data);
+});
+
 socket.on('room result', function(data) {
 	insertURLParam("room", data);
 });
 
 function sync() {
-	if(hasSynced == false) {
+	if(hasSynced === false) {
 		name = document.getElementById('name').value;
+		var me = {
+			id: getURLParam('room'),
+			name : name,
+			colour: brush.colour
+		}
 		socket.emit('join room', getURLParam('room'));
+		socket.emit('im online', me);
 	}
 }
 
-socket.on('room verification', function() {
-	var me = {
-		id: getURLParam('room'),
-		name : name,
-		colour: brush.colour
-	}
-	document.getElementById('room-full').className = "invisible";
-	socket.emit('im online', me);
+socket.on('name taken', function() {
+	document.getElementById('name-taken').className = "";
 });
 
 socket.on('user validated', function() {
 	document.getElementById('name-content').className = "invisible";
+	document.getElementById('name-taken').className = "invisible";
 	document.getElementById('currently-syncing').className = "";
 	socket.emit('sync');
 	// Hide enter name box
@@ -373,15 +401,15 @@ function drawBrushOutline(x, y) {
 	pointerContext.lineCap = "round";
     pointerContext.beginPath();
     pointerContext.strokeStyle = 'white';
-    pointerContext.arc(x - cr.left, y - cr.top, brush.size / 2,0,2*Math.PI);
+    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(brush.size / 2 + 1) ,0,2*Math.PI);
     pointerContext.stroke();
     pointerContext.beginPath();
     pointerContext.strokeStyle = 'black';
-    pointerContext.arc(x - cr.left, y - cr.top, brush.size / 2,0,2*Math.PI);
+    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(brush.size / 2),0,2*Math.PI);
     pointerContext.stroke();
     pointerContext.beginPath();
     pointerContext.strokeStyle = 'white';
-    pointerContext.arc(x - cr.left, y - cr.top, brush.size / 2,0,2*Math.PI);
+    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(brush.size / 2 - 1),0,2*Math.PI);
     pointerContext.stroke();
 }
 
@@ -391,7 +419,7 @@ function drawEraserOutline(x, y) {
 	pointerContext.lineWidth = 1;
 	pointerContext.lineCap = "round";
 	pointerContext.beginPath();
-    pointerContext.rect(x - cr.left - brush.size / 2, y - cr.top - brush.size / 2, brush.size, brush.size);
+    pointerContext.rect(x - cr.left - brush.size / 2 - 1, y - cr.top - brush.size / 2 - 1, brush.size + 2, brush.size + 2);
     pointerContext.strokeStyle = 'white';
     pointerContext.stroke();
     pointerContext.beginPath();
@@ -399,7 +427,7 @@ function drawEraserOutline(x, y) {
     pointerContext.strokeStyle = 'black';
     pointerContext.stroke();
     pointerContext.beginPath();
-    pointerContext.rect(x - cr.left - brush.size / 2, y - cr.top - brush.size / 2, brush.size, brush.size);
+    pointerContext.rect(x - cr.left - brush.size / 2 + 1, y - cr.top - brush.size / 2 + 1, brush.size - 2, brush.size - 2);
     pointerContext.strokeStyle = 'white';
     pointerContext.stroke();
 }
@@ -580,14 +608,16 @@ myEvent(chkevent, function(e) { // For >=IE7, Chrome, Firefox
 	}
 });
 
-function saveCanvas() {
-	currentlySaving = true;
-	document.getElementById('save-wrap').className = "table-visible";
-	document.getElementById('save-progress').className = "";
-	var me = {
-		canvas: canvas.toDataURL()
-	};
-	socket.emit('store canvas', me);
+function saveRoom() {
+	if(hasSynced === true) {
+		currentlySaving = true;
+		document.getElementById('save-wrap').className = "table-visible";
+		document.getElementById('save-progress').className = "";
+		var me = {
+			canvas: canvas.toDataURL()
+		};
+		socket.emit('store canvas', me);
+	}
 }
 
 function clearUsers() {
@@ -965,8 +995,6 @@ document.addEventListener("mousedown", function(evt) {
 				}
     		}
     	}
-	} else {
-		brush.colour = getRandomColor();
 	}
 });
 document.addEventListener("mouseup", function(evt) {

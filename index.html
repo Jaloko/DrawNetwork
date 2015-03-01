@@ -3,6 +3,7 @@
 		<title>Draw Network</title>
  		<script src="/socket.io/socket.io.js"></script>
  		<script src="js/functions.js"></script>
+ 		<link rel="icon" href="img/logo/dn-32x32.png" type="image/x-icon" />
 		<link rel="stylesheet" type="text/css" href="css/global.css">
 		<link rel="stylesheet" type="text/css" href="css/extras.css">
 		<link rel="stylesheet" type="text/css" href="css/fonts.css">
@@ -20,7 +21,7 @@
 		<div id="nav-bar">
 			<div class="content-box">
 				<a href="/" class="nav-opt">Home</a>
-				<a id="save-canvas" onclick="saveCanvas();" class="nav-opt save invisible">Save Canvas</a>
+				<a id="save-room" onclick="saveRoom();" class="nav-opt save invisible">Save Room</a>
 			</div>
 		</div>
 		<div class="content-box" >
@@ -112,17 +113,28 @@
 							</div>
 						</div>
 						<div id="room-container">
-							<table id="room-list">
-								<tr>
-									<th>Room ID</th>
-									<th>No. Users</th>
-								</tr>
+							<table id="room-list-headers">
+								<thead>
+									<tr>
+										<th id='room-id'>Room ID</th>
+										<th id='no-users'>No. Users</th>
+										<th id='last-activity'>Last Activity</th>
+									</tr>
+								<thead>
 							</table>
+							<div id="table-wrap-scroll" class="table-scroll">
+								<table id="room-list">
+									<tbody>
+									</tbody>
+								</table>
+							</div>
 							<script>
 								var socket = io.connect();
 								var selectedRoom;
+								var roomList;
 								socket.emit('get room list');
 								socket.on('recieve room list', function(data) {
+									roomList = data;
 									for(var i = 0; i < data.length; i++) {
 										var checked = false;
 										if(i == 0) {
@@ -131,33 +143,77 @@
 										createRadioElement("rooms", data[i].id, checked);
 									}
 									var table = document.getElementById("room-list");
+									var tbody = table.getElementsByTagName('tbody')[0];
 									for(var i = 0; i < data.length; i++) {
-										var row = table.insertRow(i + 1);
+										var row = tbody.insertRow(i);
 										row.id = data[i].id;
 										row.onclick = function() {
 											selectedRoom = this.id;
 											var temp = document.getElementById(this.id + "-radio");
 											temp.checked = true;
 											var tableRows = document.getElementById("room-list").rows;
-											for(var i = 1; i < tableRows.length; i++) {
+											for(var i = 0; i < tableRows.length; i++) {
 												tableRows[i].cells[0].className = "";
 												tableRows[i].cells[1].className = "";
+												tableRows[i].cells[2].className = "";
 											}
 											var temp2 = document.getElementById(this.id);
 											temp2.cells[0].className = "row-selected";
 											temp2.cells[1].className = "row-selected";
+											temp2.cells[2].className = "row-selected";
 										};
 										var cell1 = row.insertCell(0);
 										var cell2 = row.insertCell(1);
+										var cell3 = row.insertCell(2);
 										cell1.innerHTML = data[i].id;
 										cell2.innerHTML = data[i].users + "/10";
+										var time = (new Date().getTime() - data[i].activity) / 1000;
+										var suffix = "now";
+										if(time === 1) {
+											suffix = "second"
+										} else if(time > 1 && time < 60) {
+											suffix = "seconds";
+										} else if(time >= 60 && time < 120) {
+											time = time / 60;
+											suffix = "minute"
+										} else if(time >= 120 && time < 3600) {
+											time = time / 60;
+											suffix = "minutes"
+										} else if(time >= 3600 && time < 7200) {
+											time = (time / 60) / 60;
+											suffix = "hour"
+										} else if(time >= 7200 && time < 86400) {
+											time = (time / 60) / 60;
+											suffix = "hours"
+										} else if(time >= 86400 && time < 172800) {
+											time = ((time / 60) / 60) / 24;
+											suffix = "day"
+										} else if(time >= 172800) {
+											time = ((time / 60) / 60) / 24;
+											suffix = "days"
+										}
+										time = Math.floor(time);
+										if(suffix === "now") {
+											cell3.innerHTML = suffix;
+										} else {
+											cell3.innerHTML = time + " " + suffix;
+										}
+
 										if(i == 0) {
 											selectedRoom = data[i].id;
 											cell1.className = "row-selected";
 											cell2.className = "row-selected";
+											cell3.className = "row-selected";
 										}
 									}
+									if(isOverflowed(document.getElementById('table-wrap-scroll'))) {
+										document.getElementById('room-id').style.width = "179px";
+										document.getElementById('no-users').style.width = "134px";
+									}
 								});
+								function isOverflowed(element){
+								    return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
+								}
 								function createRadioElement(name, value, checked) {
 								    var radioHtml = '<input id="' + value + '-radio" type="radio" name="' + name + '" value="' + value + '"';
 								    if ( checked ) {
@@ -319,13 +375,20 @@
 					<div id="name-wrap" class="table-visible">
 						<div id="name-box-wrap">
 							<div id="name-box">
-								<div id="name-content">
+								<div id="name-content" class="invisible">
 									<h2>Enter a name: </h2>
-									<a id="room-full" class="invisible" style="color: red;">Room is full!</a>
+									<a id="room-full" class="invisible">Room is full!</a>
+									<a id="name-taken" class="invisible">Name is already taken!</a>
 									<input id="name" type="text" maxlength="20"></input></br>
 									<div class="button" onclick="sync()">
 									Submit Name
 									</div>
+								</div>
+								<div id="room-not-exist" class="invisible">
+									<h2>Room does not exist!</h2>
+									<a href="/" class="button">
+										Home
+									</a>
 								</div>
 								<div id="currently-syncing" class="invisible">
 									<h3>Sync in progress</h3>
@@ -346,7 +409,7 @@
 									</div>
 								</div>
 								<div id="save-complete" class="invisible">
-									<h3>Canvas successfully saved!</h3>
+									<h3>Save complete!</h3>
 								</div>
 							</div>
 						</div>	
@@ -378,9 +441,28 @@
 					</div>
 				</div>
 				<script>
-					checkPageState();
+					if(checkPageState()) {
+						socket.on('recieve room list', function(data) {
+							var counter = 0;
+							for(var i = 0; i < data.length; i++) {
+								if(getURLParam('room') === data[i].id) {
+									counter++;
+									break;
+								}
+							}
+							if(counter <= 0) {
+								document.getElementById('room-not-exist').className = "";
+							} else {
+								document.getElementById('name-content').className = "";
+							}
+						});
+					}
 				</script>
 			</div>
+		</div>
+		<div id="footer">
+			<p>&copy 2015 Cory Beams</p>
+			<p>Source available on <a href="https://github.com/Jaloko/DrawNetwork" target="_blank">Github</a></p>
 		</div>
 	</body>
 	<script src="js/gl-matrix-min.js"></script>

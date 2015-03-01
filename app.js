@@ -1,13 +1,43 @@
 var express = require('express'),
 	app = express(),
 	server = require('http').createServer(app),
-	io = require('socket.io').listen(server);
+	io = require('socket.io').listen(server),
+	fs = require('fs');
 	app.use(express.static('public'));
 
 var rooms = [];
-rooms.push(new Room(generateId(), "admin", true));
+
+// Create the file if it doesnt exist
+fs.exists(__dirname + "/rooms.txt", function(exists) {
+    if (!exists) {
+		fs.writeFile(__dirname + "/rooms.txt", '', function(){});
+    }
+    readFile();
+});
+
+function readFile() {
+	// Load room data from the file
+	fs.readFile(__dirname + "/rooms.txt", function(err, data) {
+	    if(err) throw err;
+	    var array = data.toString().split("\n");
+	    if(array.length <= 1) {
+			rooms.push(new Room(generateId(), "admin", true));
+			console.log("No rooms in file, created new room.");
+	    } else {
+		    for(var r = 0; r < array.length / 5; r++) {
+		    	var room = new Room(array[r * 5], array[r * 5 + 1], Boolean(array[r * 5 + 2]));
+		    	room.storedCanvas = array[r * 5 + 3];
+		    	room.activity = array[r * 5 + 4];
+		    	rooms.push(room);
+		    }
+		    console.log("Successfully loaded rooms from file.");
+	    }
+	});
+}
 
 var timer = new Date().getTime();
+var saveRoomsTimer = new Date().getTime();
+var finalSaveRooms = false;
 
 function Room(id, owner, public) {
 	this.id = id,
@@ -43,7 +73,8 @@ io.sockets.on('connection', function(socket) {
 			if(rooms[i].public === true) {
 				var obj = {
 					id: rooms[i].id,
-					users: rooms[i].users.length
+					users: rooms[i].users.length,
+					activity: rooms[i].activity
 				};
 				theRooms.push(obj);
 			}
@@ -59,15 +90,21 @@ io.sockets.on('connection', function(socket) {
 			if(countRoomsOwnerOf(socket) < 5) {
 				var id = generateId();
 				var ip = socket.request.connection.remoteAddress;
-				rooms.push(new Room(id, ip, newData.isPublic));
-				socket.emit('room result', id);
-				var isPublic;
-				if(newData.isPublic === true) {
-					isPublic = "public";
+				if(ip != null) {
+					rooms.push(new Room(id, ip, newData.isPublic));
+					socket.emit('room result', id);
+					var isPublic;
+					if(newData.isPublic === true) {
+						isPublic = "public";
+					} else {
+						isPublic = "private";
+					}
+					console.log("Room: " + id + " (" + isPublic + ") created by: " + ip + "!");
 				} else {
-					isPublic = "private";
+					socket.emit('cannot create room', 'Error identifying remote address. Try again.');
 				}
-				console.log("Room: " + id + " (" + isPublic + ") created by: " + ip + "!");
+			} else {
+				socket.emit('cannot create room', 'You have already created 5 rooms!');
 			}
 		}
 	});
@@ -309,7 +346,6 @@ io.sockets.on('connection', function(socket) {
 		if(validateText(newData.id)) {
 			if(socket.rooms.length <= 1) {
 				socket.join(newData.id);
-				socket.emit('room verification');
 			}
 		}
 	});
@@ -349,8 +385,12 @@ io.sockets.on('connection', function(socket) {
 						rooms[index].activity = new Date().getTime();
 						socket.emit('user validated');
 						io.sockets.in(rooms[index].id).emit('user list', rooms[index].users);
+					} else {
+						socket.leave(newData.id);
+						socket.emit('name taken');
 					}
 				} else {
+					socket.leave(newData.id);
 					socket.emit('room full');
 				}
 			}
@@ -517,7 +557,51 @@ setInterval(function() {
 			}
 		}
 	}
+	var counter = 0;
+	for(var i = 0; i < rooms.length; i++) {
+		if(rooms[i].users.length != 0) {
+			counter++;
+		}
+	}
+	if(counter > 0) {
+		if(new Date().getTime() > saveRoomsTimer + 1000) {
+			finalSaveRooms = true;
+			saveRoomsTimer = new Date().getTime();
+			fs.writeFile(__dirname + "/rooms.txt", '', function(){});
+			fs.writeFile(__dirname + "/rooms.txt", saveRooms(), function(err) {
+			    if(err) {
+			        console.log(err);
+			    }
+			});
+		}
+	} else{
+		if(finalSaveRooms === true) {
+			finalSaveRooms = false;
+			fs.writeFile(__dirname + "/rooms.txt", '', function(){});
+			fs.writeFile(__dirname + "/rooms.txt", saveRooms(), function(err) {
+			    if(err) {
+			        console.log(err);
+			    }
+			});
+		}
+	}
+
 }, 1);
+
+function saveRooms() {
+	var text = "";
+	for(var r = 0; r < rooms.length; r++) {
+		text += rooms[r].id + "\n";
+		text += rooms[r].owner + "\n";
+		text += rooms[r].public + "\n";
+		text += rooms[r].storedCanvas + "\n";
+		text += rooms[r].activity;
+		if(r != rooms.length -1) {
+			text += "\n";
+		}
+	}
+	return text;
+} 
 
 function generateId(){
     var text = "";

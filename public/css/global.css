@@ -35,6 +35,30 @@ body {
 	background-color: #998675; 
 }
 
+#footer {
+	display: block;
+	text-align: center;
+	line-height: 30px;
+	color: #998675;
+	width: 100%;
+	height: 60px;
+	background-color: #372f2d;
+}
+
+#footer p {
+	margin: 0;
+	padding: 0;
+	color: #998675;
+}
+
+#footer a {
+	text-decoration: none;
+	color: #cfb9a6;
+}
+#footer a:hover {
+	color: white;
+}
+
 .save {
 	float: right;
 	cursor: pointer;
@@ -164,7 +188,6 @@ table {
 
 #room-list {
 	text-align: left;
-	margin-top: 10px;
 	width: 100%;
 }
 
@@ -191,6 +214,10 @@ td, th {
 
 input[type="radio"] {
 	display: none;
+}
+
+#room-container {
+	position: relative;
 }
 
 #join-room-container {
@@ -247,6 +274,7 @@ input[type="radio"] {
 
 .button {
 	display: inline-block;
+	text-decoration: none;
 	height: 40px;
 	padding-left: 5px;
 	padding-right: 5px;
@@ -381,12 +409,11 @@ input[type="radio"] {
 
 #name-wrap, #clear-wrap, #save-wrap {	
 	position: absolute;
-	top: 0;
+	top: 60px;
 	left: 0;
 	width: 100%;
-	height: 100%;
 	min-width: 1280px;
-	min-height: 720px;
+	min-height: 643px;
 	background-color: #111;
 	background-color: rgba(25,25,25,0.8);
 	z-index: 40;
@@ -407,6 +434,7 @@ input[type="radio"] {
 }
 
 #name-box input {
+	margin-top: 10px;
 	width: 250px;
 	height: 30px;
 	color: #000000;
@@ -556,6 +584,46 @@ input[type="radio"] {
 
 #canvas, #pointer-canvas {
 	cursor: none;
+}
+
+.table-scroll {
+	display: block;
+	width: 100%;
+	overflow:auto;
+	max-height: 496px;
+	vertical-align: middle;	
+
+}
+
+#room-list-headers {
+	margin-top: 16px;
+}
+
+#room-id {
+	text-align: left;
+	width: 186px;
+}
+
+#no-users {
+	text-align: left;
+	width: 140px;
+}
+
+#last-activity {
+	text-align: left;
+	width: 240px;
+}
+
+#room-list tbody td {
+	width: 186px;
+}
+
+#room-list tbody td + td{
+	width: 140px;
+}
+
+#room-list tbody td + td + td{
+	width: 240px;
 }
 
 /*---------------------------------

@@ -256,7 +256,7 @@ function changeColour() {
         g: 0,
         b: 0
     };
-    if(canMoveTintPointer == true) {
+    if(canMoveTintPointer === true) {
         var tintRect = tintCanvas.getBoundingClientRect();
         if(mouseIsHoveringCanvas(tintCanvas)) {
             tintPointer = mousePos;
