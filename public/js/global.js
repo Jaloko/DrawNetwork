@@ -150,9 +150,10 @@ function joinRoom() {
 
 function searchRoom() {
 	var table = document.getElementById('room-list');
-	var row = table.rows;
+	var tbody = table.getElementsByTagName('tbody')[0]
+	var row = tbody.rows;
 	var roomSearch = document.getElementById('room-search');
-	for(var i = 1; i < row.length; i++) {
+	for(var i = 0; i < row.length; i++) {
 		row[i].className = "";
 		if(roomSearch.value != "") {
 			if(row[i].cells[0].innerHTML.indexOf(roomSearch.value) == -1) {
@@ -374,7 +375,7 @@ function addChatMessage(data) {
 	}
 	var newMesage = '<div class="chat-row">' +
 						'<div class="name" style="font-weight: bold;">' + theName + ': ' + '</div>' +
-						'<div class="message">' + data.message + '</div>' +
+						'<div class="message"><p>' + data.message + '</p></div>' +
 					'</div>';
 	chat.innerHTML += newMesage;
 	chat.scrollTop = chat.scrollHeight;
@@ -396,38 +397,46 @@ function clearCanvas() {
 
 function drawBrushOutline(x, y) {
 	var cr = pointerCanvas.getBoundingClientRect();
+	var outSize = brush.size / 2;
+	if(outSize <= 1.5) {
+		outSize = 1.5;
+	}
 	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
 	pointerContext.lineWidth = 1;
 	pointerContext.lineCap = "round";
     pointerContext.beginPath();
     pointerContext.strokeStyle = 'white';
-    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(brush.size / 2 + 1) ,0,2*Math.PI);
+    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(outSize + 1) ,0,2*Math.PI);
     pointerContext.stroke();
     pointerContext.beginPath();
     pointerContext.strokeStyle = 'black';
-    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(brush.size / 2),0,2*Math.PI);
+    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(outSize),0,2*Math.PI);
     pointerContext.stroke();
     pointerContext.beginPath();
     pointerContext.strokeStyle = 'white';
-    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(brush.size / 2 - 1),0,2*Math.PI);
+    pointerContext.arc(x - cr.left, y - cr.top, Math.abs(outSize - 1),0,2*Math.PI);
     pointerContext.stroke();
 }
 
 function drawEraserOutline(x, y) {
 	var cr = pointerCanvas.getBoundingClientRect();
+	var outSize = brush.size / 2;
+	if(outSize <= 1.5) {
+		outSize = 1.5;
+	}
 	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
 	pointerContext.lineWidth = 1;
 	pointerContext.lineCap = "round";
 	pointerContext.beginPath();
-    pointerContext.rect(x - cr.left - brush.size / 2 - 1, y - cr.top - brush.size / 2 - 1, brush.size + 2, brush.size + 2);
+    pointerContext.rect(x - cr.left - outSize - 1, y - cr.top - outSize - 1, outSize * 2 + 2, outSize * 2 + 2);
     pointerContext.strokeStyle = 'white';
     pointerContext.stroke();
     pointerContext.beginPath();
-    pointerContext.rect(x - cr.left - brush.size / 2, y - cr.top - brush.size / 2, brush.size, brush.size);
+    pointerContext.rect(x - cr.left - outSize, y - cr.top - outSize, outSize * 2, outSize * 2);
     pointerContext.strokeStyle = 'black';
     pointerContext.stroke();
     pointerContext.beginPath();
-    pointerContext.rect(x - cr.left - brush.size / 2 + 1, y - cr.top - brush.size / 2 + 1, brush.size - 2, brush.size - 2);
+    pointerContext.rect(x - cr.left - outSize + 1, y - cr.top - outSize + 1, outSize * 2 - 2, outSize * 2 - 2);
     pointerContext.strokeStyle = 'white';
     pointerContext.stroke();
 }
@@ -921,8 +930,8 @@ document.addEventListener("mousedown", function(evt) {
 	if(evt.button === 0) {
     	mouseDown = true;
     	if(mouseDown === true) {
-    		// Located in colour-picker2.js
     		if(hasSynced === true) {
+    			// Located in colour-picker2.js
 	    		if(canMoveTintPointer === false) {
 			        if(mouseIsHoveringCanvas(tintCanvas)) {
 			            canMoveTintPointer = true;
@@ -1057,6 +1066,7 @@ document.addEventListener("mouseup", function(evt) {
 document.body.addEventListener("keydown", function(e) {
 	if(readyForText === true) {
 		if(currentlyVoting === false && currentlySaving === false) {
+			textToRender = document.getElementById('text-tool-text').value;	
 			drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
 			document.getElementById('text-tool-text').focus();
 			if(e.keyCode == 13) {
@@ -1069,8 +1079,8 @@ document.body.addEventListener("keydown", function(e) {
 document.body.addEventListener("keyup", function(e) {
 	if(readyForText === true) {
 		if(currentlyVoting === false && currentlySaving === false) {
-			drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
 			textToRender = document.getElementById('text-tool-text').value;	
+			drawTempText(textPos.x, textPos.y, textFont, brush.colour, textToRender);
 		}
 	}
 });

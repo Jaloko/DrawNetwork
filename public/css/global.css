@@ -4,18 +4,44 @@ body {
 
 *{
 	padding:0; margin:0;
-	color: white;
+	color: #e8dfd7;
 }
-/*canvas.dragged{
-	cursor: pointer;
-}
-*/
 
+*.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#logo-64 {
+	height: 60px;
+	width: 60px;
+	padding: 0;
+	background: url("../img/logo/dn-64x64.png") center no-repeat;
+	background-size: 80%;
+}
+
+a {
+	text-decoration: none;
+	color: #cfb9a6;
+}
+
+a:hover {
+	color: #fff;
+}
+
+.link {
+	color: #e8dfd7;
+}
 /*---------------------------------
 	Home Layout
 ---------------------------------*/
 #nav-bar {
 	display: block;
+	position: relative;
 	width: 100%;
 	min-width: 1280px;
 	height: 60px;
@@ -24,11 +50,13 @@ body {
 
 .nav-opt {
 	display: inline-block;
+	float: left;
 	text-decoration: none;
 	height: 60px;
 	line-height: 60px;
 	padding-left: 10px;
 	padding-right: 10px;
+	top: 0;
 }
 
 .nav-opt:hover {
@@ -41,6 +69,7 @@ body {
 	line-height: 30px;
 	color: #998675;
 	width: 100%;
+	min-width: 1280px;
 	height: 60px;
 	background-color: #372f2d;
 }
@@ -283,7 +312,7 @@ input[type="radio"] {
 	background-color: #998675;
 }
 
-.message {
+.messageB {
 	margin-left: 0px;
 	margin-right: 0px;
 }
@@ -295,6 +324,11 @@ input[type="radio"] {
 .button:hover {
 	cursor: pointer;
 	background-color: #cfb9a6;
+	color: #fff;
+}
+
+.button:hover a {
+	color: #fff;
 }
 
 #currentColour {
@@ -349,6 +383,10 @@ input[type="radio"] {
 .tab:hover {
 	background-color: #998675;
 	cursor: pointer;
+}
+
+.tab:hover a {
+	color: #ffffff;
 }
 
 .selected {
@@ -430,7 +468,7 @@ input[type="radio"] {
 	text-align: center;
 	width: 300px;
 	padding: 20px;
-	background-color: #333;
+	background-color: #4d3d2f;
 }
 
 #name-box input {
@@ -438,18 +476,45 @@ input[type="radio"] {
 	width: 250px;
 	height: 30px;
 	color: #000000;
-	background-color: #888;
+	background-color: #aaa;
 	-webkit-appearance: none;
 	border: none;
 }
 
 #name-box input:focus {
-	background-color: #ddd;
+	outline: 0;
+	background-color: #fff;
 }
 
 
 #name-box h2, #name-box input{
 	margin-bottom: 20px;
+}
+
+#no-javascript {
+	position: absolute;
+	top: 60px;
+	left: 0;
+	width: 100%;
+	min-width: 1280px;
+	min-height: 700px;
+	background-color: #111;
+	background-color: rgba(25,25,25,0.8);
+	z-index: 40;
+}
+
+#no-javascript-wrap {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#no-javascript-box {
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+	width: 400px;
+	padding: 20px;
+	background-color: #4d3d2f;
 }
 /*---------------------------------
 	Tools
@@ -633,9 +698,9 @@ input[type="radio"] {
 	height:276px;
 	width:306px;
 	border:0px solid #ccc;
-	overflow:auto;
 	background-color: #4d3d2f;
 	padding: 2px;
+	overflow: auto;
 }
 
 #chat-message {
@@ -647,4 +712,12 @@ input[type="radio"] {
 	width: 253px;
 	outline: 0;
 	color: black;
+}
+
+.message {
+	width: 289px;
+}
+
+.message p {
+	word-wrap: break-word;
 }

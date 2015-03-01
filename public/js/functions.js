@@ -40,6 +40,8 @@ function checkPageState() {
 	if(getURLParam('room') != null) {
 		var home = document.getElementById('home-content');
 		home.className = "invisible";
+        var drawContent = document.getElementById('draw-content');
+        drawContent.className = "";
         return true;
 	} else {
 		var drawContent = document.getElementById('draw-content');

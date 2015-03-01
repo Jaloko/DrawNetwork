@@ -7,6 +7,7 @@
 		<link rel="stylesheet" type="text/css" href="css/global.css">
 		<link rel="stylesheet" type="text/css" href="css/extras.css">
 		<link rel="stylesheet" type="text/css" href="css/fonts.css">
+<!-- 		<noscript><meta http-equiv="refresh" content="0; URL=/badbrowser.html"></noscript> -->
 	</head>
 	<body onload="init()">
 		<div class="font_preload" style="opacity: 0; position: absolute; left: -99999px;">
@@ -20,8 +21,10 @@
 		</div>
 		<div id="nav-bar">
 			<div class="content-box">
+				<a id="logo-64" href="/" class="nav-opt"></a>
 				<a href="/" class="nav-opt">Home</a>
 				<a id="save-room" onclick="saveRoom();" class="nav-opt save invisible">Save Room</a>
+				<div class="clear"></div>
 			</div>
 		</div>
 		<div class="content-box" >
@@ -238,8 +241,8 @@
 				<script>
 					checkHomeState();
 				</script>
-				<div id="draw-content">
-					<div id="left-col">
+				<div id="draw-content" class="invisible">
+					<div id="left-col" class="unselectable">
 						<div id="canvas-wrap">
 						 	<canvas id="canvas" width="960" height="528"></canvas>
 						 	<canvas id="pointer-canvas" style="position:absolute; left: 0; top: 0;" width="960" height="528"></canvas>
@@ -322,7 +325,7 @@
 						</div>
 					</div>
 					<div id="right-col">
-						<div id="colour-picker">
+						<div id="colour-picker" class="unselectable">
 							<div class="paletteLeftCol" onmousedown="return false">
 								<canvas id="webgl-temp" width="255" height="255" style="display: none;"></canvas>
 								<canvas id="tint" width="255" height="255"></canvas>
@@ -360,11 +363,11 @@
 									<div class="users-border">
 										<div id="chat-box">
 											<div class="chat-row">
-												<div class="message">Welcome to the chat!</div>
+												<div class="message"><p>Welcome to the chat!</p></div>
 											</div>
 										</div>
 										<input id="chat-message" type="text" placeholder="Message..." maxlength="300"></input>
-										<div class="message button" onclick="sendChatMessage();">Send</div>
+										<div class="messageB button" onclick="sendChatMessage();">Send</div>
 									</div>
 								</div>
 							</div>
@@ -374,7 +377,7 @@
 					</div>
 					<div id="name-wrap" class="table-visible">
 						<div id="name-box-wrap">
-							<div id="name-box">
+							<div id="name-box" class="invisible">
 								<div id="name-content" class="invisible">
 									<h2>Enter a name: </h2>
 									<a id="room-full" class="invisible">Room is full!</a>
@@ -386,7 +389,7 @@
 								</div>
 								<div id="room-not-exist" class="invisible">
 									<h2>Room does not exist!</h2>
-									<a href="/" class="button">
+									<a href="/" class="button link">
 										Home
 									</a>
 								</div>
@@ -440,6 +443,16 @@
 						</div>	
 					</div>
 				</div>
+				<noscript>
+					<div id="no-javascript" class="table-visible">
+						<div id="no-javascript-wrap">
+							<div id="no-javascript-box">
+								<h2>Error</h2>
+								<p>This website requires javascript to work properly. This may require you to allow javascript on this page or to download a <a href="https://www.google.com/chrome/browser/desktop/" target="_blank">javascript enabled browser</a>.</p>
+							</div>
+						</div>
+					</div>
+				</noscript>
 				<script>
 					if(checkPageState()) {
 						socket.on('recieve room list', function(data) {
@@ -451,8 +464,10 @@
 								}
 							}
 							if(counter <= 0) {
+								document.getElementById('name-box').className = "";
 								document.getElementById('room-not-exist').className = "";
 							} else {
+								document.getElementById('name-box').className = "";
 								document.getElementById('name-content').className = "";
 							}
 						});
