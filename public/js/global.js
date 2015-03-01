@@ -39,9 +39,6 @@ var shapeEndPos = {
 	x: 0,
 	y: 0
 };
-var rainbowPointer = 0;
-var rainbowSpeed = 1;
-var gradientSwitch = false;
 var messageCounter = 0;
 var userJoinCounter = 0;
 var canvasRect = canvas.getBoundingClientRect();
@@ -492,7 +489,7 @@ function rainbowDraw() {
 		var rgb = convertHexToRGB(tool.brush.colour);
 		huePointer = {
 			x: 0,
-			y: rainbowPointer
+			y: tool.brush.rainbowPointer
 		}
 		var rgba = getColourOnHueCanvas();
 		var hex = convertRGBToHex(rgba.r, rgba.g, rgba.b);
@@ -661,7 +658,7 @@ brushSelection.addEventListener("input", function(evt){
 });
 
 speedSelection.addEventListener("input", function(evt){
-	rainbowSpeed = parseInt(this.value);
+	tool.brush.rainbowSpeed = parseInt(this.value);
 	tool.brush.gradientSpeed = parseInt(this.value);
 });
 
@@ -825,26 +822,26 @@ function applyText() {
 document.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(evt);
-	if(tool.brush.brushType === "freeroam" || tool.brush.brushType === "gradient-brush" || tool.brush.brushType === "rainbow-brush") {
+	if(tool.getBrushType() === "freeroam" || tool.getBrushType() === "gradient-brush" || tool.getBrushType() === "rainbow-brush") {
 		drawBrushOutline(mousePos.x, mousePos.y);
-	} else if(tool.brush.brushType === "eraser"){
+	} else if(tool.getBrushType() === "eraser"){
 		drawEraserOutline(mousePos.x, mousePos.y);
 	}
 	if(mouseDown === true) {
 		if(hasSynced === true) {
-			if(tool.brush.getBrushType() === "freeroam") {
+			if(tool.getBrushType() === "freeroam") {
 				if(canDraw === true) {
 					draw();
 				}	
-			} else if(tool.brush.getBrushType() === "gradient-brush") {
+			} else if(tool.getBrushType() === "gradient-brush") {
 				if(canDraw === true) {
 					if(tool.brush.gradientTimer >= 255) {
-						gradientSwitch = true;
+						tool.brush.gradientSwitch = true;
 					} else if(tool.brush.gradientTimer <= 0) {
-						gradientSwitch = false;
+						tool.brush.gradientSwitch = false;
 					}
 
-					if(gradientSwitch === true) {
+					if(tool.brush.gradientSwitch === true) {
 						tool.brush.gradientTimer -= tool.brush.gradientSpeed;
 					} else {
 						tool.brush.gradientTimer += tool.brush.gradientSpeed;
@@ -852,31 +849,31 @@ document.addEventListener('mousemove', function(evt) {
 
 					gradientDraw(tool.brush.gradientTimer);
 				}	
-			}  else if(tool.brush.brushType === "rainbow-brush") {
+			}  else if(tool.getBrushType() === "rainbow-brush") {
 		    	if(canDraw === true) {
-		    		rainbowPointer+=rainbowSpeed;
-		    		if(rainbowPointer >= 255) {
-		    			rainbowPointer = 0;
+		    		tool.brush.rainbowPointer+=tool.brush.rainbowSpeed;
+		    		if(tool.brush.rainbowPointer >= 255) {
+		    			tool.brush.rainbowPointer = 0;
 		    		}
 		    		rainbowDraw();
     			}
-			} else if(tool.brush.brushType === "dropper"){
+			} else if(tool.getBrushType() === "dropper"){
 		    	if(mouseIsHoveringCanvas(canvas)) {
 		    		if(currentlyVoting === false && currentlySaving === false) {
 	    				var rgb = getColourOnCanvas(canvas, context);
 						onColourChange(rgb);
 					}
 				}
-			} else if(tool.brush.brushType === "eraser"){
+			} else if(tool.getBrushType() === "eraser"){
 		    	if(canDraw === true) {
 		    		erase();
 				}
-			} else if(tool.brush.brushType === "text"){
+			} else if(tool.getBrushType() === "text"){
 		    	if(canDraw === true) {
 		    		textPos = mousePos;
 				}
 				drawTempText(textPos.x, textPos.y, textFont, tool.brush.colour, textToRender);
-			} else if(tool.brush.brushType === "shape"){
+			} else if(tool.getBrushType() === "shape"){
 		    	if(canDraw === true) {
 		    		if(readyForShape === true) {
 		    			if(currentlyVoting === false && currentlySaving === false) {
@@ -889,7 +886,7 @@ document.addEventListener('mousemove', function(evt) {
 		    			}
 		    		}
 				}
-			} else if(tool.brush.brushType === "line"){
+			} else if(tool.getBrushType() === "line"){
 			    if(canDraw === true) {
 			    	if(readyForShape === true) {
 			    		if(currentlyVoting === false && currentlySaving === false) {
@@ -927,27 +924,27 @@ document.addEventListener("mousedown", function(evt) {
 					}
 	    		}
 	    		changeColour();
-			    if(tool.brush.brushType === "freeroam") {
+			    if(tool.getBrushType() === "freeroam") {
 			    	if(canDraw === true) {
 			    		draw();
 			    	}
-			    } else if(tool.brush.brushType === "gradient-brush") {
+			    } else if(tool.getBrushType() === "gradient-brush") {
 			    	if(canDraw === true) {
 			    		tool.brush.gradientTimer = 0;
 			    		gradientDraw(tool.brush.gradientTimer);
 	    			}
-			    } else if(tool.brush.brushType === "rainbow-brush") {
+			    } else if(tool.getBrushType() === "rainbow-brush") {
 			    	if(canDraw === true) {
 			    		rainbowDraw();
 	    			}
-			    } else if(tool.brush.brushType === "dropper"){
+			    } else if(tool.getBrushType() === "dropper"){
 			    	if(mouseIsHoveringCanvas(canvas)) {
 			    		if(currentlyVoting === false && currentlySaving === false) {
 		    				var rgb = getColourOnCanvas(canvas, context);
 							onColourChange(rgb);
 						}
 					}
-				} else if(tool.brush.brushType === "text"){
+				} else if(tool.getBrushType() === "text"){
 			    	if(canDraw === true) {
 			    		if(currentlyVoting === false && currentlySaving === false) {
 				    		readyForText = true;
@@ -955,7 +952,7 @@ document.addEventListener("mousedown", function(evt) {
 			    		}
 					}
 					drawTempText(textPos.x, textPos.y, textFont, tool.brush.colour, textToRender);
-				} else if(tool.brush.brushType === "shape"){
+				} else if(tool.getBrushType() === "shape"){
 			    	if(canDraw === true) {
 			    		if(readyForShape === false) {
 			    			if(currentlyVoting === false && currentlySaving === false) {
@@ -964,7 +961,7 @@ document.addEventListener("mousedown", function(evt) {
 			    			}
 			    		}
 					}
-				} else if(tool.brush.brushType === "line"){
+				} else if(tool.getBrushType() === "line"){
 			    	if(canDraw === true) {
 			    		if(readyForShape === false) {
 			    			if(currentlyVoting === false && currentlySaving === false) {
@@ -973,11 +970,11 @@ document.addEventListener("mousedown", function(evt) {
 				    		}
 			    		}
 					}
-				} else if(tool.brush.brushType === "eraser"){
+				} else if(tool.getBrushType() === "eraser"){
 			    	if(canDraw === true) {
 		    			erase();
 					}
-				} else if(tool.brush.brushType === "fillBucket") {
+				} else if(tool.getBrushType() === "fillBucket") {
 					fillBucket(context, tool.brush.colour);
 					tool.brush.setBrushType("freeroam");
 				}
@@ -992,7 +989,7 @@ document.addEventListener("mouseup", function(evt) {
     	if(readyForShape === true) {
     		pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
     		canvasRect = canvas.getBoundingClientRect();
-    		if(tool.brush.brushType === "shape"){
+    		if(tool.getBrushType() === "shape"){
     			if(currentlyVoting === false && currentlySaving === false) {
 		    		var shapeData = {
 		    			x: shapePos.x - canvasRect.left,
@@ -1009,7 +1006,7 @@ document.addEventListener("mouseup", function(evt) {
 			    		socket.emit('draw circle', shapeData);
 	    			}
     			}
-    		} else if(tool.brush.brushType === "line") {
+    		} else if(tool.getBrushType() === "line") {
   				if(currentlyVoting === false && currentlySaving === false) {
 	    			var lineData = {
 		    			x: shapePos.x - canvasRect.left,

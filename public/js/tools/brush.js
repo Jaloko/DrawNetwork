@@ -8,6 +8,11 @@ var Brush = function(){
 
 	this.gradientTimer = 0,
 	this.gradientSpeed = 1,
+	this.gradientSwitch = false,
+
+	// Rainbow vars
+	this.rainbowPointer = 0,
+	this.rainbowSpeed = 1,
 
 	this.setBrushType = function(type){
 		this.brushType = type;
