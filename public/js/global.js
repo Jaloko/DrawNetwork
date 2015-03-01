@@ -14,7 +14,6 @@ var context = canvas.getContext('2d');
 var pointerCanvas = document.getElementById('pointer-canvas');
 var pointerContext = pointerCanvas.getContext('2d');
 var canDraw = false;
-var gradientTimer = 0;
 
 var tool = new ToolSet();
 	
@@ -42,9 +41,7 @@ var shapeEndPos = {
 };
 var rainbowPointer = 0;
 var rainbowSpeed = 1;
-var lineTip = "round";
 var gradientSwitch = false;
-var gradientSpeed = 1;
 var messageCounter = 0;
 var userJoinCounter = 0;
 var canvasRect = canvas.getBoundingClientRect();
@@ -665,7 +662,7 @@ brushSelection.addEventListener("input", function(evt){
 
 speedSelection.addEventListener("input", function(evt){
 	rainbowSpeed = parseInt(this.value);
-	gradientSpeed = parseInt(this.value);
+	tool.brush.gradientSpeed = parseInt(this.value);
 });
 
 var textSizeSel = document.getElementById('textSizeSel');
@@ -683,7 +680,7 @@ function changeFont() {
 
 function changeLineTip() {
 	var e = document.getElementById("lineTip");
-	lineTip = e.options[e.selectedIndex].value;
+	tool.brush.lineTip = e.options[e.selectedIndex].value;
 }
 
 function changeTextSize(newSize){
@@ -787,7 +784,7 @@ function drawTempLine(x, y, endX, endY, colour, size, lineTip) {
 	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
 	pointerContext.strokeStyle = colour;
 	pointerContext.lineWidth = size;
-	pointerContext.lineCap = lineTip;
+	pointerContext.lineCap = tool.brush.lineTip;
 	pointerContext.beginPath();
 	pointerContext.moveTo(x - cr.left, y - cr.top);
 	pointerContext.lineTo(endX - cr.left,endY - cr.top);
@@ -797,7 +794,7 @@ function drawTempLine(x, y, endX, endY, colour, size, lineTip) {
 function drawShapeLine(x, y, endX, endY, colour, size, lineTip) {
 	context.strokeStyle = colour;
 	context.lineWidth = size;
-	context.lineCap = lineTip;
+	context.lineCap = tool.brush.lineTip;
 	context.beginPath();
 	context.moveTo(x, y);
 	context.lineTo(endX,endY);
@@ -841,19 +838,19 @@ document.addEventListener('mousemove', function(evt) {
 				}	
 			} else if(tool.brush.getBrushType() === "gradient-brush") {
 				if(canDraw === true) {
-					if(gradientTimer >= 255) {
+					if(tool.brush.gradientTimer >= 255) {
 						gradientSwitch = true;
-					} else if(gradientTimer <= 0) {
+					} else if(tool.brush.gradientTimer <= 0) {
 						gradientSwitch = false;
 					}
 
 					if(gradientSwitch === true) {
-						gradientTimer -= gradientSpeed;
+						tool.brush.gradientTimer -= tool.brush.gradientSpeed;
 					} else {
-						gradientTimer += gradientSpeed;
+						tool.brush.gradientTimer += tool.brush.gradientSpeed;
 					}
 
-					gradientDraw(gradientTimer);
+					gradientDraw(tool.brush.gradientTimer);
 				}	
 			}  else if(tool.brush.brushType === "rainbow-brush") {
 		    	if(canDraw === true) {
@@ -897,7 +894,7 @@ document.addEventListener('mousemove', function(evt) {
 			    	if(readyForShape === true) {
 			    		if(currentlyVoting === false && currentlySaving === false) {
 			    			shapeEndPos = mousePos;
-			    			drawTempLine(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour, tool.brush.size, lineTip);
+			    			drawTempLine(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour, tool.brush.size, tool.brush.lineTip);
 			    		}
 			    	}
 				}
@@ -936,8 +933,8 @@ document.addEventListener("mousedown", function(evt) {
 			    	}
 			    } else if(tool.brush.brushType === "gradient-brush") {
 			    	if(canDraw === true) {
-			    		gradientTimer = 0;
-			    		gradientDraw(gradientTimer);
+			    		tool.brush.gradientTimer = 0;
+			    		gradientDraw(tool.brush.gradientTimer);
 	    			}
 			    } else if(tool.brush.brushType === "rainbow-brush") {
 			    	if(canDraw === true) {
@@ -1019,7 +1016,7 @@ document.addEventListener("mouseup", function(evt) {
 		    			y: shapePos.y - canvasRect.top,
 		    			endX: shapeEndPos.x - canvasRect.left,
 		    			endY: shapeEndPos.y - canvasRect.top,
-		    			lineTip: lineTip,
+		    			lineTip: tool.brush.lineTip,
 		    			size: tool.brush.size,
 		    			colour: tool.brush.colour
 		    		};
