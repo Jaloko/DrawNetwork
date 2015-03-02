@@ -39,7 +39,9 @@ var textPos = {
 	y: 0
 };
 var readyForShape = false;
-var shapeType = "rectangle";
+// Cannot remove shapeType as it introduces a bug where cirlce can never be toogled
+var shapeType = "rectangle"; 
+
 var shapePos = {
 	x: 0,
 	y: 0
@@ -51,13 +53,6 @@ var shapeEndPos = {
 var messageCounter = 0;
 var userJoinCounter = 0;
 var canvasRect = canvas.getBoundingClientRect();
-
-function setShapeType(ele, shape) {
-	document.getElementById('shapeRect').className = "button tool";
-	document.getElementById('shapeCircle').className = "button tool";
-	ele.className = "button bselect tool";
-	shapeType = shape;
-}
 
 function sendChatMessage() {
 	var data = {
@@ -171,7 +166,7 @@ socket.on('room full', function() {
 });
 
 socket.on('sync draw', function(data) {
-	drawCircle(data.x, data.y, data.lastX, data.lastY, data.size, data.colour);
+	tool.shapeTool.drawCircle(data.x, data.y, data.lastX, data.lastY, data.size, data.colour);
 });
 
 socket.on('sync draw text', function(data) {
@@ -179,19 +174,19 @@ socket.on('sync draw text', function(data) {
 });
 
 socket.on('sync draw rect', function(data) {
-	drawShapeRect(data.x, data.y, data.endX, data.endY, data.colour);
+	tool.shapeTool.drawShapeRect(data.x, data.y, data.endX, data.endY, data.colour);
 });
 
 socket.on('sync draw circle', function(data) {
-	drawShapeCircle(data.x, data.y, data.endX, data.endY, data.colour);
+	tool.shapeTool.drawShapeCircle(data.x, data.y, data.endX, data.endY, data.colour);
 });
 
 socket.on('sync draw line', function(data) {
-	drawShapeLine(data.x, data.y, data.endX, data.endY, data.colour, data.size, data.lineTip);
+	tool.brush.drawShapeLine(data.x, data.y, data.endX, data.endY, data.colour, data.size, data.lineTip);
 });
 
 socket.on('sync erase', function(data) {
-	drawRect(data.x, data.y, data.lastX, data.lastY, data.size, "white");
+	tool.shapeTool.drawRect(data.x, data.y, data.lastX, data.lastY, data.size, "white");
 });
 
 socket.on('sync result', function(data) {
@@ -372,67 +367,6 @@ function angleBetween(point1, point2) {
   return Math.atan2( point2.x - point1.x, point2.y - point1.y );
 }
 
-function drawRect(curX, curY, lastX, lastY, size, colour) {
-	var lastP = {
-		x: lastX,
-		y: lastY
-	},
-	curP = {
-		x: curX,
-		y: curY
-	}
-	var dist = distanceBetween(lastP, curP);
-  	var angle = angleBetween(lastP, curP);
-    for (var i = 0; i < dist; i+=1) {
-	    x = lastP.x + (Math.sin(angle) * i);
-	    y = lastP.y + (Math.cos(angle) * i);
-	    context.fillStyle = colour;
-		context.fillRect(x - size / 2, y - size / 2, size, size);
-    }
-}
-
-function drawCircle(curX, curY, lastX, lastY, size, colour) {
-	var lastP = {
-		x: lastX,
-		y: lastY
-	},
-	curP = {
-		x: curX,
-		y: curY
-	}
-	var dist = distanceBetween(lastP, curP);
-  	var angle = angleBetween(lastP, curP);
-    for (var i = 0; i < dist; i+=1) {
-	    x = lastP.x + (Math.sin(angle) * i);
-	    y = lastP.y + (Math.cos(angle) * i);
-	    context.beginPath();
-	   	context.fillStyle = colour;
-	    context.arc(x, y, size / 2, false, Math.PI * 2, false);
-	    context.closePath();
-	    context.fill();
-    }
-}
-
-function drawLine(x, y, lastX, lastY, size, colour) {
-	context.strokeStyle = colour;
-	context.lineWidth = size;
-	context.lineCap = "round";
-	context.beginPath();
-	context.moveTo(lastX, lastY);
-	context.lineTo(x,y);
-	context.stroke();
-}
-
-function drawNormalLine(x, y, lastX, lastY, size) {
-	context.strokeStyle = "white";
-	context.lineWidth = size;
-	context.lineCap = "square";
-	context.beginPath();
-	context.moveTo(lastX, lastY);
-	context.lineTo(x,y);
-	context.stroke();
-}
-
 var myEvent = window.attachEvent || window.addEventListener;
 var chkevent = window.attachEvent ? 'onbeforeunload' : 'beforeunload'; /// make IE7, IE8 compitable
 
@@ -551,68 +485,6 @@ function onColourChange(rgb) {
 	tool.brush.setColour(hex);
 }
 
-function drawTempRect(x, y, endX, endY) {
-	var cr = pointerCanvas.getBoundingClientRect();
-	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
-    pointerContext.fillStyle = tool.brush.colour;
-	pointerContext.fillRect(x - cr.left, y - cr.top, (endX - x), (endY - y));
-}
-
-function drawShapeRect(x, y, endX, endY, colour) {
-    context.fillStyle = colour;
-	context.fillRect(x, y, (endX - x), (endY - y));
-}
-
-function drawTempCircle(x, y, endX, endY, colour) {
-	var cr = pointerCanvas.getBoundingClientRect();
-	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
-	pointerContext.beginPath();
-	var radius = 0;
-	if(Math.abs((endX - x)) > Math.abs((endY - y))) {
-		radius = Math.abs((endX - x));
-	} else {
-		radius = Math.abs((endY - y));
-	}
-	pointerContext.arc(x - cr.left, y - cr.top, radius, 0, 2 * Math.PI, false);
-	pointerContext.fillStyle = colour;
-	pointerContext.fill();
-}
-
-function drawShapeCircle(x, y, endX, endY, colour) {
-	context.beginPath();
-	var radius = 0;
-	if(Math.abs((endX - x)) > Math.abs((endY - y))) {
-		radius = Math.abs((endX - x));
-	} else {
-		radius = Math.abs((endY - y));
-	}
-	context.arc(x, y, radius, 0, 2 * Math.PI, false);
-	context.fillStyle = colour;
-	context.fill();
-}
-
-function drawTempLine(x, y, endX, endY, colour, size, lineTip) {
-	var cr = pointerCanvas.getBoundingClientRect();
-	pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
-	pointerContext.strokeStyle = colour;
-	pointerContext.lineWidth = size;
-	pointerContext.lineCap = tool.brush.lineTip;
-	pointerContext.beginPath();
-	pointerContext.moveTo(x - cr.left, y - cr.top);
-	pointerContext.lineTo(endX - cr.left,endY - cr.top);
-	pointerContext.stroke();
-}
-
-function drawShapeLine(x, y, endX, endY, colour, size, lineTip) {
-	context.strokeStyle = colour;
-	context.lineWidth = size;
-	context.lineCap = tool.brush.lineTip;
-	context.beginPath();
-	context.moveTo(x, y);
-	context.lineTo(endX,endY);
-	context.stroke();
-}
-
 
 function applyText() {
 	if(readyForText == true) {
@@ -685,9 +557,9 @@ document.addEventListener('mousemove', function(evt) {
 		    		if(currentlyVoting === false && currentlySaving === false) {
 			    		shapeEndPos = mousePos;
 			    		if(shapeType === "rectangle") {
-			    			drawTempRect(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
+			    			tool.shapeTool.drawTempRect(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
 			    		} else if(shapeType === "circle") {
-			    			drawTempCircle(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
+			    			tool.shapeTool.drawTempCircle(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
 			    		}
 		    		}
 		    	}
@@ -695,7 +567,7 @@ document.addEventListener('mousemove', function(evt) {
 		    	if(readyForShape === true) {
 		    		if(currentlyVoting === false && currentlySaving === false) {
 		    			shapeEndPos = mousePos;
-		    			drawTempLine(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour, tool.brush.size, tool.brush.lineTip);
+		    			tool.brush.drawTempLine(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour, tool.brush.size, tool.brush.lineTip);
 		    		}
 		    	}
 			}
@@ -789,10 +661,10 @@ document.addEventListener("mouseup", function(evt) {
 		    			colour: tool.brush.colour
 		    		}
 		    		if(shapeType === "rectangle") {
-			    		drawShapeRect(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
+			    		tool.shapeTool.drawShapeRect(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
 			    		socket.emit('draw rect', shapeData);
 		    		} else if(shapeType === "circle") {
-			    		drawShapeCircle(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
+			    		tool.shapeTool.drawShapeCircle(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
 			    		socket.emit('draw circle', shapeData);
 	    			}
     			}
@@ -807,7 +679,7 @@ document.addEventListener("mouseup", function(evt) {
 		    			size: tool.brush.size,
 		    			colour: tool.brush.colour
 		    		};
-			    	drawShapeLine(lineData.x, lineData.y, lineData.endX, lineData.endY, lineData.colour, lineData.size, lineData.lineTip);
+			    	tool.brush.drawShapeLine(lineData.x, lineData.y, lineData.endX, lineData.endY, lineData.colour, lineData.size, lineData.lineTip);
 			    	socket.emit('draw line', lineData);
 		    	}
     		}
@@ -921,6 +793,7 @@ document.getElementById('text-tool').addEventListener('click', function(evt){
 	document.getElementById('text-settings').className = "";
 });
 
+/* Shape tool */
 document.getElementById('shape-tool').addEventListener('click', function(evt){
 	tool.brush.setBrushType('shape');
 	resetTools();
@@ -928,6 +801,15 @@ document.getElementById('shape-tool').addEventListener('click', function(evt){
 	document.getElementById('canvas').style.cursor = "pointer";
 	document.getElementById('pointer-canvas').style.cursor = "pointer";
 	document.getElementById('shape-settings').className = "";
+});
+
+
+document.getElementById('shapeRect').addEventListener('click', function(evt){
+	tool.shapeTool.setShapeType(this, 'rectangle');
+});
+
+document.getElementById('shapeCircle').addEventListener('click', function(evt){
+	tool.shapeTool.setShapeType(this, 'circle');
 });
 
 document.getElementById('line-tool').addEventListener('click', function(evt){

@@ -31,4 +31,4 @@ var TextTool = function(){
 		this.textFont = newSize + "px " + font;
 		this.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 	}
-}
+};

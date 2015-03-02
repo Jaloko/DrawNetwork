@@ -1,3 +1,15 @@
+/*--------------------------------------------
+	Brush
+	This object contains methods for
+	all brush related functions
+
+	- Standard Brush
+	- Gradient Brush
+	- Rainbow Brush
+	- Line Tool
+	- Eraser
+--------------------------------------------*/
+
 var Brush = function(){
 	this.size = 30,
 	this.colour = "#ff0000",
@@ -15,10 +27,9 @@ var Brush = function(){
 	this.rainbowSpeed = 1,
 
 
-
-
-
-	// Setters and Getters
+	/*--------------------------------------------
+		Setters and Getters
+	--------------------------------------------*/
 	this.setBrushType = function(type){
 		this.brushType = type;
 	}
@@ -39,7 +50,8 @@ var Brush = function(){
 		this.colour = newColour;
 	}
 	/*--------------------------------------------
-		Drawing Methods
+		Outlines for brush and eraser
+		Displays a grey outline on the canvas
 	--------------------------------------------*/
 	this.drawBrushOutline = function(x, y) {
 		var cr = pointerCanvas.getBoundingClientRect();
@@ -87,6 +99,9 @@ var Brush = function(){
  		pointerContext.stroke();
 	}
 
+	/*--------------------------------------------
+		Gradient Draw
+	--------------------------------------------*/
 	this.gradientDraw = function() {
 		if(currentlyVoting === false && currentlySaving === false) {
 			canvasRect = canvas.getBoundingClientRect();
@@ -119,6 +134,9 @@ var Brush = function(){
 		}
 	}
 
+	/*--------------------------------------------
+		Rainbow Brush		
+	--------------------------------------------*/
 	this.rainbowDraw = function() {
 		if(currentlyVoting === false && currentlySaving === false) {
 			canvasRect = canvas.getBoundingClientRect();
@@ -143,6 +161,37 @@ var Brush = function(){
 		}
 	}
 
+	/*--------------------------------------------
+		Line tool
+	--------------------------------------------*/
+	this.drawTempLine = function(x, y, endX, endY, colour, size, lineTip) {
+		var cr = pointerCanvas.getBoundingClientRect();
+		pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+		pointerContext.strokeStyle = colour;
+		pointerContext.lineWidth = size;
+		pointerContext.lineCap = tool.brush.lineTip;
+		pointerContext.beginPath();
+		pointerContext.moveTo(x - cr.left, y - cr.top);
+		pointerContext.lineTo(endX - cr.left,endY - cr.top);
+		pointerContext.stroke();
+	}
+
+	this.drawShapeLine = function(x, y, endX, endY, colour, size, lineTip) {
+		context.strokeStyle = colour;
+		context.lineWidth = size;
+		context.lineCap = tool.brush.lineTip;
+		context.beginPath();
+		context.moveTo(x, y);
+		context.lineTo(endX,endY);
+		context.stroke();
+	}
+	/*--------------------------------------------
+		The draw and erase function
+		Both methods check if voting or saving.
+		Gets the size of the canvas
+		Assigns to JSON and draws the circle
+		Then emits
+	--------------------------------------------*/
 	this.draw = function() {
 		if(currentlyVoting === false && currentlySaving === false) {
 			canvasRect = canvas.getBoundingClientRect();
