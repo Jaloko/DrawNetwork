@@ -108,8 +108,8 @@
 								        <span class="onoffswitch-switch"></span>
 								    </label>
 								</div>
-								<input id="room-search" type="text" placeholder="Search..." onchange="searchRoom()"></input>
-								<div class="button" onclick="searchRoom()">
+								<input id="room-search" type="text" placeholder="Search..."></input>
+								<div class="button" onclick="room.searchRoom()">
 									Search
 								</div>
 							</div>
@@ -300,7 +300,7 @@
 							</div>
 							<div id="text-settings" class="invisible">
 								Font: 
-								<select id="fontSel" onchange="changeFont()">
+								<select id="fontSel">
 								  	<option value="Open Sans">Open Sans</option>
 								  	<option value="Roboto">Roboto</option>
 								  	<option value="Ubuntu">Ubuntu</option>
@@ -481,9 +481,11 @@
 	</body>
 	<script src="js/gl-matrix-min.js"></script>
 	<script src="js/shaders.js"></script>
+	<script src="js/room.js"></script>
 	<script src="js/tools/tools.js"></script>
 	<script src="js/tools/brush.js"></script>
 	<script src="js/tools/text-tool.js"></script>
+
 	<script src="js/global.js"></script>
 	<script src="js/fill-bucket.js"></script>
 	<script src="js/colour-picker.js"></script>

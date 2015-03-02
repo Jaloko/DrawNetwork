@@ -1,3 +1,12 @@
+/*------------------------------------------
+	Global JS
+	
+	Events - Mouse
+	Events - Key
+	Events - onChange
+	Events - Click
+------------------------------------------*/
+
 var mouseDown = false;
 var mousePos = {
 	x : 0,
@@ -17,6 +26,7 @@ var pointerContext = pointerCanvas.getContext('2d');
 var canDraw = false;
 
 var tool = new ToolSet();
+var room = new Room();
 	
 var name;
 var randomNames;
@@ -121,21 +131,6 @@ function createRoom() {
 
 function joinRoom() {
 	insertURLParam("room", selectedRoom);
-}
-
-function searchRoom() {
-	var table = document.getElementById('room-list');
-	var tbody = table.getElementsByTagName('tbody')[0]
-	var row = tbody.rows;
-	var roomSearch = document.getElementById('room-search');
-	for(var i = 0; i < row.length; i++) {
-		row[i].className = "";
-		if(roomSearch.value != "") {
-			if(row[i].cells[0].innerHTML.indexOf(roomSearch.value) == -1) {
-				 row[i].className = "invisible";
-			}
-		}
-	}
 }
 
 socket.on('cannot create room', function(data) {
@@ -639,6 +634,10 @@ function applyText() {
 	}
 }
 
+
+/*------------------------------------------
+	Events (Mouse)
+------------------------------------------*/
 document.addEventListener('mousemove', function(evt) {
 	lastPos = mousePos;
 	mousePos = getMousePos(evt);
@@ -830,6 +829,11 @@ document.addEventListener("mouseup", function(evt) {
 	}
 });
 
+
+/*------------------------------------------
+	Events (Keys)
+------------------------------------------*/
+
 document.body.addEventListener("keydown", function(e) {
 	if(readyForText === true) {
 		if(currentlyVoting === false && currentlySaving === false) {
@@ -852,6 +856,23 @@ document.body.addEventListener("keyup", function(e) {
 	}
 });
 
+
+/*------------------------------------------
+	Events (onChange)
+------------------------------------------*/
+// Search room
+document.getElementById('room-search').addEventListener('change', function(evt){
+	room.searchRoom();
+});
+
+// Change fonts
+document.getElementById('fontSel').addEventListener('change', function(evt){
+	tool.textTool.changeFont();
+});
+
+/*------------------------------------------
+	Events (Click) - Tools
+------------------------------------------*/
 document.getElementById('clearCanvas').addEventListener('click', function(evt){
 	clearCanvas();
 })
@@ -926,9 +947,6 @@ document.getElementById('eraser').addEventListener('click', function(evt){
 	document.getElementById('brush-settings').className = "";
 });
 
-document.getElementById('fontSel').addEventListener('change', function(evt){
-	tool.textTool.changeFont();
-})
 
 function resetTools() {
 	tool.textTool.textToRender = "";
