@@ -129,7 +129,7 @@ var Brush = function(){
 				size: tool.brush.size,
 				colour: hex
 			}
-			drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+			tool.shapeTool.drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
 			socket.emit('draw', json);
 		}
 	}
@@ -156,7 +156,7 @@ var Brush = function(){
 				size: this.size,
 				colour: hex
 			}
-			drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+			tool.shapeTool.drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
 			socket.emit('draw', json);
 		}
 	}
@@ -221,9 +221,51 @@ var Brush = function(){
 				size: tool.brush.size,
 				colour: tool.brush.colour
 			}
-			drawRect(json.x, json.y, json.lastX, json.lastY, json.size, "white");
+			tool.shapeTool.drawRect(json.x, json.y, json.lastX, json.lastY, json.size, "white");
 			socket.emit('erase', json);
 		}
 	}
+
+
+function drawRect(curX, curY, lastX, lastY, size, colour) {
+	var lastP = {
+		x: lastX,
+		y: lastY
+	},
+	curP = {
+		x: curX,
+		y: curY
+	}
+	var dist = distanceBetween(lastP, curP);
+  	var angle = angleBetween(lastP, curP);
+    for (var i = 0; i < dist; i+=1) {
+	    x = lastP.x + (Math.sin(angle) * i);
+	    y = lastP.y + (Math.cos(angle) * i);
+	    context.fillStyle = colour;
+		context.fillRect(x - size / 2, y - size / 2, size, size);
+    }
+}
+
+function drawCircle(curX, curY, lastX, lastY, size, colour) {
+	var lastP = {
+		x: lastX,
+		y: lastY
+	},
+	curP = {
+		x: curX,
+		y: curY
+	}
+	var dist = distanceBetween(lastP, curP);
+  	var angle = angleBetween(lastP, curP);
+    for (var i = 0; i < dist; i+=1) {
+	    x = lastP.x + (Math.sin(angle) * i);
+	    y = lastP.y + (Math.cos(angle) * i);
+	    context.beginPath();
+	   	context.fillStyle = colour;
+	    context.arc(x, y, size / 2, false, Math.PI * 2, false);
+	    context.closePath();
+	    context.fill();
+    }
+}
 
 };
