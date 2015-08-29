@@ -1,22 +1,22 @@
 <html>
 	<head>
 		<title>Draw Network</title>
- 		<script src="/socket.io/socket.io.js"></script>
- 		<script src="js/functions.js"></script>
- 		<link rel="icon" href="img/logo/dn-32x32.png" type="image/x-icon" />
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="js/functions.js"></script>
+		<link rel="icon" href="img/logo/dn-32x32.png" type="image/x-icon" />
 		<link rel="stylesheet" type="text/css" href="css/global.css">
 		<link rel="stylesheet" type="text/css" href="css/extras.css">
 		<link rel="stylesheet" type="text/css" href="css/fonts.css">
 	</head>
 	<body onload="init()">
 		<div class="font_preload" style="opacity: 0; position: absolute; left: -99999px;">
-		    <span style="font-family: 'Open Sans';">Test</span>
-		    <span style="font-family: 'Roboto';">Test</span>
-		    <span style="font-family: 'Ubuntu';">Test</span>
-		    <span style="font-family: 'Sigmar One';">Test</span>
-		    <span style="font-family: 'Droid Serif';">Test</span>
-		    <span style="font-family: 'Pacifico';">Test</span>
-		    <input id="text-tool-text" type="text" />
+			<span style="font-family: 'Open Sans';">Test</span>
+			<span style="font-family: 'Roboto';">Test</span>
+			<span style="font-family: 'Ubuntu';">Test</span>
+			<span style="font-family: 'Sigmar One';">Test</span>
+			<span style="font-family: 'Droid Serif';">Test</span>
+			<span style="font-family: 'Pacifico';">Test</span>
+			<input id="text-tool-text" type="text" />
 		</div>
 		<div id="nav-bar">
 			<div class="content-box">
@@ -102,11 +102,11 @@
 									Create Room
 								</div>
 								<div class="onoffswitch">
-								    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
-								    <label class="onoffswitch-label" for="myonoffswitch">
-								        <span class="onoffswitch-inner"></span>
-								        <span class="onoffswitch-switch"></span>
-								    </label>
+									<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+									<label class="onoffswitch-label" for="myonoffswitch">
+										<span class="onoffswitch-inner"></span>
+										<span class="onoffswitch-switch"></span>
+									</label>
 								</div>
 								<input id="room-search" type="text" placeholder="Search..."></input>
 								<div class="button" onclick="room.searchRoom()">
@@ -214,17 +214,17 @@
 									}
 								});
 								function isOverflowed(element){
-								    return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
+									return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
 								}
 								function createRadioElement(name, value, checked) {
-								    var radioHtml = '<input id="' + value + '-radio" type="radio" name="' + name + '" value="' + value + '"';
-								    if ( checked ) {
-								        radioHtml += ' checked="checked"';
-								    }
-								    radioHtml += '/>';
+									var radioHtml = '<input id="' + value + '-radio" type="radio" name="' + name + '" value="' + value + '"';
+									if ( checked ) {
+										radioHtml += ' checked="checked"';
+									}
+									radioHtml += '/>';
 
-								    var radioFragment = document.getElementById('room-container');
-								    radioFragment.innerHTML += radioHtml;
+									var radioFragment = document.getElementById('room-container');
+									radioFragment.innerHTML += radioHtml;
 								}
 							</script>
 							<div id="join-room-container" class="center">
@@ -243,8 +243,8 @@
 				<div id="draw-content" class="invisible">
 					<div id="left-col" class="unselectable">
 						<div id="canvas-wrap">
-						 	<canvas id="canvas" width="960" height="528"></canvas>
-						 	<canvas id="pointer-canvas" style="position:absolute; left: 0; top: 0;" width="960" height="528"></canvas>
+							<canvas id="canvas" width="960" height="528"></canvas>
+							<canvas id="pointer-canvas" style="position:absolute; left: 0; top: 0;" width="960" height="528"></canvas>
 						</div>
 						<div id="tools">
 							<div id="brush" class="button bselect tool" data-tip="Standard Brush">
@@ -290,8 +290,8 @@
 								<div id="line-settings" class="invisible">
 									Line Tip: 			
 									<select id="lineTip" onchange="changeLineTip()">
-									  	<option value="round">Rounded</option>
-									  	<option value="square">Flat</option>
+										<option value="round">Rounded</option>
+										<option value="square">Flat</option>
 									</select>
 								</div>
 							</div>
@@ -301,12 +301,12 @@
 							<div id="text-settings" class="invisible">
 								Font: 
 								<select id="fontSel">
-								  	<option value="Open Sans">Open Sans</option>
-								  	<option value="Roboto">Roboto</option>
-								  	<option value="Ubuntu">Ubuntu</option>
-								  	<option value="Sigmar One">Sigmar One</option>
-								  	<option value="Droid Serif">Droid Serif</option>
-								  	<option value="Pacifico">Pacifico</option>
+									<option value="Open Sans">Open Sans</option>
+									<option value="Roboto">Roboto</option>
+									<option value="Ubuntu">Ubuntu</option>
+									<option value="Sigmar One">Sigmar One</option>
+									<option value="Droid Serif">Droid Serif</option>
+									<option value="Pacifico">Pacifico</option>
 								</select>
 								Size: <input id="textSizeSel" type="range" min="1" max="100" value="30"></input>
 								<div class="button" onclick="applyText()">
@@ -395,7 +395,7 @@
 								<div id="currently-syncing" class="invisible">
 									<h3>Sync in progress</h3>
 									<div class="progress-bar purple stripes">
-									    <span style="width: 100%"></span>
+										<span style="width: 100%"></span>
 									</div>
 								</div>
 							</div>
@@ -407,7 +407,7 @@
 								<div id="save-progress">
 									<h3>Save in progress</h3>
 									<div class="progress-bar purple stripes">
-									    <span style="width: 100%"></span>
+										<span style="width: 100%"></span>
 									</div>
 								</div>
 								<div id="save-complete" class="invisible">
@@ -452,26 +452,34 @@
 						</div>
 					</div>
 				</noscript>
-				<script>
-					if(checkPageState()) {
-						socket.on('recieve room list', function(data) {
-							var counter = 0;
-							for(var i = 0; i < data.length; i++) {
-								if(getURLParam('room') === data[i].id) {
-									counter++;
-									break;
-								}
-							}
-							if(counter <= 0) {
-								document.getElementById('name-box').className = "";
-								document.getElementById('room-not-exist').className = "";
-							} else {
-								document.getElementById('name-box').className = "";
-								document.getElementById('name-content').className = "";
-							}
-						});
-					}
-				</script>
+	<script>
+	 if(checkPageState()) {
+	  socket.on('recieve room list', function(data) {
+		/* To do add a method of telling the using if a room does not exist */
+		/*  var counter = 0;
+		for(var i = 0; i < data.length; i++) {
+		console.log(getURLParam('room') + " " + data[i].id);
+		if(getURLParam('room') === data[i].id) {
+		 counter++;
+		 break;
+		}
+		}*/
+		//if(counter <= 0) {
+		//document.getElementById('name-box').className = "";
+		//document.getElementById('room-not-exist').className = "";
+		//} else {
+		document.getElementById('name-box').className = "";
+		document.getElementById('name-content').className = "";
+		//}
+	  });
+	  /* Temporary Solution*/
+	  socket.on('room does not exist', function(data) {
+		document.getElementById('name-box').className = "";
+		document.getElementById('room-not-exist').className = "";
+		document.getElementById('name-content').className = "Invisible";
+	  });
+	 }
+	</script>
 			</div>
 		</div>
 		<div id="footer">

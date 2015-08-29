@@ -395,6 +395,9 @@ io.sockets.on('connection', function(socket) {
 				}
 			}
 		}
+		else{
+			socket.emit('room does not exist');
+		}
 	});
 
 	socket.on('vote clear', function() {
