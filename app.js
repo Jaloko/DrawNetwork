@@ -395,6 +395,9 @@ io.sockets.on('connection', function(socket) {
 				}
 			}
 		}
+		else{
+			socket.emit('room does not exist');
+		}
 	});
 
 	socket.on('vote clear', function() {
@@ -503,6 +506,7 @@ setInterval(function() {
 		if(rooms[i].users.length === 0 && rooms[i].owner != "admin") {
 			if(new Date().getTime() > rooms[i].activity + 259200000) {
 				rooms.splice(i, 1);
+				writeRoomsToFile();
 				continue;
 			}
 		}
@@ -567,26 +571,25 @@ setInterval(function() {
 		if(new Date().getTime() > saveRoomsTimer + 1000) {
 			finalSaveRooms = true;
 			saveRoomsTimer = new Date().getTime();
-			fs.writeFile(__dirname + "/rooms.txt", '', function(){});
-			fs.writeFile(__dirname + "/rooms.txt", saveRooms(), function(err) {
-			    if(err) {
-			        console.log(err);
-			    }
-			});
+			writeRoomsToFile();
 		}
 	} else{
 		if(finalSaveRooms === true) {
 			finalSaveRooms = false;
-			fs.writeFile(__dirname + "/rooms.txt", '', function(){});
-			fs.writeFile(__dirname + "/rooms.txt", saveRooms(), function(err) {
-			    if(err) {
-			        console.log(err);
-			    }
-			});
+			writeRoomsToFile();
 		}
 	}
 
 }, 1);
+
+function writeRoomsToFile() {
+	fs.writeFile(__dirname + "/rooms.txt", '', function(){});
+	fs.writeFile(__dirname + "/rooms.txt", saveRooms(), function(err) {
+	    if(err) {
+	        console.log(err);
+	    }
+	});
+}
 
 function saveRooms() {
 	var text = "";

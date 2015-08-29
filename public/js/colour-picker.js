@@ -295,7 +295,7 @@ function changeColour() {
         pickedColour.r = rgb.r;
         pickedColour.g = rgb.g;
         pickedColour.b = rgb.b;
-        brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
+        tool.brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
         var currentColour = document.getElementById('currentColour');
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         assignHTMLValues();
@@ -338,7 +338,7 @@ function changeColour() {
         pickedColour.r = rgb.r;
         pickedColour.g = rgb.g;
         pickedColour.b = rgb.b;
-        brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
+        tool.brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
         var currentColour = document.getElementById('currentColour');
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         var paletteArrow = document.getElementById('palette-arrow');
@@ -351,14 +351,14 @@ function changeColour() {
         pickedColour.r = rgb.r;
         pickedColour.g = rgb.g;
         pickedColour.b = rgb.b;
-        brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
+        tool.brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
         var currentColour = document.getElementById('currentColour');
         currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
         assignHTMLValues();
     }
     if(new Date().getTime() > colourTimer + 200) {
         colourTimer = new Date().getTime();
-        socket.emit('update colour', brush.colour); 
+        socket.emit('update colour', tool.brush.colour); 
     }
 }
 
@@ -367,7 +367,7 @@ function updateColour() {
     pickedColour.r = rgb.r;
     pickedColour.g = rgb.g;
     pickedColour.b = rgb.b;
-    brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
+    tool.brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
     var currentColour = document.getElementById('currentColour');
     currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
     var paletteArrow = document.getElementById('palette-arrow');
@@ -381,7 +381,7 @@ function updateColour() {
     pickedColour.r = rgb.r;
     pickedColour.g = rgb.g;
     pickedColour.b = rgb.b;
-    brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
+    tool.brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
     var currentColour = document.getElementById('currentColour');
     currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
     assignHTMLValues(); 
