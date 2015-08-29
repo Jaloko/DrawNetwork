@@ -66,7 +66,6 @@ app.get('/', function(req, res) {
 });
 
 io.sockets.on('connection', function(socket) {
-	var ip = socket.request.connection.remoteAddress;
 
 	socket.on('get room list', function() {
 		var theRooms = [];
@@ -88,8 +87,9 @@ io.sockets.on('connection', function(socket) {
 			isPublic: data
 		};
 		if(validateBool(newData.isPublic) === true) {
-			if(countRoomsOwnerOf(ip) < 5) {
+			if(countRoomsOwnerOf(socket) < 5) {
 				var id = generateId();
+				var ip = socket.request.connection.remoteAddress;
 				if(ip != null) {
 					rooms.push(new Room(id, ip, newData.isPublic));
 					socket.emit('room result', id);
@@ -101,7 +101,7 @@ io.sockets.on('connection', function(socket) {
 					}
 					console.log("Room: " + id + " (" + isPublic + ") created by: " + ip + "!");
 				} else {
-					socket.emit('cannot create room', 'Error identifying remote address: ' + ip + '. Try again.');
+					socket.emit('cannot create room', 'Error identifying remote address. Try again.');
 				}
 			} else {
 				socket.emit('cannot create room', 'You have already created 5 rooms!');
@@ -643,10 +643,10 @@ function getRoomIndex(socket) {
 	}
 }
 
-function countRoomsOwnerOf(ip) {
+function countRoomsOwnerOf(socket) {
 	var counter = 0;
 	for(var i = 0; i < rooms.length; i++) {
-		if(rooms[i].owner === ip) {
+		if(rooms[i].owner === socket.request.connection.remoteAddress) {
 			counter++;
 		}
 	}
