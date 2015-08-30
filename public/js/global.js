@@ -832,16 +832,19 @@ document.getElementById('shape-tool').addEventListener('click', function(evt){
 document.getElementById('shapeRect').addEventListener('click', function(evt){
 	resetSubCategoryFlags();
 	tool.shapeTool.setShapeType(this, 'rectangle');
+	document.getElementById('shape-settings').className = "inline-block";
 });
 
 document.getElementById('shapeCircle').addEventListener('click', function(evt){
 	resetSubCategoryFlags();
 	tool.shapeTool.setShapeType(this, 'circle');
+	document.getElementById('shape-settings').className = "inline-block";
 });
 
 
 document.getElementById('text-tool').addEventListener('click', function(evt){
-	resetCategoryFlags();	
+	resetCategoryFlags();
+	resetSubCategoryFlags();	
 	tool.brush.setBrushType('text');
 	this.className = "button bselect tool";
 	document.getElementById('canvas').style.cursor = "text";
@@ -852,6 +855,7 @@ document.getElementById('text-tool').addEventListener('click', function(evt){
 document.getElementById('colourDrop').addEventListener('click', function(evt){
 	tool.brush.setBrushType('dropper');
 	resetCategoryFlags();
+	resetSubCategoryFlags();
 	this.className = "button bselect tool";
 	document.getElementById('pointer-canvas').style.cursor = "crosshair";
 	document.getElementById('dropper-settings').className = "";
@@ -867,16 +871,9 @@ function resetCategoryFlags() {
 	// Tools
 	document.getElementById('brushes').className = "button tool";
 	document.getElementById('colourDrop').className = "button tool";
-	document.getElementById('grid-tool').className = "button tool";
+	//document.getElementById('grid-tool').className = "button tool";
 	document.getElementById('text-tool').className = "button tool";
 	document.getElementById('shape-tool').className = "button tool";
-	// Tool Settings
-	document.getElementById('brush-settings').className = "invisible";
-	document.getElementById('rainbow-settings').className = "invisible";
-	document.getElementById('dropper-settings').className = "invisible";
-	document.getElementById('text-settings').className = "invisible";
-	document.getElementById('shape-settings').className = "invisible";
-	document.getElementById('line-settings').className = "invisible";
 	// Canvases
 	document.getElementById('canvas').style.cursor = "none";
 	document.getElementById('pointer-canvas').style.cursor = "none";
@@ -893,6 +890,14 @@ function resetSubCategoryFlags(){
 	// Shapes
 	document.getElementById('shapeRect').className = "button tool";
 	document.getElementById('shapeCircle').className = "button tool";
+
+	// Tool Settings
+	document.getElementById('brush-settings').className = "invisible";
+	document.getElementById('rainbow-settings').className = "invisible";
+	document.getElementById('dropper-settings').className = "invisible";
+	document.getElementById('text-settings').className = "invisible";
+	document.getElementById('shape-settings').className = "invisible";
+	document.getElementById('line-settings').className = "invisible";
 }
 
 /*document.getElementById('fillBucket').addEventListener('click', function(evt){
