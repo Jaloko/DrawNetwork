@@ -66,7 +66,6 @@ app.get('/', function(req, res) {
 });
 
 io.sockets.on('connection', function(socket) {
-
 	socket.on('get room list', function() {
 		var theRooms = [];
 		for(var i = 0; i < rooms.length; i++) {
@@ -89,7 +88,7 @@ io.sockets.on('connection', function(socket) {
 		if(validateBool(newData.isPublic) === true) {
 			if(countRoomsOwnerOf(socket) < 5) {
 				var id = generateId();
-				var ip = socket.request.connection.remoteAddress;
+				var ip = socket.handshake.address || socket.client.conn.remoteAddress || socket.conn.remoteAddress;
 				if(ip != null) {
 					rooms.push(new Room(id, ip, newData.isPublic));
 					socket.emit('room result', id);
