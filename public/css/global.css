@@ -321,6 +321,18 @@ input[type="radio"] {
 	background-color: #63574c;
 }
 
+#brush-settings > .button{
+	background: #B59274;
+}
+
+#brush-settings > .button:hover{
+	background: #FFDDBF;
+}
+
+#brush-settings > .bselect{
+	background: #DBB797;
+}
+
 .button:hover {
 	cursor: pointer;
 	background-color: #cfb9a6;
@@ -554,6 +566,14 @@ input[type="radio"] {
     opacity: 1;
 }
 
+
+#tool-collection-brush-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/cup29.png") center no-repeat;
+	background-size: 80%;
+}
+
 #tool-brush-img {
 	width: 40px;
 	height: 40px;
@@ -568,6 +588,14 @@ input[type="radio"] {
 	background-size: 100%;
 }
 
+
+#tool-rainbow-brush-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/star42.png") center no-repeat;
+	background-size: 80%;
+}
+
 #tool-dropper-img {
 	width: 40px;
 	height: 40px;
@@ -579,22 +607,39 @@ input[type="radio"] {
 	width: 40px;
 	height: 40px;
 	background: url("../img/icons/square194.png") center no-repeat;
-	background-size: 70%;
+	background-size: 80%;
+}
+
+/*Shapes*/
+#tool-shape-rect-img{
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/square.png") center no-repeat;
+	background-size: 80%;	
+}
+
+
+#tool-shape-circle-img{
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/circle.png") center no-repeat;
+	background-size: 80%;	
+}
+
+#tool-grid-img {
+	width: 40px;
+	height: 40px;
+	background: url("../img/icons/grid.png") center no-repeat;
+	background-size: 80%;
 }
 
 #tool-line-img {
 	width: 40px;
 	height: 40px;
 	background: url("../img/icons/divide4.png") center no-repeat;
-	background-size: 70%;
-}
-
-#tool-rainbow-brush-img {
-	width: 40px;
-	height: 40px;
-	background: url("../img/icons/star42.png") center no-repeat;
 	background-size: 80%;
 }
+
 
 #tool-eraser-img {
 	width: 40px;
@@ -614,7 +659,7 @@ input[type="radio"] {
 	width: 40px;
 	height: 40px;
 	background: url("../img/icons/download174.png") center no-repeat;
-	background-size: 90%;
+	background-size: 80%;
 }
 
 #tool-text-img {

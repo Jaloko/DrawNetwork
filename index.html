@@ -247,29 +247,20 @@
 							<canvas id="pointer-canvas" style="position:absolute; left: 0; top: 0;" width="960" height="528"></canvas>
 						</div>
 						<div id="tools">
-							<div id="brush" class="button bselect tool" data-tip="Standard Brush">
-								<div id="tool-brush-img" ></div>
+							<div id="brush" class="button tool" data-tip="Brushes">
+								<div id="tool-collection-brush-img"></div>
 							</div>
-							<div id="gradient-brush" class="button tool" data-tip="Gradient Brush">
-								<div id="tool-gradient-brush-img"></div>
+							<div id="shape-tool" class="button tool" data-tip="Shapes">
+								<div id="tool-shape-img"></div>
 							</div>
-							<div id="rainbow-brush" class="button tool" data-tip="Rainbow Brush">
-								<div id="tool-rainbow-brush-img"></div>
+							<div id="text-tool" class="button tool" data-tip="Text">
+								<div id="tool-text-img"></div>
 							</div>
 							<div id="colourDrop" class="button tool" data-tip="Colour Dropper">
 								<div id="tool-dropper-img"></div>
 							</div>
-							<div id="text-tool" class="button tool" data-tip="Text Tool">
-								<div id="tool-text-img"></div>
-							</div>
-							<div id="shape-tool" class="button tool" data-tip="Shape Tool">
-								<div id="tool-shape-img"></div>
-							</div>
-							<div id="line-tool" class="button tool" data-tip="Line Tool">
-								<div id="tool-line-img"></div>
-							</div>
-							<div id="eraser" class="button tool" data-tip="Eraser Tool">
-								<div id="tool-eraser-img"></div>
+							<div id="grid-tool" class="button tool" data-tip="Toogle Grids">
+								<div id="tool-grid-img"></div>
 							</div>
 							<div id="clearCanvas" class="button tool" data-tip="Vote To Clear">
 								<div id="tool-clear-img"></div>
@@ -283,12 +274,31 @@
 						</div>
 						<div id="tool-settings" >
 							<div id="brush-settings">
-								Size: <input id="brushSelection" type="range" min="1" max="100" value="30"></input>
+
+							<div id="brush" class="button tool" data-tip="Standard Brush">
+								<div id="tool-brush-img" ></div>
+							</div>
+							<div id="gradient-brush" class="button tool" data-tip="Gradient Brush">
+								<div id="tool-gradient-brush-img"></div>
+							</div>
+							<div id="rainbow-brush" class="button tool" data-tip="Rainbow Brush">
+								<div id="tool-rainbow-brush-img"></div>
+							</div>
+							<div id="eraser" class="button tool" data-tip="Eraser Tool">
+								<div id="tool-eraser-img"></div>
+							</div>
+
+							<div id="line-tool" class="button tool" data-tip="Line Tool">
+								<div id="tool-line-img"></div>
+							</div>
+								<label>Size:</label>
+								<input id="brushSelection" type="range" min="1" max="100" value="30"></input>
 								<div id="rainbow-settings" class="invisible">
-									Speed: <input id="speedSelection" type="range" min="1" max="20" value="1"></input>
+									<label>Speed:</label>
+									<input id="speedSelection" type="range" min="1" max="20" value="1"></input>
 								</div>
 								<div id="line-settings" class="invisible">
-									Line Tip: 			
+									<label>Line Tip:</label> 			
 									<select id="lineTip" onchange="changeLineTip()">
 										<option value="round">Rounded</option>
 										<option value="square">Flat</option>
@@ -314,11 +324,11 @@
 								</div>
 							</div>
 							<div id="shape-settings" class="invisible">
-								<div id="shapeRect" class="button bselect tool">
-								Rectangle
+								<div id="shapeRect" class="button bselect tool" data-tip="Square">
+									<div id="tool-shape-rect-img"></div>
 								</div>
-								<div id="shapeCircle" class="button tool">
-								Circle
+								<div id="shapeCircle" class="button tool" data-tip="Circle">
+									<div id="tool-shape-circle-img"></div>
 								</div>
 							</div>
 						</div>
