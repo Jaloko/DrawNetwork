@@ -755,81 +755,52 @@ document.getElementById('fontSel').addEventListener('change', function(evt){
 ------------------------------------------*/
 document.getElementById('clearCanvas').addEventListener('click', function(evt){
 	clearCanvas();
-})
+});
+
+/* Brushes */
+document.getElementById('brushes').addEventListener('click', function(evt){
+	tool.brush.setBrushType('freeroam');
+	resetCategoryFlags();
+	this.className = "button bselect tool";
+	document.getElementById('brush-settings').className = "inline-block";
+
+	var brush = document.getElementById('brush');
+	brush.className = "button bselect tool";
+});
 
 document.getElementById('brush').addEventListener('click', function(evt){
+	resetSubCategoryFlags();
 	tool.brush.setBrushType('freeroam');
-	resetTools();
 	this.className = "button bselect tool";
-	document.getElementById('brush-settings').className = "";
+	document.getElementById('brush-settings').className = "inline-block";
 });
 
 document.getElementById('square-brush').addEventListener('click', function(evt){
+	resetSubCategoryFlags();
 	tool.brush.setBrushType('square-brush');
-	resetTools();
 	this.className = "button bselect tool";
-	document.getElementById('brush-settings').className = "";
-});
-
-document.getElementById('colourDrop').addEventListener('click', function(evt){
-	tool.brush.setBrushType('dropper');
-	resetTools();
-	this.className = "button bselect tool";
-	document.getElementById('pointer-canvas').style.cursor = "crosshair";
-	document.getElementById('dropper-settings').className = "";
+	document.getElementById('brush-settings').className = "inline-block";
 });
 
 document.getElementById('gradient-brush').addEventListener('click', function(evt){
+	resetSubCategoryFlags();
 	tool.brush.setBrushType('gradient-brush');
-	resetTools();
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "";
 	document.getElementById('rainbow-settings').className = "inline-block";
 });
 
 document.getElementById('rainbow-brush').addEventListener('click', function(evt){
+	resetSubCategoryFlags();
 	tool.brush.setBrushType('rainbow-brush');
-	resetTools();
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "";
 	document.getElementById('rainbow-settings').className = "inline-block";
 });
 
-document.getElementById('saveCanvas').addEventListener('click', function(evt){
-	window.open(canvas.toDataURL());
-});
-
-document.getElementById('text-tool').addEventListener('click', function(evt){
-	tool.brush.setBrushType('text');
-	resetTools();
-	this.className = "button bselect tool";
-	document.getElementById('canvas').style.cursor = "text";
-	document.getElementById('pointer-canvas').style.cursor = "text";
-	document.getElementById('text-settings').className = "";
-});
-
-/* Shape tool */
-document.getElementById('shape-tool').addEventListener('click', function(evt){
-	tool.brush.setBrushType('shape');
-	resetTools();
-	this.className = "button bselect tool";
-	document.getElementById('canvas').style.cursor = "pointer";
-	document.getElementById('pointer-canvas').style.cursor = "pointer";
-	document.getElementById('shape-settings').className = "";
-});
-
-
-document.getElementById('shapeRect').addEventListener('click', function(evt){
-	tool.shapeTool.setShapeType(this, 'rectangle');
-});
-
-document.getElementById('shapeCircle').addEventListener('click', function(evt){
-	tool.shapeTool.setShapeType(this, 'circle');
-});
-
 document.getElementById('line-tool').addEventListener('click', function(evt){
+	resetSubCategoryFlags();
 	tool.brush.setBrushType('line');
-	resetTools();
 	this.className = "button bselect tool";
 	document.getElementById('canvas').style.cursor = "pointer";
 	document.getElementById('pointer-canvas').style.cursor = "pointer";
@@ -838,26 +809,67 @@ document.getElementById('line-tool').addEventListener('click', function(evt){
 });
 
 document.getElementById('eraser').addEventListener('click', function(evt){
+	resetSubCategoryFlags();
 	tool.brush.setBrushType('eraser');
-	resetTools();
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "";
 });
 
 
-function resetTools() {
+
+/* Shape tool */
+document.getElementById('shape-tool').addEventListener('click', function(evt){
+	resetCategoryFlags();
+	tool.brush.setBrushType('shape');
+	this.className = "button bselect tool";
+	document.getElementById('canvas').style.cursor = "pointer";
+	document.getElementById('pointer-canvas').style.cursor = "pointer";
+	document.getElementById('shape-settings').className = "";
+});
+
+
+document.getElementById('shapeRect').addEventListener('click', function(evt){
+	resetSubCategoryFlags();
+	tool.shapeTool.setShapeType(this, 'rectangle');
+});
+
+document.getElementById('shapeCircle').addEventListener('click', function(evt){
+	resetSubCategoryFlags();
+	tool.shapeTool.setShapeType(this, 'circle');
+});
+
+
+document.getElementById('text-tool').addEventListener('click', function(evt){
+	resetCategoryFlags();	
+	tool.brush.setBrushType('text');
+	this.className = "button bselect tool";
+	document.getElementById('canvas').style.cursor = "text";
+	document.getElementById('pointer-canvas').style.cursor = "text";
+	document.getElementById('text-settings').className = "";
+});
+
+document.getElementById('colourDrop').addEventListener('click', function(evt){
+	tool.brush.setBrushType('dropper');
+	resetCategoryFlags();
+	this.className = "button bselect tool";
+	document.getElementById('pointer-canvas').style.cursor = "crosshair";
+	document.getElementById('dropper-settings').className = "";
+});
+
+document.getElementById('saveCanvas').addEventListener('click', function(evt){
+	window.open(canvas.toDataURL());
+});
+
+
+function resetCategoryFlags() {
 	tool.textTool.textToRender = "";
 	readyForText = false;
 	// Tools
-	document.getElementById('brush').className = "button tool";
-	document.getElementById('square-brush').className = "button tool";
+	document.getElementById('brushes').className = "button tool";
 	document.getElementById('colourDrop').className = "button tool";
-	document.getElementById('gradient-brush').className = "button tool";
-	document.getElementById('rainbow-brush').className = "button tool";
+	document.getElementById('grid-tool').className = "button tool";
 	document.getElementById('text-tool').className = "button tool";
 	document.getElementById('shape-tool').className = "button tool";
-	document.getElementById('line-tool').className = "button tool";
-	document.getElementById('eraser').className = "button tool";
 	// Tool Settings
 	document.getElementById('brush-settings').className = "invisible";
 	document.getElementById('rainbow-settings').className = "invisible";
@@ -868,6 +880,16 @@ function resetTools() {
 	// Canvases
 	document.getElementById('canvas').style.cursor = "none";
 	document.getElementById('pointer-canvas').style.cursor = "none";
+};
+
+
+function resetSubCategoryFlags(){
+	document.getElementById('brush').className = "button tool";
+	document.getElementById('square-brush').className = "button tool";
+	document.getElementById('gradient-brush').className = "button tool";
+	document.getElementById('rainbow-brush').className = "button tool";
+	document.getElementById('line-tool').className = "button tool";
+	document.getElementById('eraser').className = "button tool";
 }
 
 /*document.getElementById('fillBucket').addEventListener('click', function(evt){

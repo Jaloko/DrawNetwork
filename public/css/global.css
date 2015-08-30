@@ -321,15 +321,18 @@ input[type="radio"] {
 	background-color: #63574c;
 }
 
-#brush-settings > .button{
+#brush-settings > .button,
+#shape-settings > .button{
 	background: #B59274;
 }
 
-#brush-settings > .button:hover{
+#brush-settings > .button:hover,
+#shape-settings > .button:hover{
 	background: #FFDDBF;
 }
 
-#brush-settings > .bselect{
+#brush-settings > .bselect,
+#shape-settings > .bselect{
 	background: #DBB797;
 }
 
@@ -566,105 +569,81 @@ input[type="radio"] {
     opacity: 1;
 }
 
-
-#tool-collection-brush-img {
+.button-icon{
 	width: 40px;
 	height: 40px;
+}
+
+#tool-collection-brush-img {
 	background: url("../img/icons/cup29.png") center no-repeat;
 	background-size: 80%;
 }
 
 #tool-brush-img {
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/artist3.png") center no-repeat;
 	background-size: 100%;
 }
 
 #tool-gradient-brush-img {
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/brush2.png") center no-repeat;
 	background-size: 100%;
 }
 
 
 #tool-rainbow-brush-img {
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/star42.png") center no-repeat;
 	background-size: 80%;
 }
 
 #tool-dropper-img {
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/color8.png") center no-repeat;
 	background-size: 100%;
 }
 
 #tool-shape-img {
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/square194.png") center no-repeat;
 	background-size: 80%;
 }
 
 /*Shapes*/
 #tool-shape-rect-img{
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/square.png") center no-repeat;
 	background-size: 80%;	
 }
 
 
 #tool-shape-circle-img{
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/circle.png") center no-repeat;
 	background-size: 80%;	
 }
 
 #tool-grid-img {
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/grid.png") center no-repeat;
 	background-size: 80%;
 }
 
 #tool-line-img {
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/divide4.png") center no-repeat;
 	background-size: 80%;
 }
 
 
 #tool-eraser-img {
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/erase2.png") center no-repeat;
 	background-size: 80%;
 }
 
 #tool-clear-img {
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/trash30.png") center no-repeat;
 	background-size: 80%;
 }
 
 #tool-save-img {
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/download174.png") center no-repeat;
 	background-size: 80%;
 }
 
 #tool-text-img {
-	width: 40px;
-	height: 40px;
 	background: url("../img/icons/font13.png") center no-repeat;
 	background-size: 100%;
 }

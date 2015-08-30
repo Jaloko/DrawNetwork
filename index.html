@@ -247,23 +247,26 @@
 							<canvas id="pointer-canvas" style="position:absolute; left: 0; top: 0;" width="960" height="528"></canvas>
 						</div>
 						<div id="tools">
-							<div id="brush" class="button tool" data-tip="Brushes">
-								<div id="tool-collection-brush-img"></div>
+							<div id="brushes" class="button bselect tool" data-tip="Brushes">
+								<div id="tool-collection-brush-img" class="button-icon"></div>
+							</div>
+							<div id="shape-tool" class="button tool" data-tip="Shape Tool">
+								<div id="tool-shape-img" class="button-icon"></div>
 							</div>
 							<div id="text-tool" class="button tool" data-tip="Text">
-								<div id="tool-text-img"></div>
+								<div id="tool-text-img" class="button-icon"></div>
 							</div>
 							<div id="colourDrop" class="button tool" data-tip="Colour Dropper">
-								<div id="tool-dropper-img"></div>
+								<div id="tool-dropper-img" class="button-icon"></div>
 							</div>
 							<div id="grid-tool" class="button tool" data-tip="Toogle Grids">
-								<div id="tool-grid-img"></div>
+								<div id="tool-grid-img" class="button-icon"></div>
 							</div>
 							<div id="clearCanvas" class="button tool" data-tip="Vote To Clear">
-								<div id="tool-clear-img"></div>
+								<div id="tool-clear-img" class="button-icon"></div>
 							</div>
 							<div id="saveCanvas" class="button tool" data-tip="Save Image">
-								<div id="tool-save-img"></div>
+								<div id="tool-save-img" class="button-icon"></div>
 							</div>
 							<div id="currentColour" data-tip="Current Colour"></div>
 							<div class="clear">
@@ -272,24 +275,24 @@
 						<div id="tool-settings" >
 							<div id="brush-settings">
 
-							<div id="brush" class="button tool" data-tip="Circle Brush">
-								<div id="tool-brush-img" ></div>
+							<div id="brush" class="button bselect tool" data-tip="Circle Brush">
+								<div id="tool-brush-img"  class="button-icon"></div>
 							</div>
 							<div id="square-brush" class="button tool" data-tip="Square Brush">
-								<div id="tool-brush-img" ></div>
+								<div id="tool-brush-img"  class="button-icon"></div>
 							</div>
 							<div id="gradient-brush" class="button tool" data-tip="Gradient Brush">
-								<div id="tool-gradient-brush-img"></div>
+								<div id="tool-gradient-brush-img" class="button-icon"></div>
 							</div>
 							<div id="rainbow-brush" class="button tool" data-tip="Rainbow Brush">
-								<div id="tool-rainbow-brush-img"></div>
+								<div id="tool-rainbow-brush-img" class="button-icon"></div>
 							</div>
 							<div id="eraser" class="button tool" data-tip="Eraser Tool">
-								<div id="tool-eraser-img"></div>
+								<div id="tool-eraser-img" class="button-icon"></div>
 							</div>
 
 							<div id="line-tool" class="button tool" data-tip="Line Tool">
-								<div id="tool-line-img"></div>
+								<div id="tool-line-img" class="button-icon"></div>
 							</div>
 								<label>Size:</label>
 								<input id="brushSelection" type="range" min="1" max="100" value="30"></input>
@@ -325,10 +328,10 @@
 							</div>
 							<div id="shape-settings" class="invisible">
 								<div id="shapeRect" class="button bselect tool" data-tip="Square">
-									<div id="tool-shape-rect-img"></div>
+									<div id="tool-shape-rect-img" class="button-icon"></div>
 								</div>
 								<div id="shapeCircle" class="button tool" data-tip="Circle">
-									<div id="tool-shape-circle-img"></div>
+									<div id="tool-shape-circle-img" class="button-icon"></div>
 								</div>
 							</div>
 						</div>
