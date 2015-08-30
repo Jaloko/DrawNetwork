@@ -761,6 +761,7 @@ document.getElementById('clearCanvas').addEventListener('click', function(evt){
 document.getElementById('brushes').addEventListener('click', function(evt){
 	tool.brush.setBrushType('freeroam');
 	resetCategoryFlags();
+	resetSubCategoryFlags();
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "inline-block";
 
@@ -816,12 +817,12 @@ document.getElementById('eraser').addEventListener('click', function(evt){
 });
 
 
-
 /* Shape tool */
 document.getElementById('shape-tool').addEventListener('click', function(evt){
 	resetCategoryFlags();
+	resetSubCategoryFlags();
 	tool.brush.setBrushType('shape');
-	this.className = "button bselect tool";
+	tool.shapeTool.setShapeType(document.getElementById('shapeRect'), 'rectangle');
 	document.getElementById('canvas').style.cursor = "pointer";
 	document.getElementById('pointer-canvas').style.cursor = "pointer";
 	document.getElementById('shape-settings').className = "";
@@ -860,7 +861,6 @@ document.getElementById('saveCanvas').addEventListener('click', function(evt){
 	window.open(canvas.toDataURL());
 });
 
-
 function resetCategoryFlags() {
 	tool.textTool.textToRender = "";
 	readyForText = false;
@@ -890,6 +890,9 @@ function resetSubCategoryFlags(){
 	document.getElementById('rainbow-brush').className = "button tool";
 	document.getElementById('line-tool').className = "button tool";
 	document.getElementById('eraser').className = "button tool";
+	// Shapes
+	document.getElementById('shapeRect').className = "button tool";
+	document.getElementById('shapeCircle').className = "button tool";
 }
 
 /*document.getElementById('fillBucket').addEventListener('click', function(evt){

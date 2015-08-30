@@ -584,9 +584,14 @@ input[type="radio"] {
 	background-size: 100%;
 }
 
+#tool-square-brush-img {
+	background: url("../img/icons/roller-brush.png") center no-repeat;
+	background-size: 80%;
+}
+
 #tool-gradient-brush-img {
-	background: url("../img/icons/brush2.png") center no-repeat;
-	background-size: 100%;
+	background: url("../img/icons/painter11.png") center no-repeat;
+	background-size: 80%;
 }
 
 
