@@ -312,6 +312,29 @@ io.sockets.on('connection', function(socket) {
 		}
 	});
 
+	socket.on('draw square', function(data) {
+		var index = getRoomIndex(socket);
+		var newData = {
+			name: data.name,
+			x: data.x,
+			y: data.y,
+			lastX: data.lastX,
+			lastY: data.lastY,
+			size: data.size
+		};
+		if(index != null) {
+			if(validateText(newData.name) && newData.name.length <= 30
+				&& validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.lastX)
+				&& validateNumber(newData.lastY) && validateNumber(newData.size) && newData.size > 0 && newData.size <= 100) {
+				if(rooms[index].users != null) {
+					if(rooms[index].clearVote.vote == false) {
+						socket.broadcast.to(rooms[index].id).emit('sync draw square', newData);
+					}
+				}
+			}
+		}
+	});
+
 	socket.on('chat message', function(data) {
 		var index = getRoomIndex(socket);
 		var newData = {
@@ -346,6 +369,26 @@ io.sockets.on('connection', function(socket) {
 		if(validateText(newData.id)) {
 			if(socket.rooms.length <= 1) {
 				socket.join(newData.id);
+			}
+		}
+	});
+
+	socket.on('does room exist', function(data) {
+		var newData = {
+			id: data,
+		};
+		if(validateText(newData.id)) {
+			var isRoom = false
+			for(var i = 0; i < rooms.length; i++) {
+				if(rooms[i].id == newData.id) {
+					isRoom = true;
+					break;
+				}
+			}
+			if(isRoom) {
+				socket.emit('does room exist result', isRoom);
+			} else {
+				socket.emit('does room exist result', isRoom);
 			}
 		}
 	});

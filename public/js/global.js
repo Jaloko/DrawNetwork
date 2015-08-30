@@ -189,6 +189,10 @@ socket.on('sync erase', function(data) {
 	tool.shapeTool.drawRect(data.x, data.y, data.lastX, data.lastY, data.size, "white");
 });
 
+socket.on('sync draw square', function(data) {
+	tool.shapeTool.drawRect(data.x, data.y, data.lastX, data.lastY, data.size, "white");
+});
+
 socket.on('sync result', function(data) {
 	document.getElementById('name-wrap').className = "invisible";
 	if(data != null) {
@@ -515,7 +519,7 @@ document.addEventListener('mousemove', function(evt) {
 	mousePos = getMousePos(evt);
 	if(tool.getBrushType() === "freeroam" || tool.getBrushType() === "gradient-brush" || tool.getBrushType() === "rainbow-brush") {
 		tool.brush.drawBrushOutline(mousePos.x, mousePos.y);
-	} else if(tool.getBrushType() === "eraser"){
+	} else if(tool.getBrushType() === "eraser" || tool.getBrushType() === "square-brush"){
 		tool.brush.drawEraserOutline(mousePos.x, mousePos.y);
 	}
 	if(mouseDown === true && hasSynced === true && canDraw === true) {
@@ -549,7 +553,9 @@ document.addEventListener('mousemove', function(evt) {
 			}
 		} else if(tool.getBrushType() === "eraser"){
 		    tool.brush.erase();
-		} else if(tool.getBrushType() === "text"){
+		} else if(tool.getBrushType() === "square-brush"){
+		    tool.brush.drawSquare();
+		}  else if(tool.getBrushType() === "text"){
 			textPos = mousePos;
 			tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 		} else if(tool.getBrushType() === "shape"){
@@ -573,7 +579,7 @@ document.addEventListener('mousemove', function(evt) {
 		}
 
 	} else {
-				changeColour();
+		changeColour();
 	}
 }, false);
 
@@ -758,6 +764,13 @@ document.getElementById('brush').addEventListener('click', function(evt){
 	document.getElementById('brush-settings').className = "";
 });
 
+document.getElementById('square-brush').addEventListener('click', function(evt){
+	tool.brush.setBrushType('square-brush');
+	resetTools();
+	this.className = "button bselect tool";
+	document.getElementById('brush-settings').className = "";
+});
+
 document.getElementById('colourDrop').addEventListener('click', function(evt){
 	tool.brush.setBrushType('dropper');
 	resetTools();
@@ -837,6 +850,7 @@ function resetTools() {
 	readyForText = false;
 	// Tools
 	document.getElementById('brush').className = "button tool";
+	document.getElementById('square-brush').className = "button tool";
 	document.getElementById('colourDrop').className = "button tool";
 	document.getElementById('gradient-brush').className = "button tool";
 	document.getElementById('rainbow-brush').className = "button tool";

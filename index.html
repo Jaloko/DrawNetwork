@@ -250,6 +250,9 @@
 							<div id="brush" class="button bselect tool" data-tip="Standard Brush">
 								<div id="tool-brush-img" ></div>
 							</div>
+							<div id="square-brush" class="button tool" data-tip="Square Brush">
+								<div id="tool-brush-img" ></div>
+							</div>
 							<div id="gradient-brush" class="button tool" data-tip="Gradient Brush">
 								<div id="tool-gradient-brush-img"></div>
 							</div>
@@ -452,34 +455,29 @@
 						</div>
 					</div>
 				</noscript>
-	<script>
-	 if(checkPageState()) {
-	  socket.on('recieve room list', function(data) {
-		/* To do add a method of telling the using if a room does not exist */
-		/*  var counter = 0;
-		for(var i = 0; i < data.length; i++) {
-		console.log(getURLParam('room') + " " + data[i].id);
-		if(getURLParam('room') === data[i].id) {
-		 counter++;
-		 break;
-		}
-		}*/
-		//if(counter <= 0) {
-		//document.getElementById('name-box').className = "";
-		//document.getElementById('room-not-exist').className = "";
-		//} else {
-		document.getElementById('name-box').className = "";
-		document.getElementById('name-content').className = "";
-		//}
-	  });
-	  /* Temporary Solution*/
-	  socket.on('room does not exist', function(data) {
-		document.getElementById('name-box').className = "";
-		document.getElementById('room-not-exist').className = "";
-		document.getElementById('name-content').className = "Invisible";
-	  });
-	 }
-	</script>
+				<script>
+					if(checkPageState()) {
+					 	socket.emit('does room exist', getURLParam('room'));
+					 	socket.on('does room exist result', function(data) {
+							if(data == true) {
+								document.getElementById('name-box').className = "";
+								document.getElementById('name-content').className = "";
+							} else {
+								document.getElementById('name-box').className = "";
+								document.getElementById('room-not-exist').className = "";
+								document.getElementById('name-content').className = "Invisible";
+							}
+
+							//}
+					  	});
+					  	// Fall back incase the above doesnt catch that the room doesnt exist
+					  	socket.on('room does not exist', function(data) {
+							document.getElementById('name-box').className = "";
+							document.getElementById('room-not-exist').className = "";
+							document.getElementById('name-content').className = "Invisible";
+					  	});
+					}
+				</script>
 			</div>
 		</div>
 		<div id="footer">
