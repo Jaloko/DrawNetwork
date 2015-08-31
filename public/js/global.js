@@ -16,7 +16,7 @@ var lastPos = {
 	x: 0,
 	y: 0
 }
-var socket = io.connect('http://draw.network:8080');
+var socket = io.connect();
 var hasSynced = false;
 var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
