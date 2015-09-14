@@ -546,7 +546,8 @@ io.sockets.on('connection', function(socket) {
 setInterval(function() {
 	for(var i = 0; i < rooms.length; i++) {
 		if(rooms[i].users.length === 0 && rooms[i].owner != "admin") {
-			if(new Date().getTime() > rooms[i].activity + 259200000) {
+			// Delete rooms that have more than 3 days of inactivity
+			if(new Date().getTime() > parseInt(rooms[i].activity) + 259200000) {
 				rooms.splice(i, 1);
 				writeRoomsToFile();
 				continue;
