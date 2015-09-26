@@ -4,8 +4,117 @@ var express = require('express'),
 	io = require('socket.io').listen(server),
 	fs = require('fs');
 	app.use(express.static('public'));
+var passport = require('passport');
+var passportLocal = require('passport-local');
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var expressSession = require('express-session');
+var crypto = require('crypto');
+var sqlite3 = require('sqlite3').verbose();
+var db = new sqlite3.Database('database.db');
+
+db.serialize(function() {
+	db.run('CREATE TABLE IF NOT EXISTS users(' +
+			'id integer PRIMARY KEY NOT NULL,' +
+			'username text NOT NULL,' +
+			'password text NOT NULL,' +
+			'salt text NOT NULL,' +
+			'administrator boolean NOT NULL' +
+			')');
+
+	var salt = String(crypto.randomBytes(16));
+	var passwordHash = hashPassword("admin215", salt);
+	db.run('INSERT OR IGNORE INTO users(id, username, password, salt, administrator) VALUES(1, "admin", "' + passwordHash + '", "' + salt + '", 1)');
+});
+
+// Set the view engine
+app.set('view engine', 'ejs');
+
+app.use(bodyParser());
+app.use(cookieParser());
+app.use(expressSession( { 
+	secret: process.env.SESSION_SECRET || 'secret',
+	resave: false,
+	saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+function hashPassword(password, salt) {
+  var hash = crypto.createHash('sha256');
+  hash.update(password);
+  hash.update(salt);
+  return hash.digest('hex');
+}
 
 var rooms = [];
+
+// Middleware
+passport.use(new passportLocal.Strategy(function(username, password, done) {
+	db.get('SELECT salt FROM users WHERE username = ?', username, function(err, row) {
+	if (!row) return done(null, false);
+	var hash = hashPassword(password, row.salt);
+		db.get('SELECT username, id FROM users WHERE username = ? AND password = ? AND administrator = ?', username, hash, 1, function(err, row) {
+		    if (!row) return done(null, false);
+		    return done(null, row);
+		});
+	});
+}));
+
+passport.serializeUser(function(user, done) {
+	done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+	db.get('SELECT id, username FROM users WHERE id = ?', id, function(err, row) {
+		if (!row) return done(null, false);
+		return done(null, row);
+	});
+})
+
+app.get('/acp', function(req, res) {
+	if(!req.isAuthenticated()) {
+		res.redirect('/acp/login');
+	} else {
+		res.render('acp', {
+			user: req.user,
+			rooms: rooms
+		});
+	}
+})
+
+app.post('/acp', function(req, res) {
+	if(req.isAuthenticated()) {
+		var roomsToDelete = Object.keys(req.body).map(function(k) { return req.body[k] });
+		for(var i = 0; i < roomsToDelete.length; i++) {
+			for(var ii = 0; ii < rooms.length; ii++) {
+				if(req.body[ii] != undefined) {
+					if(rooms[ii].owner != "admin") {
+						rooms.splice(ii, 1);
+						break;
+					}
+				}
+			}
+		}
+		writeRoomsToFile();
+	}
+	res.redirect('/acp');
+});
+
+app.post('/acp/login', passport.authenticate('local'), function(req, res) {
+	res.redirect('/acp');
+});
+
+app.get('/acp/login', function(req, res) {
+	res.render('login');
+});
+
+app.get('/acp/logout', function(req, res) {
+	req.logout();
+	res.redirect('/acp');
+});
+
 
 // Create the file if it doesnt exist
 fs.exists(__dirname + "/rooms.txt", function(exists) {
@@ -25,7 +134,13 @@ function readFile() {
 			console.log("No rooms in file, created new room.");
 	    } else {
 		    for(var r = 0; r < array.length / 5; r++) {
-		    	var room = new Room(array[r * 5], array[r * 5 + 1], Boolean(array[r * 5 + 2]));
+		    	var isPublic;
+		    	if(array[r * 5 + 2] == "true") {
+		    		isPublic = true;
+		    	} else {
+		    		isPublic = false;
+		    	}
+		    	var room = new Room(array[r * 5], array[r * 5 + 1], isPublic);
 		    	room.storedCanvas = array[r * 5 + 3];
 		    	room.activity = array[r * 5 + 4];
 		    	rooms.push(room);
@@ -65,7 +180,12 @@ app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/index.html');
 });
 
+app.get('/acp', function(req, res) {
+	res.render('acp');
+});
+
 io.sockets.on('connection', function(socket) {
+
 	socket.on('get room list', function() {
 		var theRooms = [];
 		for(var i = 0; i < rooms.length; i++) {

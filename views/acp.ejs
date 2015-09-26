@@ -1,0 +1,86 @@
+<% include /partials/header %>
+	<div id="acp-content">
+		<script>
+			var socket = io.connect();
+			var selectedRoom;
+			// Coppied from index.html - line 154
+			function selectElement(ele) {
+				var temp = document.getElementById(ele.id + "-radio");
+				temp.checked = true;
+				var tableRows = document.getElementById("room-list").rows;
+				for(var i = 0; i < tableRows.length; i++) {
+					for(var ii = 0; ii < tableRows[i].cells.length; ii++) {
+						tableRows[i].cells[ii].className = "";
+					}
+				}
+				for(var i = 0; i < ele.cells.length; i++) {
+					ele.cells[i].className = "row-selected";
+				}
+				selectedRoom = ele.id;
+			}
+
+			function redirectToRoom() {
+				if(selectedRoom == null) {
+					var tableRows = document.getElementById("room-list").rows;
+					selectedRoom = tableRows[0].id;
+				}
+				location.href = '/?room=' + selectedRoom;
+			}
+		</script>
+		<h2>Administration Control Panel</h2>
+			Hello, <%= user.username %>! <br>
+			<a href="/acp/logout">Log out here</a> <br>
+			<div id="room-container">
+				<!-- Table Header -->
+				<table id="room-list-headers">
+					<thead>
+						<tr>
+							<th>Room ID</th>
+							<th>No. Users</th>
+							<th>Last Activity</th>
+							<th>Public</th>
+							<th>Delete Room</th>
+						</tr>
+					</thead>
+				</table>
+				<!-- Table Body -->
+				<form action="/acp" method="post">
+					<div id="table-wrap-scroll" class="table-scroll">
+						<table id="room-list">
+							<tbody>
+							<%	for(var i = 0; i < rooms.length; i++) { 
+								if(i == 0) { %>
+								<tr id="<%= rooms[i].id %>" onclick="selectElement(this)">
+									<td class="row-selected"><%= rooms[i].id %></td>
+									<td class="row-selected"><%= rooms[i].users.length %>/10</td>
+									<td class="row-selected"><%= rooms[i].activity %></td>
+									<td class="row-selected"><%= rooms[i].public %></td>
+									<td class="row-selected"><input type="checkbox" name="<%= i %>" value="true" disabled></td>
+								</tr>
+							<% } else { %>
+								<tr id="<%= rooms[i].id %>" onclick="selectElement(this)">
+									<td><%= rooms[i].id %></td>
+									<td><%= rooms[i].users.length %>/10</td>
+									<td><%= rooms[i].activity %></td>
+									<td><%= rooms[i].public %></td>
+									<td><input type="checkbox" name="<%= i %>" value="true"></td>
+								</tr>
+							<% 	}} %>
+							</tbody>
+						</table>
+					</div>
+				 	<div class="button" type="submit" onclick="this.parentNode.submit();">Submit</div>
+				 	<div class="button" class="center" onclick="redirectToRoom()">
+						Join Room
+					</div>
+				</form>
+				<%  for(var i = 0; i < rooms.length; i++) {
+						if(i == 0) { %>
+					<input id="<%= rooms[i].id %>-radio" type="radio" name="rooms" value="<%= rooms[i].id %>" checked="true">
+					<% } else {%>
+						<input id="<%= rooms[i].id %>-radio" type="radio" name="rooms" value="<%= rooms[i].id %>" checked="false">
+				<% } } %>
+			</div>
+			<div class="clear"></div>
+	</div>
+<% include /partials/footer %>
