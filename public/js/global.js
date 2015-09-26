@@ -774,6 +774,10 @@ document.getElementById('brush').addEventListener('click', function(evt){
 	tool.brush.setBrushType('freeroam');
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "inline-block";
+
+
+	document.getElementById('canvas').style.cursor = "none";
+	document.getElementById('pointer-canvas').style.cursor = "none";
 });
 
 document.getElementById('square-brush').addEventListener('click', function(evt){
@@ -781,6 +785,10 @@ document.getElementById('square-brush').addEventListener('click', function(evt){
 	tool.brush.setBrushType('square-brush');
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "inline-block";
+
+
+	document.getElementById('canvas').style.cursor = "none";
+	document.getElementById('pointer-canvas').style.cursor = "none";
 });
 
 document.getElementById('gradient-brush').addEventListener('click', function(evt){
@@ -789,6 +797,10 @@ document.getElementById('gradient-brush').addEventListener('click', function(evt
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "";
 	document.getElementById('rainbow-settings').className = "inline-block";
+
+
+	document.getElementById('canvas').style.cursor = "none";
+	document.getElementById('pointer-canvas').style.cursor = "none";
 });
 
 document.getElementById('rainbow-brush').addEventListener('click', function(evt){
@@ -797,6 +809,9 @@ document.getElementById('rainbow-brush').addEventListener('click', function(evt)
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "";
 	document.getElementById('rainbow-settings').className = "inline-block";
+
+	document.getElementById('canvas').style.cursor = "none";
+	document.getElementById('pointer-canvas').style.cursor = "none";
 });
 
 document.getElementById('line-tool').addEventListener('click', function(evt){
@@ -874,10 +889,8 @@ function resetCategoryFlags() {
 	//document.getElementById('grid-tool').className = "button tool";
 	document.getElementById('text-tool').className = "button tool";
 	document.getElementById('shape-tool').className = "button tool";
-	// Canvases
-	document.getElementById('canvas').style.cursor = "none";
-	document.getElementById('pointer-canvas').style.cursor = "none";
 };
+
 
 
 function resetSubCategoryFlags(){
