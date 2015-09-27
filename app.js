@@ -1,8 +1,9 @@
 var express = require('express'),
 	app = express(),
 	server = require('http').createServer(app),
-	io = require('socket.io').listen(server),
-	fs = require('fs');
+	io = require('socket.io').listen(server);
+	// Deprecated
+	//fs = require('fs');
 	app.use(express.static('public'));
 var passport = require('passport');
 var passportLocal = require('passport-local');
@@ -13,6 +14,8 @@ var crypto = require('crypto');
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('database.db');
 
+var rooms = [];
+
 db.serialize(function() {
 	db.run('CREATE TABLE IF NOT EXISTS users(' +
 			'id integer PRIMARY KEY NOT NULL,' +
@@ -22,15 +25,43 @@ db.serialize(function() {
 			'administrator boolean NOT NULL' +
 			')');
 
+	db.run('CREATE TABLE IF NOT EXISTS rooms(' +
+			'id text PRIMARY KEY NOT NULL,' +
+			'owner text NOT NULL,' +
+			'public boolean NOT NULL,' +
+			'canvas blob,' +
+			'activity integer NOT NULL' +
+			')');
+
 	var salt = String(crypto.randomBytes(16));
 	var passwordHash = hashPassword("admin215", salt);
 	db.run('INSERT OR IGNORE INTO users(id, username, password, salt, administrator) VALUES(1, "admin", "' + passwordHash + '", "' + salt + '", 1)');
+	db.get('SELECT COUNT(*) AS rows FROM rooms', function(err, row) {
+		if(row.rows == 0) {
+			var newRoom = new Room(generateId(), "admin", true);
+			rooms.push(newRoom);
+			db.run('INSERT OR IGNORE INTO rooms(id, owner, public, activity) VALUES("' + newRoom.id + '", "' + newRoom.owner + '", ' + (newRoom.public ? 1 : 0) + ', ' + newRoom.activity + ')');
+			console.log("No rooms in database, created new room.");
+		} else {
+			var counter = 0;
+			db.each('SELECT * FROM rooms', function(err, row) {
+				var oldRoom = new Room(row.id, row.owner, row.public == 1 ? true : false);
+				oldRoom.storedCanvas = row.canvas;
+				oldRoom.activity = row.activity;
+				rooms.push(oldRoom);
+				counter++;
+			}, function() {
+				console.log("Successfully loaded " + counter + " room(s) from the database.");
+			});
+		}
+	});
 });
 
 // Set the view engine
 app.set('view engine', 'ejs');
 
-app.use(bodyParser());
+app.use(bodyParser.urlencoded( { extended: true } ));
+app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(expressSession( { 
 	secret: process.env.SESSION_SECRET || 'secret',
@@ -47,8 +78,6 @@ function hashPassword(password, salt) {
   hash.update(salt);
   return hash.digest('hex');
 }
-
-var rooms = [];
 
 // Middleware
 passport.use(new passportLocal.Strategy(function(username, password, done) {
@@ -71,7 +100,7 @@ passport.deserializeUser(function(id, done) {
 		if (!row) return done(null, false);
 		return done(null, row);
 	});
-})
+});
 
 app.get('/acp', function(req, res) {
 	if(!req.isAuthenticated()) {
@@ -82,7 +111,7 @@ app.get('/acp', function(req, res) {
 			rooms: rooms
 		});
 	}
-})
+});
 
 app.post('/acp', function(req, res) {
 	if(req.isAuthenticated()) {
@@ -91,13 +120,15 @@ app.post('/acp', function(req, res) {
 			for(var ii = 0; ii < rooms.length; ii++) {
 				if(req.body[ii] != undefined) {
 					if(rooms[ii].owner != "admin") {
+						deleteRoomInDB(ii);
 						rooms.splice(ii, 1);
 						break;
 					}
 				}
 			}
 		}
-		writeRoomsToFile();
+		// Deprecated
+		//writeRoomsToFile();
 	}
 	res.redirect('/acp');
 });
@@ -116,15 +147,16 @@ app.get('/acp/logout', function(req, res) {
 });
 
 
-// Create the file if it doesnt exist
+/*// Create the file if it doesnt exist
 fs.exists(__dirname + "/rooms.txt", function(exists) {
     if (!exists) {
 		fs.writeFile(__dirname + "/rooms.txt", '', function(){});
     }
     readFile();
-});
+});*/
 
-function readFile() {
+// Deprecated
+/*function readFile() {
 	// Load room data from the file
 	fs.readFile(__dirname + "/rooms.txt", function(err, data) {
 	    if(err) throw err;
@@ -148,7 +180,7 @@ function readFile() {
 		    console.log("Successfully loaded rooms from file.");
 	    }
 	});
-}
+}*/
 
 var timer = new Date().getTime();
 var saveRoomsTimer = new Date().getTime();
@@ -210,7 +242,9 @@ io.sockets.on('connection', function(socket) {
 				var id = generateId();
 				var ip = socket.handshake.address || socket.client.conn.remoteAddress || socket.conn.remoteAddress;
 				if(ip != null) {
-					rooms.push(new Room(id, ip, newData.isPublic));
+					var newRoom = new Room(id, ip, newData.isPublic)
+					rooms.push(newRoom);
+					db.run('INSERT OR IGNORE INTO rooms(id, owner, public, activity) VALUES("' + newRoom.id + '", "' + newRoom.owner + '", ' + (newRoom.public ? 1 : 0) + ', ' + newRoom.activity + ')');
 					socket.emit('room result', id);
 					var isPublic;
 					if(newData.isPublic === true) {
@@ -668,8 +702,10 @@ setInterval(function() {
 		if(rooms[i].users.length === 0 && rooms[i].owner != "admin") {
 			// Delete rooms that have more than 3 days of inactivity
 			if(new Date().getTime() > parseInt(rooms[i].activity) + 259200000) {
+				deleteRoomInDB(i);
 				rooms.splice(i, 1);
-				writeRoomsToFile();
+				// Deprecated
+				//writeRoomsToFile();
 				continue;
 			}
 		}
@@ -734,18 +770,38 @@ setInterval(function() {
 		if(new Date().getTime() > saveRoomsTimer + 1000) {
 			finalSaveRooms = true;
 			saveRoomsTimer = new Date().getTime();
-			writeRoomsToFile();
+			updateRoomsInDB();
+			// Deprecated
+			//writeRoomsToFile();
 		}
 	} else{
 		if(finalSaveRooms === true) {
 			finalSaveRooms = false;
-			writeRoomsToFile();
+			updateRoomsInDB();
+			// Deprecated
+			//writeRoomsToFile();
 		}
 	}
 
 }, 1);
 
-function writeRoomsToFile() {
+function updateRoomInDB(index) {
+	db.run('UPDATE rooms SET canvas = "' + rooms[index].storedCanvas + '", activity = ' + rooms[index].activity + ' WHERE id = "' + rooms[index].id + '"');
+}
+
+function deleteRoomInDB(index) {
+	db.run('DELETE FROM rooms WHERE id = "' + rooms[index].id + '"');
+}
+
+// Assumes the rooms in db are the same as in memory - which they will be
+function updateRoomsInDB() {
+	for(var r = 0; r < rooms.length; r++) {
+		updateRoomInDB(r);
+	}
+}
+
+// Deprecated
+/*function writeRoomsToFile() {
 	fs.writeFile(__dirname + "/rooms.txt", '', function(){});
 	fs.writeFile(__dirname + "/rooms.txt", saveRooms(), function(err) {
 	    if(err) {
@@ -753,8 +809,9 @@ function writeRoomsToFile() {
 	    }
 	});
 }
-
-function saveRooms() {
+*/
+// Deprecated
+/*function saveRooms() {
 	var text = "";
 	for(var r = 0; r < rooms.length; r++) {
 		text += rooms[r].id + "\n";
@@ -767,7 +824,7 @@ function saveRooms() {
 		}
 	}
 	return text;
-} 
+} */
 
 function generateId(){
     var text = "";
