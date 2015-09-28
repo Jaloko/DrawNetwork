@@ -314,6 +314,7 @@ socket.on('sync chat message', function(data) {
 		messageCounter = 0;
 	}
 });
+
 socket.on('canvas saved', function(data) {
 	cSavedTimer = new Date().getTime();
 	document.getElementById('save-complete').className = "";
@@ -324,6 +325,10 @@ socket.on('canvas saved', function(data) {
 		document.getElementById('save-progress').className = "";
 		currentlySaving = false;
 	}, 1500)
+});
+
+socket.on('room does not exist', function() {
+	location.reload();
 });
 
 function clearChatNotifs() {
@@ -838,6 +843,7 @@ document.getElementById('shape-tool').addEventListener('click', function(evt){
 	resetSubCategoryFlags();
 	tool.brush.setBrushType('shape');
 	tool.shapeTool.setShapeType(document.getElementById('shapeRect'), 'rectangle');
+	this.className = "button bselect tool";
 	document.getElementById('canvas').style.cursor = "pointer";
 	document.getElementById('pointer-canvas').style.cursor = "pointer";
 	document.getElementById('shape-settings').className = "";

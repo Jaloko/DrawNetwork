@@ -36,6 +36,7 @@
 					<thead>
 						<tr>
 							<th>Room ID</th>
+							<th>Owner</th>
 							<th>No. Users</th>
 							<th>Last Activity</th>
 							<th>Public</th>
@@ -52,16 +53,18 @@
 								if(i == 0) { %>
 								<tr id="<%= rooms[i].id %>" onclick="selectElement(this)">
 									<td class="row-selected"><%= rooms[i].id %></td>
+									<td  class="row-selected"><%= rooms[i].owner %></td>
 									<td class="row-selected"><%= rooms[i].users.length %>/10</td>
-									<td class="row-selected"><%= rooms[i].activity %></td>
+									<td class="row-selected"><%= convertTime((new Date().getTime() - rooms[i].activity) / 1000) %></td>
 									<td class="row-selected"><%= rooms[i].public %></td>
 									<td class="row-selected"><input type="checkbox" name="<%= i %>" value="true" disabled></td>
 								</tr>
 							<% } else { %>
 								<tr id="<%= rooms[i].id %>" onclick="selectElement(this)">
 									<td><%= rooms[i].id %></td>
+									<td><%= rooms[i].owner %></td>
 									<td><%= rooms[i].users.length %>/10</td>
-									<td><%= rooms[i].activity %></td>
+									<td><%= convertTime((new Date().getTime() - rooms[i].activity) / 1000) %></td>
 									<td><%= rooms[i].public %></td>
 									<td><input type="checkbox" name="<%= i %>" value="true"></td>
 								</tr>

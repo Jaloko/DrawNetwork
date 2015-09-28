@@ -21,9 +21,14 @@
     width: 80%;
 }
 
+#acp-content #room-list-headers tr, #acp-content #room-container tr {
+    text-align: left;
+    width: 100%;
+}
+
 #acp-content #room-list-headers th, #acp-content #room-container td {
     text-align: left;
-    width: 22%;
+    width: 18%;
 }
 
 
