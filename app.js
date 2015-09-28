@@ -573,6 +573,7 @@ io.sockets.on('connection', function(socket) {
 						rooms[index].users.push(newData);
 						var serverUser = {
 							id: socket.id,
+							ip: socket.handshake.address || socket.client.conn.remoteAddress || socket.conn.remoteAddress,
 							hasSynced: false,
 							canSync: false,
 							hasVoted: false,
