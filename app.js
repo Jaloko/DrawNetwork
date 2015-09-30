@@ -242,7 +242,8 @@ io.sockets.on('connection', function(socket) {
 		if(validateBool(newData.isPublic) === true) {
 			if(countRoomsOwnerOf(socket) < 5) {
 				var id = generateId();
-				var ip = socket.handshake.address || socket.client.conn.remoteAddress || socket.conn.remoteAddress;
+				// socket.handshake.address || socket.client.conn.remoteAddress || socket.conn.remoteAddress
+				var ip = socket.request.connection.remoteAddress;
 				if(ip != null) {
 					var newRoom = new Room(id, ip, newData.isPublic)
 					rooms.push(newRoom);
