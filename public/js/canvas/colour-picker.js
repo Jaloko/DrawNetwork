@@ -47,7 +47,7 @@ function webGLStart() {
     image.onload = function() {
         hueCtx.drawImage(image, 0, 0);
     },
-    image.src = "img/colour-range.png";
+    image.src = "/images/colour-range.png";
     initGL(webglCanvas);
     initShaders();
     initBuffers();

@@ -1,10 +1,14 @@
 <% include /partials/header %>
-	<div id="acp-content">
-		<h2>Administration Control Panel</h2>
-		<form action="" method="post">
-			<span>Username: </span><input type="text" name="username"> <br>
-			<span>Password: </span><input type="password" name="password"> <br>
-			<button class="button" type="submit" onclick="this.parentNode.submit();">Log In</button>
-		</form>
+	<div class="container center">
+		<div class="content-wrap">
+			<h2>Log In</h2>
+			<div class="special-box">
+				<form action="" method="post">
+					<span class="login-fixed-width left">Username: </span><input name="username" type="text" autofocus/> <br><br>
+					<span class="login-fixed-width left">Password: </span><input name="password" type="password"/> <br> <br>
+					<a class="btn outline" onclick="this.parentNode.submit();">Log In</a>
+				</form>
+			</div>
+		</div>
 	</div>
 <% include /partials/footer %>

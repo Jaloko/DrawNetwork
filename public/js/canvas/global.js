@@ -54,6 +54,28 @@ var messageCounter = 0;
 var userJoinCounter = 0;
 var canvasRect = canvas.getBoundingClientRect();
 
+function loadCanvasPage() {
+	var roomId = document.getElementById('room-id').innerHTML;
+	socket.emit('does room exist', roomId);
+}
+
+socket.on('does room exist result', function(data) {
+	if(data == true) {
+		document.getElementById('name-box').className = "";
+		document.getElementById('name-content').className = "";
+	} else {
+		document.getElementById('name-box').className = "";
+		document.getElementById('room-not-exist').className = "";
+		document.getElementById('name-content').className = "Invisible";
+	}
+});
+
+socket.on('room does not exist', function(data) {
+	document.getElementById('name-box').className = "";
+	document.getElementById('room-not-exist').className = "";
+	document.getElementById('name-content').className = "Invisible";
+});
+
 function sendChatMessage() {
 	var data = {
 		name: name,
@@ -138,13 +160,14 @@ socket.on('room result', function(data) {
 
 function sync() {
 	if(hasSynced === false) {
+		var roomId = document.getElementById('room-id').innerHTML;
 		name = document.getElementById('name').value;
 		var me = {
-			id: getURLParam('room'),
+			id: roomId,
 			name : name,
 			colour: tool.brush.colour
 		}
-		socket.emit('join room', getURLParam('room'));
+		socket.emit('join room', roomId);
 		socket.emit('im online', me);
 	}
 }
@@ -746,9 +769,9 @@ document.body.addEventListener("keyup", function(e) {
 	Events (onChange)
 ------------------------------------------*/
 // Search room
-document.getElementById('room-search').addEventListener('change', function(evt){
+/*document.getElementById('room-search').addEventListener('change', function(evt){
 	room.searchRoom();
-});
+});*/
 
 // Change fonts
 document.getElementById('fontSel').addEventListener('change', function(evt){
@@ -921,5 +944,4 @@ function resetSubCategoryFlags(){
 
 /*document.getElementById('fillBucket').addEventListener('click', function(evt){
 	tool.brush.setBrushType('fillBucket');
-});
-*/
+}); */

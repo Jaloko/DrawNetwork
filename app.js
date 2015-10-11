@@ -104,10 +104,11 @@ passport.deserializeUser(function(id, done) {
 
 app.get('/acp', function(req, res) {
 	if(!req.isAuthenticated()) {
-		res.redirect('/acp/login');
+		res.redirect('/login');
 	} else {
 		res.render('acp', {
 			user: req.user,
+			isAuthenticated: req.isAuthenticated(),
 			rooms: rooms
 		});
 	}
@@ -116,10 +117,13 @@ app.get('/acp', function(req, res) {
 app.post('/acp', function(req, res) {
 	if(req.isAuthenticated()) {
 		var roomsToDelete = Object.keys(req.body).map(function(k) { return req.body[k] });
+
 		for(var i = 0; i < roomsToDelete.length; i++) {
 			for(var ii = 0; ii < rooms.length; ii++) {
+										console.log(req.body);
 				if(req.body[ii] != undefined) {
 					if(rooms[ii].owner != "admin") {
+
 						var roomId = rooms[ii].id;
 						deleteRoomInDB(ii);
 						rooms.splice(ii, 1);
@@ -135,17 +139,85 @@ app.post('/acp', function(req, res) {
 	res.redirect('/acp');
 });
 
-app.post('/acp/login', passport.authenticate('local'), function(req, res) {
-	res.redirect('/acp');
+app.post('/login', passport.authenticate('local'), function(req, res) {
+	res.redirect('/');
 });
 
-app.get('/acp/login', function(req, res) {
-	res.render('login');
+app.get('/login', function(req, res) {
+	res.render('login', {
+		isAuthenticated: req.isAuthenticated()
+	});
 });
 
-app.get('/acp/logout', function(req, res) {
+app.get('/logout', function(req, res) {
 	req.logout();
-	res.redirect('/acp');
+	res.redirect('/');
+});
+
+app.get('/', function(req, res) {
+	res.render('index', {
+		isAuthenticated: req.isAuthenticated()
+	});
+});
+
+app.get('/rooms', function(req, res) {
+	var publicRooms = [];
+	for(var i = 0; i < rooms.length; i++) {
+		if(rooms[i].public == true) {
+			publicRooms.push({ id: rooms[i].id, numberOfUsers: rooms[i].users.length, activity: rooms[i].activity});
+		}
+	}
+	res.render('rooms', {
+		isAuthenticated: req.isAuthenticated(),
+		rooms: publicRooms
+	});
+});
+
+app.post('/rooms/create', function(req, res) {
+	var newData = {
+		isPublic: true
+	};
+	if(req.body.onoffswitch === "on") {
+		newData.isPublic = true;
+	} else {
+		newData.isPublic = false;
+	}
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+	if(validateBool(newData.isPublic) === true) {
+		if(countRoomsOwnerOf(ip) < 5) {
+			var id = generateId();
+			// socket.handshake.address || socket.client.conn.remoteAddress || socket.conn.remoteAddress
+/*			var ip = req.socket.request.connection.remoteAddress;*/
+			if(ip != null) {
+				var newRoom = new Room(id, ip, newData.isPublic)
+				rooms.push(newRoom);
+				db.run('INSERT OR IGNORE INTO rooms(id, owner, public, activity) VALUES("' + newRoom.id + '", "' + newRoom.owner + '", ' + (newRoom.public ? 1 : 0) + ', ' + newRoom.activity + ')');
+				//socket.emit('room result', id);
+				res.redirect('/rooms/' + newRoom.id);
+				var isPublic;
+				if(newData.isPublic === true) {
+					isPublic = "public";
+				} else {
+					isPublic = "private";
+				}
+				console.log("Room: " + id + " (" + isPublic + ") created by: " + ip + "!");
+			} else {
+				// Insert error handling here
+				//socket.emit('cannot create room', 'Error identifying remote address. Try again.');
+			}
+		} else {
+			// Insert error handling here
+			//socket.emit('cannot create room', 'You have already created 5 rooms!');
+		}
+	}
+});
+
+app.get('/rooms/:uid', function(req, res){
+    var uid = req.params.uid;
+    res.render('canvas', {
+    	isAuthenticated: req.isAuthenticated(),
+    	roomId: uid
+    });
 });
 
 
@@ -210,13 +282,13 @@ function Room(id, owner, public) {
 
 server.listen(8080);
 
-app.get('/', function(req, res) {
+/*app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/index.html');
 });
 
 app.get('/acp', function(req, res) {
 	res.render('acp');
-});
+});*/
 
 io.sockets.on('connection', function(socket) {
 
@@ -233,36 +305,6 @@ io.sockets.on('connection', function(socket) {
 			}
 		}
 		socket.emit('recieve room list', theRooms);
-	});
-
-	socket.on('create room', function(data) {
-		var newData = {
-			isPublic: data
-		};
-		if(validateBool(newData.isPublic) === true) {
-			if(countRoomsOwnerOf(socket) < 5) {
-				var id = generateId();
-				// socket.handshake.address || socket.client.conn.remoteAddress || socket.conn.remoteAddress
-				var ip = socket.request.connection.remoteAddress;
-				if(ip != null) {
-					var newRoom = new Room(id, ip, newData.isPublic)
-					rooms.push(newRoom);
-					db.run('INSERT OR IGNORE INTO rooms(id, owner, public, activity) VALUES("' + newRoom.id + '", "' + newRoom.owner + '", ' + (newRoom.public ? 1 : 0) + ', ' + newRoom.activity + ')');
-					socket.emit('room result', id);
-					var isPublic;
-					if(newData.isPublic === true) {
-						isPublic = "public";
-					} else {
-						isPublic = "private";
-					}
-					console.log("Room: " + id + " (" + isPublic + ") created by: " + ip + "!");
-				} else {
-					socket.emit('cannot create room', 'Error identifying remote address. Try again.');
-				}
-			} else {
-				socket.emit('cannot create room', 'You have already created 5 rooms!');
-			}
-		}
 	});
 
 	socket.on('sync', function() {
@@ -867,10 +909,10 @@ function getRoomIndex(socket) {
 	}
 }
 
-function countRoomsOwnerOf(socket) {
+function countRoomsOwnerOf(ip) {
 	var counter = 0;
 	for(var i = 0; i < rooms.length; i++) {
-		if(rooms[i].owner === socket.request.connection.remoteAddress) {
+		if(rooms[i].owner === ip) {
 			counter++;
 		}
 	}

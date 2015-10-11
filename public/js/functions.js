@@ -1,53 +1,76 @@
-function getURLParam(name) {
- 	return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
-}
-
-function insertURLParam(key, value) {
-    key = escape(key); value = escape(value);
-
-    var kvp = document.location.search.substr(1).split('&');
-    if (kvp == '') {
-        document.location.search = '?' + key + '=' + value;
-    }
-    else {
-
-        var i = kvp.length; var x; while (i--) {
-            x = kvp[i].split('=');
-
-            if (x[0] == key) {
-                x[1] = value;
-                kvp[i] = x.join('=');
-                break;
-            }
-        }
-
-        if (i < 0) { kvp[kvp.length] = [key, value].join('='); }
-
-        //this will reload the page, it's likely better to store this until finished
-/*            document.location.search = kvp.join('&');*/
-    }
-}
-
-function checkHomeState() {
-	if(getURLParam('room') != null) {
-		var home = document.getElementById('home-content');
-		home.className = "invisible";
-        document.getElementById('save-room').className = "nav-opt save";
+function selectElement(ele) {
+	var temp = document.getElementById(ele.id + "-radio");
+	temp.checked = true;
+	var tableRows = document.getElementById("rooms").rows;
+	for(var i = 1; i < tableRows.length; i++) {
+		for(var ii = 0; ii < tableRows[i].cells.length; ii++) {
+			tableRows[i].cells[ii].className = "";
+		}
+	}
+	for(var i = 0; i < ele.cells.length; i++) {
+		ele.cells[i].className = "row-selected";
 	}
 }
 
-function checkPageState() {
-	if(getURLParam('room') != null) {
-		var home = document.getElementById('home-content');
-		home.className = "invisible";
-        var drawContent = document.getElementById('draw-content');
-        drawContent.className = "";
-        return true;
-	} else {
-		var drawContent = document.getElementById('draw-content');
-		drawContent.className = "invisible";
-        return false;
+var selectedRoom;
+function selectACPElement(ele) {
+	var temp = document.getElementById(ele.id + "-radio");
+	temp.checked = true;
+	var tableRows = document.getElementById("rooms").rows;
+	for(var i = 0; i < tableRows.length; i++) {
+		for(var ii = 0; ii < tableRows[i].cells.length; ii++) {
+			tableRows[i].cells[ii].className = "";
+		}
 	}
+	for(var i = 0; i < ele.cells.length; i++) {
+		ele.cells[i].className = "row-selected";
+	}
+	selectedRoom = ele.id;
+
+	var allUsers = document.getElementById('room-users');
+	for(var au = 1; au < allUsers.rows.length; au++) {
+		if(allUsers.rows[au].id === ele.id) {
+			allUsers.rows[au].className = "";
+		} else {
+			allUsers.rows[au].className = "Invisible";
+		}
+	}
+}
+
+function redirectToRoom() {
+	if(selectedRoom == null) {
+		var tableRows = document.getElementById("rooms").rows;
+		selectedRoom = tableRows[1].id;
+	}
+	location.href = '/rooms/' + selectedRoom;
+}
+
+function searchRoom() {
+	var table = document.getElementById('rooms');
+	var tbody = table.getElementsByTagName('tbody')[0];
+	var row = tbody.rows;
+	var roomSearch = document.getElementById('room-search');
+	for(var i = 0; i < row.length; i++) {
+		row[i].className = "";
+		if(roomSearch.value != "") {
+			if(row[i].cells[0].innerHTML.indexOf(roomSearch.value) == -1) {
+			 	row[i].className = "invisible";
+			}
+		}
+	}
+}
+
+function joinRoom() {
+	var radios = document.getElementsByName("rooms");
+	var radioId = "";
+	for(var i = 0; i < radios.length; i++) {
+		if(radios[i].checked) {
+			radioId = radios[i].id;
+			break;
+		}
+	}
+	var roomId = radioId.split("-");
+	document.location.href = document.location.href + "/" + roomId[0];
 }
 
 // Is located in app.js as well - duplicated code

@@ -1,0 +1,250 @@
+<% include /partials/header %>
+	<script src="/socket.io/socket.io.js"></script>
+	<div class="font_preload" style="opacity: 0; position: absolute; left: -99999px;">
+		<span style="font-family: 'Open Sans';">Test</span>
+		<span style="font-family: 'Roboto';">Test</span>
+		<span style="font-family: 'Ubuntu';">Test</span>
+		<span style="font-family: 'Sigmar One';">Test</span>
+		<span style="font-family: 'Droid Serif';">Test</span>
+		<span style="font-family: 'Pacifico';">Test</span>
+		<input id="text-tool-text" type="text" />
+	</div>
+	<div class="container">
+		<div id="draw-content">
+			<div id="left-col" class="unselectable">
+				<div id="canvas-wrap">
+					<canvas id="canvas" width="960" height="528"></canvas>
+					<canvas id="pointer-canvas" style="position:absolute; left: 0; top: 0;" width="960" height="528"></canvas>
+				</div>
+				<div id="tools">
+					<div id="brushes" class="button bselect tool" data-tip="Brushes">
+						<div id="tool-collection-brush-img" class="button-icon"></div>
+					</div>
+					<div id="shape-tool" class="button tool" data-tip="Shape Tool">
+						<div id="tool-shape-img" class="button-icon"></div>
+					</div>
+					<div id="text-tool" class="button tool" data-tip="Text">
+						<div id="tool-text-img" class="button-icon"></div>
+					</div>
+					<div id="colourDrop" class="button tool" data-tip="Colour Dropper">
+						<div id="tool-dropper-img" class="button-icon"></div>
+					</div>
+<!-- 				<div id="grid-tool" class="button tool" data-tip="Toogle Grids (Disabled)">
+						<div id="tool-grid-img" class="button-icon"></div>
+					</div> -->
+					<div id="clearCanvas" class="button tool" data-tip="Vote To Clear">
+						<div id="tool-clear-img" class="button-icon"></div>
+					</div>
+					<div id="saveCanvas" class="button tool" data-tip="Save Image">
+						<div id="tool-save-img" class="button-icon"></div>
+					</div>
+					<div id="currentColour" data-tip="Current Colour"></div>
+					<div class="clear">
+					</div>
+				</div>
+				<div id="tool-settings" >
+					<div id="brush-settings">
+
+					<div id="brush" class="button bselect tool" data-tip="Circle Brush">
+						<div id="tool-brush-img"  class="button-icon"></div>
+					</div>
+					<div id="square-brush" class="button tool" data-tip="Square Brush">
+						<div id="tool-square-brush-img"  class="button-icon"></div>
+					</div>
+					<div id="gradient-brush" class="button tool" data-tip="Gradient Brush">
+						<div id="tool-gradient-brush-img" class="button-icon"></div>
+					</div>
+					<div id="rainbow-brush" class="button tool" data-tip="Rainbow Brush">
+						<div id="tool-rainbow-brush-img" class="button-icon"></div>
+					</div>
+					<div id="eraser" class="button tool" data-tip="Eraser Tool">
+						<div id="tool-eraser-img" class="button-icon"></div>
+					</div>
+
+					<div id="line-tool" class="button tool" data-tip="Line Tool">
+						<div id="tool-line-img" class="button-icon"></div>
+					</div>
+						<label>Size:</label>
+						<input id="brushSelection" type="range" min="1" max="100" value="30"></input>
+						<div id="rainbow-settings" class="invisible">
+							<label>Speed:</label>
+							<input id="speedSelection" type="range" min="1" max="20" value="1"></input>
+						</div>
+						<div id="line-settings" class="invisible">
+							<label>Line Tip:</label> 			
+							<select id="lineTip" onchange="changeLineTip()">
+								<option value="round">Rounded</option>
+								<option value="square">Flat</option>
+							</select>
+						</div>
+					</div>
+
+					<div id="dropper-settings" class="invisible">
+					</div>
+					<div id="text-settings" class="invisible">
+						Font: 
+						<select id="fontSel">
+							<option value="Open Sans">Open Sans</option>
+							<option value="Roboto">Roboto</option>
+							<option value="Ubuntu">Ubuntu</option>
+							<option value="Sigmar One">Sigmar One</option>
+							<option value="Droid Serif">Droid Serif</option>
+							<option value="Pacifico">Pacifico</option>
+						</select>
+						Size: <input id="textSizeSel" type="range" min="1" max="100" value="30"></input>
+						<div class="button" onclick="applyText()">
+						Apply Text
+						</div>
+					</div>
+					<div id="shape-settings" class="invisible">
+						<div id="shapeRect" class="button bselect tool" data-tip="Square">
+							<div id="tool-shape-rect-img" class="button-icon"></div>
+						</div>
+						<div id="shapeCircle" class="button tool" data-tip="Circle">
+							<div id="tool-shape-circle-img" class="button-icon"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="right-col">
+				<div id="colour-picker" class="unselectable">
+					<div class="paletteLeftCol" onmousedown="return false">
+						<canvas id="webgl-temp" width="255" height="255" style="display: none;"></canvas>
+						<canvas id="tint" width="255" height="255"></canvas>
+						<!-- Causing home button to break -->
+						<canvas id="tint-pointer" style="position:absolute; left: 0; top: 0;" width="255" height="255"></canvas>
+						<canvas id="hue" width="30" height="255"></canvas>
+					</div>
+					<div class="paletteArrowCol">
+						<div id="palette-arrow" class="arrow-left" style="position: absolute;"></div>
+					</div>
+					<div style="display: none;" class="paletteRightCol">
+						<span class="value">R:</span>  <input id="rValue" onchange="inputColourChange()" type="text"></input></br>
+						<span class="value">G:</span>	<input id="gValue" onchange="inputColourChange()" type="text"></input></br>
+						<span class="value">B:</span>	<input id="bValue" onchange="inputColourChange()" type="text"></input></br>
+						<span class="value">Hex:</span>	<input id="hexValue" onchange="onHexChange()" type="text"></input></br>
+						<div id="currentColour"></div>
+					</div>
+				</div>
+				<div id="user-tools">
+					<div id="user-tabs">
+						<div id="users-online-tab" class="tab selected">
+							<a>Users Online</a>
+						</div>
+						<div id="users-chat-tab" class="tab">
+							<a>Chat</a>
+						</div>
+						<div class="clear">
+						</div>
+					</div>
+					<div id="tab-content">
+						<div id="users-online" class="visible">
+							<div id ="users" class="users-border">
+							</div>
+						</div>
+						<div id="users-chat" class="invisible">
+							<div class="users-border">
+								<div id="chat-box">
+									<div class="chat-row">
+										<div class="message"><p>Welcome to the chat!</p></div>
+									</div>
+								</div>
+								<input id="chat-message" type="text" placeholder="Message..." maxlength="300"></input>
+								<div class="messageB button" onclick="sendChatMessage();">Send</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="clear">
+			</div>
+			<div id="name-wrap" class="table-visible">
+				<div id="name-box-wrap">
+					<div id="name-box" class="invisible">
+						<div id="name-content" class="invisible">
+							<h3>Enter a name: </h3>
+							<a id="room-full" class="invisible">Room is full!</a>
+							<a id="name-taken" class="invisible">Name is already taken!</a>
+							<input id="name" type="text" maxlength="20"></input></br>
+							<a class="btn outline" onclick="sync()">
+							Submit Name
+							</a>
+						</div>
+						<div id="room-not-exist" class="invisible">
+							<h3>Room does not exist!</h3>
+							<a href="/" class="btn outline" >
+								Home
+							</a>
+						</div>
+						<div id="currently-syncing" class="invisible">
+							<h3>Sync in progress</h3>
+							<div class="progress-bar purple stripes">
+								<span style="width: 100%"></span>
+							</div>
+						</div>
+					</div>
+				</div>	
+			</div>
+			<div id="save-wrap" class="invisible">
+				<div id="save-box-wrap">
+					<div id="save-box">
+						<div id="save-progress">
+							<h3>Save in progress</h3>
+							<div class="progress-bar purple stripes">
+								<span style="width: 100%"></span>
+							</div>
+						</div>
+						<div id="save-complete" class="invisible">
+							<h3>Save complete!</h3>
+						</div>
+					</div>
+				</div>	
+			</div>
+			<div id="clear-wrap" class="invisible">
+				<div id="clear-box-wrap">
+					<div id="clear-canvas-vote-box" class="invisible">
+						<div>
+							<h2>Clear canvas vote</h2>
+							<div id="progress">
+								<p id="pYes"></p>
+								<p id="pNo"></p>
+								<p id="pTotal"></p>
+							</div>
+							<div id="time">
+								<p>Time remaining:</p>
+								<p id="timeRemain"></p>
+							</div>
+							<div id="result">
+								<p id="resultData"></p>
+							</div>
+						</div>
+						<div id="voteButtons">
+							<div class="button" onclick="clearVote(true);">Yes</div>
+							<div class="button" onclick="clearVote(false);">No</div>
+						</div>
+					</div>
+				</div>	
+			</div>
+		</div>
+		</div>
+	</div>
+	<div id="room-id" class="invisible"><%= roomId %></div>
+	<script src="/js/events.js"></script>
+	<script src="/js/canvas/gl-matrix-min.js"></script>
+	<script src="/js/canvas/shaders.js"></script>
+	<script src="/js/canvas/room.js"></script>
+
+	<script src="/js/canvas/tools/tools.js"></script>
+	<script src="/js/canvas/tools/brush.js"></script>
+	<script src="/js/canvas/tools/text-tool.js"></script>
+	<script src="/js/canvas/tools/shape-tool.js"></script>
+
+	<script src="/js/canvas/global.js"></script>
+	<script src="/js/canvas/fill-bucket.js"></script>
+	<script src="/js/canvas/colour-picker.js"></script>
+	<script src="/js/canvas/tabs.js"></script>
+	<script> 
+		init();
+		loadCanvasPage();
+	</script>
+<% include /partials/footer %>
