@@ -54,8 +54,8 @@ function webGLStart() {
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.disable(gl.DEPTH_TEST);
-    this.gl.enable(this.gl.BLEND);
-    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     drawColourSquare();
     drawTintPointer();
@@ -63,7 +63,7 @@ function webGLStart() {
 
 function initGL(canvas) {
 	try {
-		gl = canvas.getContext("webgl", { alpha: false } );
+		gl = canvas.getContext("webgl",{'alpha': false }) || canvas.getContext("experimental-webgl",{'alpha': false });
 		gl.viewportWidth = canvas.width;
 		gl.viewportHeight = canvas.height;
 	} catch(e) {
@@ -208,7 +208,7 @@ function setMatrixUniforms() {
 function drawColourSquare() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    mat4.ortho(this.pMatrix, -1.0, 1.0, -1.0, 1.0, 0.1, 100.0);
+    mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, 0.1, 100.0);
     mat4.identity(mvMatrix);
     mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -1.0]);
     setMatrixUniforms();
