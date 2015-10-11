@@ -5,7 +5,6 @@ gulp.task('canvasjs', function() {
 	return gulp.src([
 		'public/js/functions.js',
 		'public/js/gl-matrix.js',
-		'public/js/event.js',
 		'public/js/canvas/shaders.js',
 		'public/js/canvas/room.js',
 		'public/js/canvas/tools/tools.js',
