@@ -6,3 +6,4 @@ window['init'] = init;
 window['loadCanvasPage'] = loadCanvasPage;
 window['sync'] = sync;
 window['applyText'] = applyText;
+window['saveRoom'] = saveRoom;

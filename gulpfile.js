@@ -28,7 +28,7 @@ gulp.task('canvasjs', function() {
 			},
 			fileName: 'dn.min.js',
 		}))
-		.pipe(gulp.dest('public'));
+		.pipe(gulp.dest('public/js'));
 });
 
 gulp.task('functionsjs', function() {
@@ -40,7 +40,7 @@ gulp.task('functionsjs', function() {
 			},
 			fileName: 'functions.min.js',
 		}))
-		.pipe(gulp.dest('public'));
+		.pipe(gulp.dest('public/js'));
 });
 
 gulp.task('default', ['canvasjs','functionsjs']);
