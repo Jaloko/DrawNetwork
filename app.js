@@ -120,10 +120,8 @@ app.post('/acp', function(req, res) {
 
 		for(var i = 0; i < roomsToDelete.length; i++) {
 			for(var ii = 0; ii < rooms.length; ii++) {
-										console.log(req.body);
 				if(req.body[ii] != undefined) {
 					if(rooms[ii].owner != "admin") {
-
 						var roomId = rooms[ii].id;
 						deleteRoomInDB(ii);
 						rooms.splice(ii, 1);
@@ -145,7 +143,8 @@ app.post('/login', passport.authenticate('local'), function(req, res) {
 
 app.get('/login', function(req, res) {
 	res.render('login', {
-		isAuthenticated: req.isAuthenticated()
+		isAuthenticated: req.isAuthenticated(),
+		user: req.user
 	});
 });
 
@@ -156,7 +155,8 @@ app.get('/logout', function(req, res) {
 
 app.get('/', function(req, res) {
 	res.render('index', {
-		isAuthenticated: req.isAuthenticated()
+		isAuthenticated: req.isAuthenticated(),
+		user: req.user
 	});
 });
 
@@ -169,7 +169,8 @@ app.get('/rooms', function(req, res) {
 	}
 	res.render('rooms', {
 		isAuthenticated: req.isAuthenticated(),
-		rooms: publicRooms
+		rooms: publicRooms,
+		user: req.user
 	});
 });
 
@@ -216,6 +217,7 @@ app.get('/rooms/:uid', function(req, res){
     var uid = req.params.uid;
     res.render('canvas', {
     	isAuthenticated: req.isAuthenticated(),
+    	user: req.user,
     	roomId: uid
     });
 });

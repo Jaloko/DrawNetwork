@@ -24,6 +24,13 @@ ul.nav-bar li a.link {
 	padding-right: 20px;
 }
 
+ul.nav-bar li a.text {
+	display: block;
+	color: #656f86;
+	text-decoration: none;
+	line-height: 60px;
+}
+
 ul.nav-bar li a.link:hover {
 	color: #1ca8dd;
 }
