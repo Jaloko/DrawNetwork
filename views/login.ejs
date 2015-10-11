@@ -1,14 +1,16 @@
 <% include /partials/header %>
 	<div class="container center">
 		<div class="content-wrap">
-			<h2>Log In</h2>
-			<div class="special-box">
-				<form action="" method="post">
+			<h2>Log in</h2>
+			<form action="" method="post">
+				<div class="special-box">
 					<span class="login-fixed-width left">Username: </span><input name="username" type="text" autofocus/> <br><br>
-					<span class="login-fixed-width left">Password: </span><input name="password" type="password"/> <br> <br>
-					<a class="btn outline" onclick="this.parentNode.submit();">Log In</a>
-				</form>
-			</div>
+					<span class="login-fixed-width left">Password: </span><input name="password" type="password"/><br>
+				</div> <br>
+				<div class="content-box">
+					<a class="btn outline" onclick="this.parentNode.parentNode.submit();">Log In</a>
+				</div>
+			</form>
 		</div>
 	</div>
 <% include /partials/footer %>

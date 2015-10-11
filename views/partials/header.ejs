@@ -2,7 +2,12 @@
 	<head>
 		<title>Draw Network</title>
 		<link rel="icon" href="/img/logo/dn-32x32.png" type="image/x-icon" />
-		<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Roboto">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Sigmar+One">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Droid+Serif">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Pacifico">
 		<link rel="stylesheet" type="text/css" href="/css/main.css">
 		<link rel="stylesheet" type="text/css" href="/css/nav.css">
 		<script src="/functions.min.js"></script>
@@ -17,6 +22,7 @@
 					<% if(isAuthenticated) { %>
 					<li><a class="link" href="/acp">ACP</a></li>
 					<li class="float-right"><a class="link" href="/logout">Log out</a></li>
+					<li class="float-right"><a class="text">Hi, <%= user.username %></a></li>
 					<% } else { %>
 					<li class="float-right"><a class="link" href="/login">Log in</a></li>
 					<% } %>

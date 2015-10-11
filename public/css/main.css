@@ -25,7 +25,7 @@ body {
 	padding-left: 10px;
 	padding-right: 10px;
 	border-radius: 10px;
-	color: #424857;
+	color: #656f86;
 	vertical-align: top;
 }
 
@@ -40,6 +40,14 @@ body {
 /*--------------------------------
 	Properties
 ---------------------------------*/
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 .no-margin {
 	margin: 0;
 }
@@ -91,7 +99,7 @@ body {
 }
 
 .feature-fixed-height {
-	height: 230px;
+	height: 170px;
 }
 
 .feature-fixed-image {
@@ -423,6 +431,10 @@ h5 {
 	background-color: #f00;
 }
 
+#saveRoom {
+	float: right;
+}
+
 #brushSelection {
 	margin-top: 15px;
 }
@@ -540,11 +552,19 @@ h5 {
 	vertical-align: middle;
 }
 
+#name-content h1, h2, h3, h4, h5, #room-not-exist h1, h2, h3, h4, h5, #currently-syncing h1, h2, h3, h4, h5 {
+	margin-top: 0;
+}
+
+#save-complete h1, h2, h3, h4, h5 {
+	margin-top: 20px;
+}
+
 #name-box, #clear-canvas-vote-box, #save-box {
 	margin-left: auto;
 	margin-right: auto;
 	text-align: center;
-	width: 300px;
+	width: 350px;
 	padding: 20px;
 	background-color: #1b1e25;
 	border-radius: 10px;
@@ -736,7 +756,6 @@ h5 {
 	overflow:auto;
 	max-height: 496px;
 	vertical-align: middle;	
-
 }
 
 #room-list-headers {
@@ -823,4 +842,29 @@ h5 {
 span.value {
 	display: inline-block;
 	width: 50px;
+}
+
+.paletteLeftCol, .paletteArrowCol, .paletteRightCol {
+    float: left;
+    display: inline-block;
+    position: relative;
+}
+
+.arrow-left {
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 10px solid #ccc;
+    z-index: 0;
+}
+
+@media (max-width: 1291px) {
+	.right-margin {
+		right-margin: 0;
+	}
+
+	.four-col {
+		margin: 20px;
+	}
 }
