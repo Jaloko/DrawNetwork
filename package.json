@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "build": "gulp"
   },
   "name": "Draw.Network",
   "version": "1.1.0",
