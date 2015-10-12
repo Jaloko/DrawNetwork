@@ -7,7 +7,6 @@ ul.nav-bar {
 	list-style-type: none;
     padding: 0px;
     margin: 0px;
-    height: 60px;
 }
 
 ul.nav-bar li {
@@ -15,8 +14,13 @@ ul.nav-bar li {
 	vertical-align: top;
 }
 
-ul.nav-bar li a.link {
-	display: block;
+ul.nav-bar li.menuTitle {
+	display: inline-block;
+	display: none
+}
+
+ul.nav-bar li a.link, ul.nav-bar li.menuTitle label {
+	display: inline-block;
 	color: white;
 	text-decoration: none;
 	line-height: 60px;
@@ -25,13 +29,13 @@ ul.nav-bar li a.link {
 }
 
 ul.nav-bar li a.text {
-	display: block;
+	display: inline-block;
 	color: #656f86;
 	text-decoration: none;
 	line-height: 60px;
 }
 
-ul.nav-bar li a.link:hover {
+ul.nav-bar li a.link:hover, ul.nav-bar li.menuTitle label:hover {
 	color: #1ca8dd;
 }
 
@@ -45,4 +49,35 @@ ul.nav-bar li a.logo {
 	height: 60px;
 	background: url('/images/dn-512x512.png') no-repeat center;
 	background-size: 80%;
+}
+
+/* Responsive navigation bar*/
+@media (max-width: 570px) {
+	ul.nav-bar li.menuItem {
+		display: none;
+		background-color: #1b1e25;
+		width: 100%;
+	}
+
+	ul.nav-bar li.menuTitle {
+		display: inline-block;
+		cursor: pointer;
+	}
+
+	ul.nav-bar li.menuTitle label {
+		cursor: pointer;
+	}
+
+	.nav-float-left {
+		float: none;
+	}
+
+	.nav-float-right {
+		float: none;
+	}
+
+	/* Toggled State */
+	input[type=checkbox]:checked ~ nav div ul.nav-bar li.menuItem {
+   		display: block;
+	}
 }

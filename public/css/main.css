@@ -40,6 +40,10 @@ body {
 /*--------------------------------
 	Properties
 ---------------------------------*/
+.inline-block {
+	display: inline-block;
+}
+
 .unselectable {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -48,9 +52,11 @@ body {
     -ms-user-select: none;
     user-select: none;
 }
+
 .no-margin {
 	margin: 0;
 }
+
 .invisible {
 	position: absolute;
 	display: none;
@@ -71,6 +77,15 @@ body {
 
 .right {
 	text-align: right;
+}
+
+/* Split because it gets altered in a media query */
+.nav-float-left {
+	float: left;
+}
+
+.nav-float-right {
+	float: right;
 }
 
 .float-left {
@@ -121,6 +136,10 @@ body {
     overflow-y: scroll;
 	overflow-x: hidden;
     max-height: 500px;
+}
+
+.left-padding {
+	padding-left: 20px;
 }
 
 /*--------------------------------
@@ -524,10 +543,8 @@ h5 {
 
 .visible {
 	display: block;
-}
-
-.invisible {
-	display: none;
+	left: 0px;
+	top: 0px;
 }
 
 .table-visible {
@@ -866,5 +883,13 @@ span.value {
 
 	.four-col {
 		margin: 20px;
+	}
+}
+
+@media (max-width: 350px) {
+	.four-col {
+		width: none;
+		margin-left: 0;
+		margin-right: 0;
 	}
 }

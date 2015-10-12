@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<title>Draw Network</title>
-		<link rel="icon" href="/img/logo/dn-32x32.png" type="image/x-icon" />
+		<link rel="icon" href="/images/logo/dn-512x512.png" type="image/x-icon" />
 		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto">
 		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans">
 		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu">
@@ -13,19 +13,24 @@
 		<script src="/js/functions.min.js"></script>
 	</head>
 	<body>
+		<input id="menuToggle" class="invisible" type="checkbox"></input>
 		<nav>
 			<div class="container">
 				<ul class="nav-bar">
-					<li><a class="logo"></a></li>
-					<li><a class="link" href="/">Home</a></li>
-					<li><a class="link" href="/rooms">Rooms</a></li>
+					<li class="nav-float-left"><a class="logo"></a></li>
+					<li class="menuTitle nav-float-left"><a><label for="menuToggle">Menu</label></a></li>
+					<li class="menuItem nav-float-left"><a class="link" href="/">Home</a></li>
+					<li class="menuItem nav-float-left"><a class="link" href="/rooms">Rooms</a></li>
 					<% if(isAuthenticated) { %>
-					<li><a class="link" href="/acp">ACP</a></li>
-					<li class="float-right"><a class="link" href="/logout">Log out</a></li>
-					<li class="float-right"><a class="text">Hi, <%= user.username %></a></li>
+					<li class="menuItem nav-float-left"><a class="link" href="/acp">ACP</a></li>
+					<li class="menuItem nav-float-right">
+						<a class="text left-padding">Hi, <%= user.username %></a>
+						<a class="link" href="/logout">Log out</a>
+					</li>
 					<% } else { %>
-					<li class="float-right"><a class="link" href="/login">Log in</a></li>
+					<li class="menuItem nav-float-right"><a class="link" href="/login">Log in</a></li>
 					<% } %>
 				</ul>
 			</div>
+			<div class="clear"></div>
 		</nav>
