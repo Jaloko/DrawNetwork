@@ -1,15 +1,12 @@
+// Public Functions
 function selectElement(ele) {
 	var temp = document.getElementById(ele.id + "-radio");
 	temp.checked = true;
 	var tableRows = document.getElementById("rooms").rows;
 	for(var i = 1; i < tableRows.length; i++) {
-		for(var ii = 0; ii < tableRows[i].cells.length; ii++) {
-			tableRows[i].cells[ii].className = "";
-		}
+		tableRows[i].className = "";
 	}
-	for(var i = 0; i < ele.cells.length; i++) {
-		ele.cells[i].className = "row-selected";
-	}
+	ele.className = "row-selected";
 }
 
 var selectedRoom;
@@ -18,13 +15,9 @@ function selectACPElement(ele) {
 	temp.checked = true;
 	var tableRows = document.getElementById("rooms").rows;
 	for(var i = 0; i < tableRows.length; i++) {
-		for(var ii = 0; ii < tableRows[i].cells.length; ii++) {
-			tableRows[i].cells[ii].className = "";
-		}
+		tableRows[i].className = "";
 	}
-	for(var i = 0; i < ele.cells.length; i++) {
-		ele.cells[i].className = "row-selected";
-	}
+	ele.className = "row-selected";
 	selectedRoom = ele.id;
 
 	var allUsers = document.getElementById('room-users');
@@ -42,7 +35,7 @@ function redirectToRoom() {
 		var tableRows = document.getElementById("rooms").rows;
 		selectedRoom = tableRows[1].id;
 	}
-	location.href = '/rooms/' + selectedRoom;
+	location.href = getBaseURL() + '/rooms/' + selectedRoom;
 }
 
 function searchRoom() {
@@ -70,41 +63,13 @@ function joinRoom() {
 		}
 	}
 	var roomId = radioId.split("-");
-	document.location.href = document.location.href + "/" + roomId[0];
+	document.location.href = getBaseURL() + '/rooms/' + roomId[0];
 }
 
-// Is located in app.js as well - duplicated code
-function convertTime(time) {
-    var timeString = "";
-    var suffix = "now";
-    if(time === 1) {
-        suffix = "second"
-    } else if(time > 1 && time < 60) {
-        suffix = "seconds";
-    } else if(time >= 60 && time < 120) {
-        time = time / 60;
-        suffix = "minute"
-    } else if(time >= 120 && time < 3600) {
-        time = time / 60;
-        suffix = "minutes"
-    } else if(time >= 3600 && time < 7200) {
-        time = (time / 60) / 60;
-        suffix = "hour"
-    } else if(time >= 7200 && time < 86400) {
-        time = (time / 60) / 60;
-        suffix = "hours"
-    } else if(time >= 86400 && time < 172800) {
-        time = ((time / 60) / 60) / 24;
-        suffix = "day"
-    } else if(time >= 172800) {
-        time = ((time / 60) / 60) / 24;
-        suffix = "days"
-    }
-    time = Math.floor(time);
-    if(suffix === "now") {
-        timeString = suffix;
-    } else {
-        timeString = time + " " + suffix;
-    }
-    return timeString;
+// Private Functions
+function getBaseURL() {
+	var pathArray = document.location.href.split( '/' );
+	var protocol = pathArray[0];
+	var host = pathArray[2];
+	return protocol + '//' + host;
 }

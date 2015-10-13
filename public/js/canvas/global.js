@@ -141,18 +141,18 @@ function getNameList() {
 }
 
 
-function createRoom() {
+/*function createRoom() {
 	var isPublic = document.getElementById('myonoffswitch').checked;
 	socket.emit('create room', isPublic);
-}
+}*/
 
-function joinRoom() {
+/*function joinRoom() {
 	insertURLParam("room", selectedRoom);
-}
+}*/
 
-socket.on('cannot create room', function(data) {
+/*socket.on('cannot create room', function(data) {
 	alert(data);
-});
+});*/
 
 socket.on('room result', function(data) {
 	insertURLParam("room", data);

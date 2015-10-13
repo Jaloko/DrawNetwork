@@ -2,9 +2,14 @@
 	<div class="container">
 		<h2>Administration Control Panel</h2>
 		<h3>Rooms</h3>
+		<% if(error == 1) { %>
+			<div class="content-wrap"><p class="error">Could not create room: Your address has already created 5 rooms!</p></div>
+		<% 	} else if(error == 2) {%>
+			<div class="content-wrap"><p class="error">Could not create room: Could not identify address</p></div>
+		<% } %>
 		<div class="content-wrap">
 			<div class="left-col float-left">
-				<form action="/rooms/create" method="post" class="no-margin">
+				<form action="/acp/rooms/create" method="post" class="no-margin">
 					<a class="btn outline" type="submit" onclick="this.parentNode.submit()">Create Room</a>
 					<div class="onoffswitch">
 					    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
@@ -16,7 +21,7 @@
 				</form>
 			</div>
 			<div class="right-col float-right">
-				<input id="room-search" type="text" placeholder="Search..." onkeydown="searchRoom()" onkeyup="searchRoom()"/>
+				<input id="room-search" type="text" placeholder="Search Room ID..." onkeydown="searchRoom()" onkeyup="searchRoom()"/>
 				<a class="btn outline" onclick="searchRoom()">Search</a>
 			</div>
 			<div class="clear">
@@ -48,16 +53,16 @@
 						<!-- For Loop To Generate Table Rows Here -->
 						<%	for(var i = 0; i < rooms.length; i++) {
 						if(i == 0) { %>
-						<tr id="<%= rooms[i].id %>" onclick="selectElement(this)">
-							<td class="row-selected"><%= rooms[i].id %></td>
-							<td class="row-selected"><%= rooms[i].owner %></td>
-							<td class="row-selected"><%= rooms[i].users.length %>/10</td>
-							<td class="row-selected"><%= convertTime((new Date().getTime() - rooms[i].activity) / 1000) %></td>
-							<td class="row-selected"><%= rooms[i].public %></td>
-							<td  class="row-selected"><input type="checkbox" name="<%= rooms[i].id %>" value="true" disabled></td>
+						<tr id="<%= rooms[i].id %>" onclick="selectACPElement(this)"  class="row-selected">
+							<td><%= rooms[i].id %></td>
+							<td><%= rooms[i].owner %></td>
+							<td><%= rooms[i].users.length %>/10</td>
+							<td><%= convertTime((new Date().getTime() - rooms[i].activity) / 1000) %></td>
+							<td><%= rooms[i].public %></td>
+							<td><input type="checkbox" name="<%= rooms[i].id %>" value="true" disabled></td>
 						</tr>
 						<% } else { %>
-						<tr id="<%= rooms[i].id %>" onclick="selectElement(this)">
+						<tr id="<%= rooms[i].id %>" onclick="selectACPElement(this)">
 							<td><%= rooms[i].id %></td>
 							<td><%= rooms[i].owner %></td>
 							<td><%= rooms[i].users.length %>/10</td>

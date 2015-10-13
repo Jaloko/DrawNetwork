@@ -106,10 +106,17 @@ app.get('/acp', function(req, res) {
 	if(!req.isAuthenticated()) {
 		res.redirect('/login');
 	} else {
+		var error = 0;
+		if(req.param("error") == 1) {
+			error = 1;
+		} else if(req.param("error") == 2) {
+			error = 2;
+		}
 		res.render('acp', {
 			user: req.user,
 			isAuthenticated: req.isAuthenticated(),
-			rooms: rooms
+			rooms: rooms,
+			error: error
 		});
 	}
 });
@@ -167,14 +174,29 @@ app.get('/rooms', function(req, res) {
 			publicRooms.push({ id: rooms[i].id, numberOfUsers: rooms[i].users.length, activity: rooms[i].activity});
 		}
 	}
+	var error = 0;
+	if(req.param("error") == 1) {
+		error = 1;
+	} else if(req.param("error") == 2) {
+		error = 2;
+	}
 	res.render('rooms', {
 		isAuthenticated: req.isAuthenticated(),
 		rooms: publicRooms,
-		user: req.user
+		user: req.user,
+		error: error
 	});
 });
 
+app.post('/acp/rooms/create', function(req, res) {
+	createRoom(req, res, '/acp');
+});
+
 app.post('/rooms/create', function(req, res) {
+	createRoom(req, res, '/rooms');
+});
+
+function createRoom(req, res, location) {
 	var newData = {
 		isPublic: true
 	};
@@ -205,13 +227,15 @@ app.post('/rooms/create', function(req, res) {
 			} else {
 				// Insert error handling here
 				//socket.emit('cannot create room', 'Error identifying remote address. Try again.');
+				res.redirect(location + '?error=2');
 			}
 		} else {
 			// Insert error handling here
 			//socket.emit('cannot create room', 'You have already created 5 rooms!');
+			res.redirect(location + '?error=1');
 		}
 	}
-});
+}
 
 app.get('/rooms/:uid', function(req, res){
     var uid = req.params.uid;
@@ -284,17 +308,9 @@ function Room(id, owner, public) {
 
 server.listen(8080);
 
-/*app.get('/', function(req, res) {
-	res.sendFile(__dirname + '/index.html');
-});
-
-app.get('/acp', function(req, res) {
-	res.render('acp');
-});*/
-
 io.sockets.on('connection', function(socket) {
 
-	socket.on('get room list', function() {
+/*	socket.on('get room list', function() {
 		var theRooms = [];
 		for(var i = 0; i < rooms.length; i++) {
 			if(rooms[i].public === true) {
@@ -307,7 +323,7 @@ io.sockets.on('connection', function(socket) {
 			}
 		}
 		socket.emit('recieve room list', theRooms);
-	});
+	});*/
 
 	socket.on('sync', function() {
 		var index = getRoomIndex(socket);
@@ -968,7 +984,6 @@ function validateBool(bool) {
 	}
 }
 
-// Is located in functions.js as well - duplicated code
 app.locals.convertTime = function(time) {
     var timeString = "";
     var suffix = "now";
