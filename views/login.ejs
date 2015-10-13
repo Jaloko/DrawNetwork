@@ -2,10 +2,11 @@
 	<div class="container center">
 		<div class="content-wrap">
 			<h2>Log in</h2>
+			<% include /partials/errors/login-error %>
 			<form action="" method="post">
 				<div class="special-box">
-					<span class="login-fixed-width left">Username: </span><input name="username" type="text" autofocus/> <br><br>
-					<span class="login-fixed-width left">Password: </span><input name="password" type="password"/><br>
+					<span class="login-fixed-width left">Username: </span><span><input name="username" type="text" autofocus/></span><br><br>
+					<span class="login-fixed-width left">Password: </span><span><input name="password" type="password"/></span><br>
 				<input type="submit" class="invisible"/>
 				</div> <br>
 				<div class="content-box">

@@ -28,6 +28,7 @@
 	display: block;
 	background-color: #181c22;
 	width: 100%;
+	min-width: 960px;
 	height: 50px;
 	float: left;
 }
@@ -35,6 +36,7 @@
 #tool-settings {
 	display: block;
 	width: 100%;
+	min-width: 960px;
 	height: 50px;
 	float: left;
 }
@@ -593,5 +595,17 @@ span.value {
 	#name-wrap, #clear-wrap, #save-wrap {
 		height: 898px;
 		min-height: 898px;
+	}
+}
+
+@media (max-width: 985px) {
+	#draw-content {
+		min-width: 0;
+		width: 100%;
+		overflow-x: scroll;
+	}
+
+	#right-col {
+		min-width: 960px;
 	}
 }

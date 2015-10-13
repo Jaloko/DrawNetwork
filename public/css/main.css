@@ -136,9 +136,9 @@ body {
 }
 
 .scroll-overflow {
-    overflow-y: scroll;
+    overflow-y: auto;
 	overflow-x: hidden;
-    max-height: 200px;
+    max-height: 500px;
 }
 
 .left-padding {
@@ -174,7 +174,7 @@ body {
 ---------------------------------*/
 .padlock {
 	display: block;
-	background: url('/images/icons/padlock17.png') no-repeat center;
+	background: url('/images/icons/locked59.png') no-repeat center;
 	background-size: 80%;
 }
 
@@ -186,7 +186,7 @@ body {
 
 .shared-canvas {
 	display: block;
-	background: url('/images/icons/seo40.png') no-repeat center;
+	background: url('/images/icons/browser13.png') no-repeat center;
 	background-size: 80%;
 }
 
@@ -265,8 +265,6 @@ tr:last-child td:last-child {
 .table-wrap {
 	border: 1px solid #4e515a;
 	border-radius: 10px;
-	overflow: hidden;
-	margin-bottom: 20px;
 }
 
 .row-selected {

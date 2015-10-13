@@ -1,4 +1,5 @@
 nav {
+
 	width: 100%;
 	border-bottom: solid 1px #4e515a;
 }
@@ -47,7 +48,7 @@ ul.nav-bar li a.logo {
 	display: block;
 	width: 60px;
 	height: 60px;
-	background: url('/images/dn-512x512.png') no-repeat center;
+	background: url('/images/logo/dn-64x64.png') no-repeat center;
 	background-size: 80%;
 }
 

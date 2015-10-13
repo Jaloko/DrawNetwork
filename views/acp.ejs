@@ -2,11 +2,7 @@
 	<div class="container">
 		<h2>Administration Control Panel</h2>
 		<h3>Rooms</h3>
-		<% if(error == 1) { %>
-			<div class="content-wrap"><p class="error">Could not create room: Your address has already created 5 rooms!</p></div>
-		<% 	} else if(error == 2) {%>
-			<div class="content-wrap"><p class="error">Could not create room: Could not identify address</p></div>
-		<% } %>
+		<% include /partials/errors/rooms-error %>
 		<div class="content-wrap">
 			<div class="left-col float-left">
 				<form action="/acp/rooms/create" method="post" class="no-margin">
@@ -37,7 +33,7 @@
 			<% } }%>
 		</div>
 		<form action="/acp" method="post">
-			<div class="table-wrap">
+			<div class="table-wrap content-wrap scroll-overflow">
 				<table id="rooms">
 					<thead>
 						<tr>
@@ -50,7 +46,7 @@
 						</tr>
 					</thead>
 					<tbody class="cursor-pointer">
-						<!-- For Loop To Generate Table Rows Here -->
+						<!-- For Loop To Generate Table Rows Here -->						
 						<%	for(var i = 0; i < rooms.length; i++) {
 						if(i == 0) { %>
 						<tr id="<%= rooms[i].id %>" onclick="selectACPElement(this)"  class="row-selected">
@@ -92,18 +88,33 @@
 					<tbody class="cursor-pointer">
 						<!-- For Loop To Generate Table Rows Here -->
 						<%  for(var i = 0; i < rooms.length; i++) { 
-								for(var u = 0; u < rooms[i].users.length; u++) { 
-									if(i == 0) {%>							
-						<tr id="<%=rooms[i].id%>">
-							<td><%= rooms[i].users[u].name %></td>
-							<td><%= rooms[i].serverUsers[u].ip %></td>
-						</tr>
-						<% 	}else { %>
-						<tr class="Invisible" id="<%=rooms[i].id%>">
-							<td><%= rooms[i].users[u].name %></td>
-							<td><%= rooms[i].serverUsers[u].ip %></td>
-						</tr>
-						<%	}	}
+								if(rooms[i].users.length == 0) { 
+									if(i == 0) { %>
+									<tr id="<%=rooms[i].id%>">
+										<td>(Empty)</td>
+										<td>(Empty)</td>
+									</tr>
+						<%			} else { %>
+									<tr class="invisible" id="<%=rooms[i].id%>">
+										<td>(Empty)</td>
+										<td>(Empty)</td>
+									</tr>
+						<%			}
+								} else {
+									for(var u = 0; u < rooms[i].users.length; u++) { 
+										if(i == 0) {%>							
+										<tr id="<%=rooms[i].id%>">
+											<td><%= rooms[i].users[u].name %></td>
+											<td><%= rooms[i].serverUsers[u].ip %></td>
+										</tr>
+										<% 	}else { %>
+										<tr class="invisible" id="<%=rooms[i].id%>">
+											<td><%= rooms[i].users[u].name %></td>
+											<td><%= rooms[i].serverUsers[u].ip %></td>
+										</tr>
+							<%			}		
+									}
+								}
 							} %>
 					</tbody>
 				</table>

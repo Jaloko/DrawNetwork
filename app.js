@@ -107,9 +107,9 @@ app.get('/acp', function(req, res) {
 		res.redirect('/login');
 	} else {
 		var error = 0;
-		if(req.param("error") == 1) {
+		if(req.query.error == 1) {
 			error = 1;
-		} else if(req.param("error") == 2) {
+		} else if(req.query.error == 2) {
 			error = 2;
 		}
 		res.render('acp', {
@@ -144,14 +144,22 @@ app.post('/acp', function(req, res) {
 	res.redirect('/acp');
 });
 
-app.post('/login', passport.authenticate('local'), function(req, res) {
-	res.redirect('/');
-});
+app.post('/login', passport.authenticate('local', {
+	successRedirect: '/',
+  	failureRedirect: '/login?error=1'
+}));
 
 app.get('/login', function(req, res) {
+	var error = 0;
+	if(req.query.error == 1) {
+		error = 1;
+	} else if(req.query.error == 2) {
+		error = 2;
+	}
 	res.render('login', {
 		isAuthenticated: req.isAuthenticated(),
-		user: req.user
+		user: req.user,
+		error: error
 	});
 });
 
@@ -175,9 +183,9 @@ app.get('/rooms', function(req, res) {
 		}
 	}
 	var error = 0;
-	if(req.param("error") == 1) {
+	if(req.query.error == 1) {
 		error = 1;
-	} else if(req.param("error") == 2) {
+	} else if(req.query.error == 2) {
 		error = 2;
 	}
 	res.render('rooms', {

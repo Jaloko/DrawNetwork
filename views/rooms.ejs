@@ -1,11 +1,7 @@
 <% include /partials/header %>
 	<div class="container">
 		<h2>Rooms</h2>
-		<% if(error == 1) { %>
-			<div class="content-wrap"><p class="error">Could not create room: Your address has already created 5 rooms!</p></div>
-		<% 	} else if(error == 2) {%>
-			<div class="content-wrap"><p class="error">Could not create room: Could not identify address</p></div>
-		<% } %>
+		<% include /partials/errors/rooms-error %>
 		<div class="content-wrap">
 			<div class="left-col float-left">
 				<form action="/rooms/create" method="post" class="no-margin">
@@ -35,7 +31,7 @@
 			<input id="<%= rooms[i].id %>-radio" type="radio" name="rooms" value="<%= rooms[i].id %>">
 			<% } }%>
 		</div>
-		<div class="table-wrap">
+		<div class="table-wrap content-wrap scroll-overflow">
 			<table id="rooms">
 				<thead>
 					<tr>
