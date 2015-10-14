@@ -53,7 +53,7 @@ ul.nav-bar li a.logo {
 }
 
 /* Responsive navigation bar*/
-@media (max-width: 670px) {
+@media (max-width: 661px) {
 	ul.nav-bar li.menuItem {
 		display: none;
 		background-color: #1b1e25;

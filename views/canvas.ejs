@@ -79,7 +79,6 @@
 							</select>
 						</div>
 					</div>
-
 					<div id="dropper-settings" class="invisible">
 					</div>
 					<div id="text-settings" class="invisible">
@@ -150,8 +149,11 @@
 										<div class="message"><p>Welcome to the chat!</p></div>
 									</div>
 								</div>
-								<input id="chat-message" type="text" placeholder="Message..." maxlength="300"></input>
-								<div class="messageB button" onclick="sendChatMessage();">Send</div>
+								<div id="chat-message-box">
+									<input id="chat-message" type="text" placeholder="Message..." maxlength="300"></input>
+									<div class="messageB button" onclick="sendChatMessage();">Send</div>
+								</div>
+
 							</div>
 						</div>
 					</div>
