@@ -108,7 +108,7 @@
 }
 
 #brushSelection {
-	margin-top: 15px;
+
 }
 
 #colour-picker {
@@ -534,6 +534,21 @@ span.value {
 
 #chat-message-box {
 	padding-top: 5px;
+}
+
+.regular-settings, #rainbow-settings, #line-settings {
+	padding-top: 14px;
+	height: 41px;
+	display: inline-block;
+	vertical-align: top;
+}
+
+.regular-settings span, #rainbow-settings span, #line-settings span {
+	vertical-align: middle;
+}
+
+.regular-settings input, #rainbow-settings input, #line-settings select {
+	vertical-align: middle;
 }
 
 

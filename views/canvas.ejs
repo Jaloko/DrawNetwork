@@ -65,19 +65,21 @@
 					<div id="line-tool" class="button tool" data-tip="Line Tool">
 						<div id="tool-line-img" class="button-icon"></div>
 					</div>
-						<label>Size:</label>
+					<div class="regular-settings">
+						<span>Size:</span>
 						<input id="brushSelection" type="range" min="1" max="100" value="30"></input>
-						<div id="rainbow-settings" class="invisible">
-							<label>Speed:</label>
-							<input id="speedSelection" type="range" min="1" max="20" value="1"></input>
-						</div>
-						<div id="line-settings" class="invisible">
-							<label>Line Tip:</label> 			
-							<select id="lineTip" onchange="changeLineTip()">
-								<option value="round">Rounded</option>
-								<option value="square">Flat</option>
-							</select>
-						</div>
+					</div>
+					<div id="rainbow-settings" class="invisible">
+						<span>Speed:</span>
+						<input id="speedSelection" type="range" min="1" max="20" value="1"></input>
+					</div>
+					<div id="line-settings" class="invisible">
+						<span>Line Tip:</span>			
+						<select id="lineTip" onchange="changeLineTip()">
+							<option value="round">Rounded</option>
+							<option value="square">Flat</option>
+						</select>
+					</div>
 					</div>
 					<div id="dropper-settings" class="invisible">
 					</div>
@@ -91,7 +93,11 @@
 							<option value="Droid Serif">Droid Serif</option>
 							<option value="Pacifico">Pacifico</option>
 						</select>
-						Size: <input id="textSizeSel" type="range" min="1" max="100" value="30"></input>
+						<div class="regular-settings">
+							<span>Size: </span>
+							<input id="textSizeSel" type="range" min="1" max="100" value="30"></input>
+						</div>
+
 						<div class="button" onclick="applyText()">
 						Apply Text
 						</div>

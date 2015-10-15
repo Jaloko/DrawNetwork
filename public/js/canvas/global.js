@@ -857,6 +857,8 @@ document.getElementById('eraser').addEventListener('click', function(evt){
 	tool.brush.setBrushType('eraser');
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "";
+	document.getElementById('canvas').style.cursor = "none";
+	document.getElementById('pointer-canvas').style.cursor = "none";
 });
 
 

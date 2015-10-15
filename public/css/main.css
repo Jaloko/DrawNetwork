@@ -115,9 +115,11 @@ body {
 	margin-right: 46.66666666666667px;
 }
 
-.login-fixed-width {
+.login-fixed {
 	display: inline-block;
 	width: 150px;
+	height: 41px;
+	line-height: 41px;
 }
 
 .feature-fixed-height {
