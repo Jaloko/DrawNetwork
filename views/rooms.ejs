@@ -1,0 +1,66 @@
+<% include /partials/header %>
+	<div class="container">
+		<h2>Rooms</h2>
+		<% include /partials/errors/rooms-error %>
+		<div class="content-wrap">
+			<div class="left-col float-left">
+				<form action="/rooms/create" method="post" class="no-margin">
+					<a class="btn outline" type="submit" onclick="this.parentNode.submit()">Create Room</a>
+					<div class="onoffswitch">
+					    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+						<label class="onoffswitch-label" for="myonoffswitch">
+						    <span class="onoffswitch-inner"></span>
+						    <span class="onoffswitch-switch"></span>
+						</label>
+					</div>
+				</form>
+			</div>
+			<div class="right-col float-right">
+				<input id="room-search" type="text" placeholder="Search Room ID..." onkeydown="searchRoom()" onkeyup="searchRoom()"/>
+				<a class="btn outline" onclick="searchRoom()">Search</a>
+			</div>
+			<div class="clear">
+			</div>
+		</div>
+		<div id="room-radios" class="invisible">
+			<!-- For Loop To Generate Radio Boxes Here -->
+			<%	for(var i = 0; i < rooms.length; i++) {
+					if(i == 0) { %>
+			<input id="<%= rooms[i].id %>-radio" type="radio" name="rooms" value="<%= rooms[i].id %>" checked="true">
+			<% } else { %>
+			<input id="<%= rooms[i].id %>-radio" type="radio" name="rooms" value="<%= rooms[i].id %>">
+			<% } }%>
+		</div>
+		<div class="table-wrap content-wrap scroll-overflow">
+			<table id="rooms">
+				<thead>
+					<tr>
+						<th>Room ID</th>
+						<th>Number of Users</th>
+						<th>Last Activity</th>
+					</tr>
+				</thead>
+				<tbody class="cursor-pointer">
+					<!-- For Loop To Generate Table Rows Here -->
+					<%	for(var i = 0; i < rooms.length; i++) {
+						if(i == 0) { %>
+					<tr id="<%= rooms[i].id %>" onclick="selectElement(this)" class="row-selected">
+						<td><%= rooms[i].id %></td>
+						<td><%= rooms[i].numberOfUsers %>/10</td>
+						<td><%= convertTime((new Date().getTime() - rooms[i].activity) / 1000) %></td>
+					</tr>
+					<% } else { %>
+					<tr id="<%= rooms[i].id %>" onclick="selectElement(this)">
+						<td><%= rooms[i].id %></td>
+						<td><%= rooms[i].numberOfUsers %>/10</td>
+						<td><%= convertTime((new Date().getTime() - rooms[i].activity) / 1000) %></td>
+					</tr>
+					<% } }%>
+				</tbody>
+			</table>
+		</div>
+		<div class="content-wrap center">
+			<a class="btn outline" onclick="joinRoom()">Join Room</a>
+		</div>
+	</div>
+<% include /partials/footer %>

@@ -1,10 +1,22 @@
 <% include /partials/header %>
-	<div id="acp-content">
-		<h2>Administration Control Panel</h2>
-		<form action="" method="post">
-			<span>Username: </span><input type="text" name="username"> <br>
-			<span>Password: </span><input type="password" name="password"> <br>
-			<button class="button" type="submit" onclick="this.parentNode.submit();">Log In</button>
-		</form>
+	<div class="container center">
+		<div class="content-wrap">
+			<h2>Log in</h2>
+			<% include /partials/errors/login-error %>
+			<form action="" method="post">
+				<div class="special-box">
+					<div class="content-wrap">
+						<span class="login-fixed left">Username: </span><span><input name="username" type="text" autofocus/></span>
+					</div>
+					<div>
+						<span class="login-fixed left">Password: </span><span><input name="password" type="password"/></span>
+					</div>
+				<input type="submit" class="invisible"/>
+				</div> <br>
+				<div class="content-box">
+					<a class="btn outline" onclick="this.parentNode.parentNode.submit();">Log In</a>
+				</div>
+			</form>
+		</div>
 	</div>
 <% include /partials/footer %>

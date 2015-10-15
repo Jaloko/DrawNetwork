@@ -1,33 +1,37 @@
 <html>
 	<head>
 		<title>Draw Network</title>
-		<script src="/socket.io/socket.io.js"></script>
-		<script src="js/functions.js"></script>
-		<script src="/js/global.js"></script>
-		<link rel="icon" href="/img/logo/dn-32x32.png" type="image/x-icon" />
-		<link rel="stylesheet" type="text/css" href="/css/global.css">
-		<link rel="stylesheet" type="text/css" href="/css/extras.css">
-		<link rel="stylesheet" type="text/css" href="/css/fonts.css">
-		<link rel="stylesheet" type="text/css" href="/css/acp.css">
+		<link rel="icon" href="/images/logo/dn-64x64.png?v=2" type="image/x-icon" />
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Sigmar+One">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Droid+Serif">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Pacifico">
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<link rel="stylesheet" type="text/css" href="/css/nav.css">
+		<link rel="stylesheet" type="text/css" href="/css/canvas.css">
+		<script src="/js/functions.min.js"></script>
 	</head>
 	<body>
-		<div class="font_preload" style="opacity: 0; position: absolute; left: -99999px;">
-			<span style="font-family: 'Open Sans';">Test</span>
-			<span style="font-family: 'Roboto';">Test</span>
-			<span style="font-family: 'Ubuntu';">Test</span>
-			<span style="font-family: 'Sigmar One';">Test</span>
-			<span style="font-family: 'Droid Serif';">Test</span>
-			<span style="font-family: 'Pacifico';">Test</span>
-			<input id="text-tool-text" type="text" />
-		</div>
-		<div id="nav-bar">
-			<div class="content-box">
-				<a id="logo-64" href="/" class="nav-opt"></a>
-				<a href="/" class="nav-opt">Home</a>
-				<a href="/acp" class="nav-opt">ACP</a>
-				<a id="save-room" onclick="saveRoom();" class="nav-opt save invisible">Save Room</a>
-				<div class="clear"></div>
+		<input id="menuToggle" class="invisible" type="checkbox"></input>
+		<nav>
+			<div class="container">
+				<ul class="nav-bar">
+					<li class="nav-float-left"><a class="logo"></a></li>
+					<li class="menuTitle nav-float-left"><a><label for="menuToggle">Menu</label></a></li>
+					<li class="menuItem nav-float-left"><a class="link" href="/">Home</a></li>
+					<li class="menuItem nav-float-left"><a class="link" href="/rooms">Rooms</a></li>
+					<% if(isAuthenticated) { %>
+					<li class="menuItem nav-float-left"><a class="link" href="/acp">ACP</a></li>
+					<li class="menuItem nav-float-right">
+						<a class="text left-padding">Hi, <%= user.username %></a>
+						<a class="link" href="/logout">Log out</a>
+					</li>
+					<% } else { %>
+					<li class="menuItem nav-float-right"><a class="link" href="/login">Log in</a></li>
+					<% } %>
+				</ul>
 			</div>
-		</div>
-		<div class="content-box" >
-			<div id="wrapper">
+			<div class="clear"></div>
+		</nav>

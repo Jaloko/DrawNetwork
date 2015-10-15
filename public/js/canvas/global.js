@@ -54,10 +54,32 @@ var messageCounter = 0;
 var userJoinCounter = 0;
 var canvasRect = canvas.getBoundingClientRect();
 
+function loadCanvasPage() {
+	var roomId = document.getElementById('room-id').innerHTML;
+	socket.emit('does room exist', roomId);
+}
+
+socket.on('does room exist result', function(data) {
+	if(data == true) {
+		document.getElementById('name-box').className = "";
+		document.getElementById('name-content').className = "";
+	} else {
+		document.getElementById('name-box').className = "";
+		document.getElementById('room-not-exist').className = "";
+		document.getElementById('name-content').className = "Invisible";
+	}
+});
+
+socket.on('room does not exist', function(data) {
+	document.getElementById('name-box').className = "";
+	document.getElementById('room-not-exist').className = "";
+	document.getElementById('name-content').className = "Invisible";
+});
+
 function sendChatMessage() {
 	var data = {
-		name: name,
-		message: document.getElementById('chat-message').value
+		'name': name,
+		'message': document.getElementById('chat-message').value
 	}
 	if(data.message.length > 0) {
 		document.getElementById('chat-message').value = "";
@@ -119,18 +141,18 @@ function getNameList() {
 }
 
 
-function createRoom() {
+/*function createRoom() {
 	var isPublic = document.getElementById('myonoffswitch').checked;
 	socket.emit('create room', isPublic);
-}
+}*/
 
-function joinRoom() {
+/*function joinRoom() {
 	insertURLParam("room", selectedRoom);
-}
+}*/
 
-socket.on('cannot create room', function(data) {
+/*socket.on('cannot create room', function(data) {
 	alert(data);
-});
+});*/
 
 socket.on('room result', function(data) {
 	insertURLParam("room", data);
@@ -138,13 +160,14 @@ socket.on('room result', function(data) {
 
 function sync() {
 	if(hasSynced === false) {
+		var roomId = document.getElementById('room-id').innerHTML;
 		name = document.getElementById('name').value;
 		var me = {
-			id: getURLParam('room'),
-			name : name,
-			colour: tool.brush.colour
+			'id': roomId,
+			'name' : name,
+			'colour': tool.brush.colour
 		}
-		socket.emit('join room', getURLParam('room'));
+		socket.emit('join room', roomId);
 		socket.emit('im online', me);
 	}
 }
@@ -166,31 +189,31 @@ socket.on('room full', function() {
 });
 
 socket.on('sync draw', function(data) {
-	tool.shapeTool.drawCircle(data.x, data.y, data.lastX, data.lastY, data.size, data.colour);
+	tool.shapeTool.drawCircle(data['x'], data['y'], data['lastX'], data['lastY'], data['size'], data['colour']);
 });
 
 socket.on('sync draw text', function(data) {
-	tool.textTool.drawText(data.x, data.y, data.font, data.colour, data.text);
+	tool.textTool.drawText(data['x'], data['y'], data['font'], data['colour'], data['text']);
 });
 
 socket.on('sync draw rect', function(data) {
-	tool.shapeTool.drawShapeRect(data.x, data.y, data.endX, data.endY, data.colour);
+	tool.shapeTool.drawShapeRect(data['x'], data['y'], data['endX'], data['endY'], data['colour']);
 });
 
 socket.on('sync draw circle', function(data) {
-	tool.shapeTool.drawShapeCircle(data.x, data.y, data.endX, data.endY, data.colour);
+	tool.shapeTool.drawShapeCircle(data['x'], data['y'], data['endX'], data['endY'], data['colour']);
 });
 
 socket.on('sync draw line', function(data) {
-	tool.brush.drawShapeLine(data.x, data.y, data.endX, data.endY, data.colour, data.size, data.lineTip);
+	tool.brush.drawShapeLine(data['x'], data['y'], data['endX'], data['endY'], data['colour'], data['size'], data['lineTip']);
 });
 
 socket.on('sync erase', function(data) {
-	tool.shapeTool.drawRect(data.x, data.y, data.lastX, data.lastY, data.size, "white");
+	tool.shapeTool.drawRect(data['x'], data['y'], data['lastX'], data['lastY'], data['size'], "white");
 });
 
 socket.on('sync draw square', function(data) {
-	tool.shapeTool.drawRect(data.x, data.y, data.lastX, data.lastY, data.size, "white");
+	tool.shapeTool.drawRect(data['x'], data['y'], data['lastX'], data['lastY'], data['size'], "white");
 });
 
 socket.on('sync result', function(data) {
@@ -216,9 +239,9 @@ socket.on('user list', function(data) {
 		for(var i = 0; i < data.length; i++) {
 			if(data[i] != null) {
 				if(data[i].name == name) {
-					addUser(data[i].name + " (you)", data[i].colour);
+					addUser(data[i]['name'] + " (you)", data[i]['colour']);
 				} else {
-					addUser(data[i].name, data[i].colour);
+					addUser(data[i]['name'], data[i]['colour']);
 				}
 			}
 		}
@@ -239,17 +262,17 @@ socket.on('sync user colour', function(data) {
 	if(data.length != 0) {
 		for(var i = 0; i < data.length; i++) {
 			var user;
-			if(data[i].name === name) {
-				user = document.getElementById(data[i].name + " (you)");
+			if(data[i]['name'] === name) {
+				user = document.getElementById(data[i]['name'] + " (you)");
 				if(user != null) {
-					user.innerHTML = '<div class="user-colour" style="background-color:' + data[i].colour + '"></div>' +
-								 '<div class="user-name">' + data[i].name + ' (you)</div>';
+					user.innerHTML = '<div class="user-colour" style="background-color:' + data[i]['colour'] + '"></div>' +
+								 '<div class="user-name">' + data[i]['name'] + ' (you)</div>';
 				}
 			} else {
-				user = document.getElementById(data[i].name);
+				user = document.getElementById(data[i]['name']);
 				if(user != null) {
-					user.innerHTML = '<div class="user-colour" style="background-color:' + data[i].colour + '"></div>' +
-							     	'<div class="user-name">' + data[i].name + '</div>';
+					user.innerHTML = '<div class="user-colour" style="background-color:' + data[i]['colour'] + '"></div>' +
+							     	'<div class="user-name">' + data[i]['name'] + '</div>';
 				}
 			}
 		}
@@ -274,10 +297,10 @@ socket.on('send clear vote timer', function(data) {
 	document.getElementById('clear-wrap').className ="table-visible";
 	document.getElementById('result').className = "invisible";
 	document.getElementById('time').className = "";
-	document.getElementById('timeRemain').innerHTML = data.timeRemaining;
-	document.getElementById('pYes').innerHTML = "Yes: " + data.yesVotes;
-	document.getElementById('pNo').innerHTML = "No: " + data.noVotes;
-	document.getElementById('pTotal').innerHTML = "Total Possible: " + data.total;
+	document.getElementById('timeRemain').innerHTML = data['timeRemaining'];
+	document.getElementById('pYes').innerHTML = "Yes: " + data['yesVotes'];
+	document.getElementById('pNo').innerHTML = "No: " + data['noVotes'];
+	document.getElementById('pTotal').innerHTML = "Total Possible: " + data['total'];
 	if(currentlyVoting === false) {
 		document.getElementById('voteButtons').className = "invisible";
 	}
@@ -343,13 +366,13 @@ function clearUserCounter() {
 
 function addChatMessage(data) {
 	var chat = document.getElementById('chat-box');
-	var theName = data.name;
-	if(data.name === name) {
+	var theName = data['name'];
+	if(data['name'] === name) {
 		theName = "You";
 	}
 	var newMesage = '<div class="chat-row">' +
 						'<div class="name" style="font-weight: bold;">' + theName + ': ' + '</div>' +
-						'<div class="message"><p>' + data.message + '</p></div>' +
+						'<div class="message"><p>' + data['message'] + '</p></div>' +
 					'</div>';
 	chat.innerHTML += newMesage;
 	chat.scrollTop = chat.scrollHeight;
@@ -383,11 +406,11 @@ var chkevent = window.attachEvent ? 'onbeforeunload' : 'beforeunload'; /// make 
 // It appears the problem here was that it cant send 2 socket.emits()
 myEvent(chkevent, function(e) { // For >=IE7, Chrome, Firefox
 	var me = {
-		name: name,
-		colour: tool.brush.colour
+		'name': name,
+		'colour': tool.brush.colour
 	};
 	if(connectedUsers <= 1) {
-		me.canvas = canvas.toDataURL();
+		me['canvas'] = canvas.toDataURL();
 		socket.emit('im offline store canvas', me);	
 	} else {
 		socket.emit('im offline', me);	
@@ -400,7 +423,7 @@ function saveRoom() {
 		document.getElementById('save-wrap').className = "table-visible";
 		document.getElementById('save-progress').className = "";
 		var me = {
-			canvas: canvas.toDataURL()
+			'canvas': canvas.toDataURL()
 		};
 		socket.emit('store canvas', me);
 	}
@@ -499,17 +522,17 @@ function applyText() {
 	if(readyForText == true) {
 		var cr = canvas.getBoundingClientRect();
 		var data = {
-			x: textPos.x - cr.left,
-			y: textPos.y - cr.top,
-			font: tool.textTool.textFont,
-			colour: tool.brush.colour,
-			text: tool.textTool.textToRender
+			'x': textPos.x - cr.left,
+			'y': textPos.y - cr.top,
+			'font': tool.textTool.textFont,
+			'colour': tool.brush.colour,
+			'text': tool.textTool.textToRender
 		};
 		socket.emit('draw text', data);
-		tool.textTool.drawText(data.x, data.y, tool.textTool.textFont, data.colour, tool.textTool.textToRender);
+		tool.textTool.drawText(data['x'], data['y'], tool.textTool.textFont, data['colour'], tool.textTool.textToRender);
 		tool.textTool.textToRender = "";
 		document.getElementById('text-tool-text').value = "";
-		tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, data.colour, tool.textTool.textToRender);
+		tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, data['colour'], tool.textTool.textToRender);
 		readyForText = false;
 		document.getElementById('text-tool-text').blur();
 	}
@@ -667,32 +690,32 @@ document.addEventListener("mouseup", function(evt) {
     		if(tool.getBrushType() === "shape"){
     			if(currentlyVoting === false && currentlySaving === false) {
 		    		var shapeData = {
-		    			x: shapePos.x - canvasRect.left,
-		    			y: shapePos.y - canvasRect.top,
-		    			endX: shapeEndPos.x - canvasRect.left,
-		    			endY: shapeEndPos.y - canvasRect.top,
-		    			colour: tool.brush.colour
+		    			'x': shapePos.x - canvasRect.left,
+		    			'y': shapePos.y - canvasRect.top,
+		    			'endX': shapeEndPos.x - canvasRect.left,
+		    			'endY': shapeEndPos.y - canvasRect.top,
+		    			'colour': tool.brush.colour
 		    		}
 		    		if(shapeType === "rectangle") {
-			    		tool.shapeTool.drawShapeRect(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
+			    		tool.shapeTool.drawShapeRect(shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
 			    		socket.emit('draw rect', shapeData);
 		    		} else if(shapeType === "circle") {
-			    		tool.shapeTool.drawShapeCircle(shapeData.x, shapeData.y, shapeData.endX, shapeData.endY, shapeData.colour);
+			    		tool.shapeTool.drawShapeCircle(shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
 			    		socket.emit('draw circle', shapeData);
 	    			}
     			}
     		} else if(tool.getBrushType() === "line") {
   				if(currentlyVoting === false && currentlySaving === false) {
 	    			var lineData = {
-		    			x: shapePos.x - canvasRect.left,
-		    			y: shapePos.y - canvasRect.top,
-		    			endX: shapeEndPos.x - canvasRect.left,
-		    			endY: shapeEndPos.y - canvasRect.top,
-		    			lineTip: tool.brush.lineTip,
-		    			size: tool.brush.size,
-		    			colour: tool.brush.colour
+		    			'x': shapePos.x - canvasRect.left,
+		    			'y': shapePos.y - canvasRect.top,
+		    			'endX': shapeEndPos.x - canvasRect.left,
+		    			'endY': shapeEndPos.y - canvasRect.top,
+		    			'lineTip': tool.brush.lineTip,
+		    			'size': tool.brush.size,
+		    			'colour': tool.brush.colour
 		    		};
-			    	tool.brush.drawShapeLine(lineData.x, lineData.y, lineData.endX, lineData.endY, lineData.colour, lineData.size, lineData.lineTip);
+			    	tool.brush.drawShapeLine(lineData['x'], lineData['y'], lineData['endX'], lineData['endY'], lineData['colour'], lineData['size'], lineData['lineTip']);
 			    	socket.emit('draw line', lineData);
 		    	}
     		}
@@ -746,9 +769,9 @@ document.body.addEventListener("keyup", function(e) {
 	Events (onChange)
 ------------------------------------------*/
 // Search room
-document.getElementById('room-search').addEventListener('change', function(evt){
+/*document.getElementById('room-search').addEventListener('change', function(evt){
 	room.searchRoom();
-});
+});*/
 
 // Change fonts
 document.getElementById('fontSel').addEventListener('change', function(evt){
@@ -834,6 +857,8 @@ document.getElementById('eraser').addEventListener('click', function(evt){
 	tool.brush.setBrushType('eraser');
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "";
+	document.getElementById('canvas').style.cursor = "none";
+	document.getElementById('pointer-canvas').style.cursor = "none";
 });
 
 
@@ -921,5 +946,4 @@ function resetSubCategoryFlags(){
 
 /*document.getElementById('fillBucket').addEventListener('click', function(evt){
 	tool.brush.setBrushType('fillBucket');
-});
-*/
+}); */

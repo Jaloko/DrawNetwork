@@ -121,15 +121,15 @@ var Brush = function(){
 			}
 			var hex = convertRGBToHex(rgb.r, rgb.g, rgb.b);
 			var json = {
-				name: name,
-				x: mousePos.x - canvasRect.left,
-				y: mousePos.y - canvasRect.top,
-				lastX: lastPos.x - canvasRect.left,
-				lastY: lastPos.y - canvasRect.top,
-				size: tool.brush.size,
-				colour: hex
+				'name': name,
+				'x': mousePos.x - canvasRect.left,
+				'y': mousePos.y - canvasRect.top,
+				'lastX': lastPos.x - canvasRect.left,
+				'lastY': lastPos.y - canvasRect.top,
+				'size': tool.brush.size,
+				'colour': hex
 			}
-			tool.shapeTool.drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+			tool.shapeTool.drawCircle(json['x'], json['y'], json['lastX'], json['lastY'], json['size'], json['colour']);
 			socket.emit('draw', json);
 		}
 	}
@@ -148,15 +148,15 @@ var Brush = function(){
 			var rgba = getColourOnHueCanvas();
 			var hex = convertRGBToHex(rgba.r, rgba.g, rgba.b);
 			var json = {
-				name: name,
-				x: mousePos.x - canvasRect.left,
-				y: mousePos.y - canvasRect.top,
-				lastX: lastPos.x - canvasRect.left,
-				lastY: lastPos.y - canvasRect.top,
-				size: this.size,
-				colour: hex
+				'name': name,
+				'x': mousePos.x - canvasRect.left,
+				'y': mousePos.y - canvasRect.top,
+				'lastX': lastPos.x - canvasRect.left,
+				'lastY': lastPos.y - canvasRect.top,
+				'size': this.size,
+				'colour': hex
 			}
-			tool.shapeTool.drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+			tool.shapeTool.drawCircle(json['x'], json['y'], json['lastX'], json['lastY'], json['size'], json['colour']);
 			socket.emit('draw', json);
 		}
 	}
@@ -196,15 +196,15 @@ var Brush = function(){
 		if(currentlyVoting === false && currentlySaving === false) {
 			canvasRect = canvas.getBoundingClientRect();
 			var json = {
-				name: name,
-				x: mousePos.x - canvasRect.left,
-				y: mousePos.y - canvasRect.top,
-				lastX: lastPos.x - canvasRect.left,
-				lastY: lastPos.y - canvasRect.top,
-				size: tool.brush.size,
-				colour: tool.brush.colour
-			}
-			tool.shapeTool.drawCircle(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+				'name': name,
+				'x': mousePos.x - canvasRect.left,
+				'y': mousePos.y - canvasRect.top,
+				'lastX': lastPos.x - canvasRect.left,
+				'lastY': lastPos.y - canvasRect.top,
+				'size': tool.brush.size,
+				'colour': tool.brush.colour
+ 			}
+			tool.shapeTool.drawCircle(json['x'], json['y'], json['lastX'], json['lastY'], json['size'], json['colour']);
 			socket.emit('draw', json);
 		}
 	}
@@ -213,15 +213,15 @@ var Brush = function(){
 		if(currentlyVoting === false && currentlySaving === false) {
 			canvasRect = canvas.getBoundingClientRect();
 			var json = {
-				name: name,
-				x: mousePos.x - canvasRect.left,
-				y: mousePos.y - canvasRect.top,
-				lastX: lastPos.x - canvasRect.left,
-				lastY: lastPos.y - canvasRect.top,
-				size: tool.brush.size,
-				colour: tool.brush.colour
-			}
-			tool.shapeTool.drawRect(json.x, json.y, json.lastX, json.lastY, json.size, "white");
+				'name': name,
+				'x': mousePos.x - canvasRect.left,
+				'y': mousePos.y - canvasRect.top,
+				'lastX': lastPos.x - canvasRect.left,
+				'lastY': lastPos.y - canvasRect.top,
+				'size': tool.brush.size,
+				'colour': tool.brush.colour
+ 			}
+			tool.shapeTool.drawRect(json['x'], json['y'], json['lastX'], json['lastY'], json['size'], "white");
 			socket.emit('erase', json);
 		}
 	}
@@ -230,15 +230,15 @@ var Brush = function(){
 		if(currentlyVoting === false && currentlySaving === false) {
 			canvasRect = canvas.getBoundingClientRect();
 			var json = {
-				name: name,
-				x: mousePos.x - canvasRect.left,
-				y: mousePos.y - canvasRect.top,
-				lastX: lastPos.x - canvasRect.left,
-				lastY: lastPos.y - canvasRect.top,
-				size: tool.brush.size,
-				colour: tool.brush.colour
-			}
-			tool.shapeTool.drawRect(json.x, json.y, json.lastX, json.lastY, json.size, json.colour);
+				'name': name,
+				'x': mousePos.x - canvasRect.left,
+				'y': mousePos.y - canvasRect.top,
+				'lastX': lastPos.x - canvasRect.left,
+				'lastY': lastPos.y - canvasRect.top,
+				'size': tool.brush.size,
+				'colour': tool.brush.colour
+ 			}
+			tool.shapeTool.drawRect(json['x'], json['y'], json['lastX'], json['lastY'], json['size'], json['colour']);
 			socket.emit('draw square', json);
 		}
 	}

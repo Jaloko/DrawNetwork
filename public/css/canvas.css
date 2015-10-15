@@ -1,0 +1,753 @@
+/*--------------------------------
+	canvas.ejs Styles
+---------------------------------*/
+#draw-content {
+	min-width: 960px;
+	background-color: #31353c;
+}
+
+#left-col {
+	float: left;
+	display: inline-block;
+	width: 960px;
+}
+
+#right-col {
+	float: left;
+	width: 320px;
+	display: inline-block;
+}
+
+#canvas-wrap {
+	display: block;
+	position: relative;
+	width: 100%;
+}
+
+#tools {
+	display: block;
+	background-color: #181c22;
+	width: 100%;
+	min-width: 960px;
+	height: 50px;
+	float: left;
+}
+
+#tool-settings {
+	display: block;
+	width: 100%;
+	min-width: 960px;
+	height: 50px;
+	float: left;
+}
+
+.tool {
+	float: left;
+}
+
+.center {
+	text-align: center;
+}
+
+.button {
+	display: inline-block;
+	text-decoration: none;
+	border: none;
+	height: 41px;
+	padding-left: 5px;
+	padding-right: 5px;
+	line-height: 41px;
+	margin: 5px;
+	border-radius: 10px;
+	background-color: #59626e;
+}
+
+.messageB {
+	margin: 0;
+}
+
+.bselect {
+	background-color: #9da8b8;
+}
+
+#brush-settings > .button,
+#shape-settings > .button{
+	background: #4e6486;
+}
+
+#brush-settings > .button:hover,
+#shape-settings > .button:hover{
+	background: #1ca8dd;
+}
+
+#brush-settings > .bselect,
+#shape-settings > .bselect{
+	background: #6f97d3;
+}
+
+.button:hover {
+	cursor: pointer;
+	background-color: #1ca8dd;
+	color: #fff;
+}
+
+.button:hover a {
+	color: #fff;
+}
+
+#currentColour {
+	float: right;
+	height: 40px;
+	margin: 5px;
+	width: 40px;
+	background-color: #f00;
+}
+
+#saveRoom {
+	float: right;
+}
+
+#brushSelection {
+
+}
+
+#colour-picker {
+	display: inline-block;
+	position: relative;
+	width: 100%;
+	height: 255px;
+}
+
+#user-tools {
+	display: inline-block;
+	width: 100%;
+	height: 388px;
+	background-color: #373d48;
+}
+
+#user-tabs {
+	display: block;
+	width: 100%;
+	background-color: #181c22;
+}
+
+.users-border {
+	display: block;
+	margin: 5px;
+}
+
+.tab {
+	display: inline-block;
+	float: left;
+	height: 35px;
+	line-height: 35px;
+	padding-left: 5px;
+	padding-right: 5px;
+	margin-left: 5px;
+	margin-top: 15px;
+	background-color: #2b3038;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+}
+
+.tab:hover {
+	background-color: #1ca8dd;
+	cursor: pointer;
+}
+
+.tab:hover a {
+	color: #ffffff;
+}
+
+.selected {
+	background-color: #373d48;
+	height:40px;
+	line-height: 40px;
+	margin-top: 10px;
+}
+
+#tab-content {
+
+}
+
+.row {
+	display: block;
+	width: 100%;
+	height: 30px;
+	background-color: #5e626a;
+	margin-bottom: 3px;
+}
+
+.user-colour {
+	display: inline-block;
+	float: left;
+	width: 30px;
+	height: 30px;
+	background-color: #fff;
+}
+
+.user-name {
+	display: inline-block;
+	float: left;
+	margin-left: 10px;
+	width: 267px;
+	height: 30px;
+	line-height: 30px;
+}
+
+.visible {
+	display: block;
+	left: 0px;
+	top: 0px;
+}
+
+.table-visible {
+	display: table;
+}
+
+#name-wrap, #clear-wrap, #save-wrap {	
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	min-width: 960px;
+	min-height: 643px; /*works in chrome*/
+	height: 643px; /*works in firefox*/
+	background-color: #111;
+	background-color: rgba(25,25,25,0.8);
+	z-index: 40;
+}
+
+#name-box-wrap, #clear-box-wrap, #save-box-wrap {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#name-content h1, h2, h3, h4, h5, #room-not-exist h1, h2, h3, h4, h5, #currently-syncing h1, h2, h3, h4, h5 {
+	margin-top: 0;
+}
+
+#save-complete h1, h2, h3, h4, h5 {
+	margin-top: 20px;
+}
+
+#name-box, #clear-canvas-vote-box, #save-box {
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+	width: 350px;
+	padding: 20px;
+	background-color: #1b1e25;
+	border-radius: 10px;
+}
+
+#name-box h2, #name-box input{
+	margin-bottom: 20px;
+}
+
+#no-javascript {
+	position: absolute;
+	top: 60px;
+	left: 0;
+	width: 100%;
+	min-width: 960px;
+	min-height: 700px;
+	height: 700px;
+	background-color: #111;
+	background-color: rgba(25,25,25,0.8);
+	z-index: 40;
+}
+
+#no-javascript-wrap {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#no-javascript-box {
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+	width: 400px;
+	padding: 20px;
+	background-color: #4d3d2f;
+}
+/*---------------------------------
+	Tools
+---------------------------------*/
+/* Tool Tip */
+
+[data-tip] {
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+}
+
+[data-tip]:before,
+[data-tip]:after {
+  	visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+[data-tip]:before {
+    position: absolute;
+    bottom: 50px;
+    padding: 10px;
+    width: 170px;
+    font-size: 12pt;
+    line-height: 1;
+    text-align: center;
+    background-color: #181c22;
+    border: 1px solid #aaa;
+    color: #fff;
+    content: attr(data-tip);
+}
+
+/* Show tooltip content on hover */
+[data-tip]:hover:before,
+[data-tip]:hover:after {
+    visibility: visible;
+    opacity: 1;
+}
+
+.button-icon{
+	width: 40px;
+	height: 40px;
+}
+
+#tool-collection-brush-img {
+	background: url("/images/icons/cup29.png") center no-repeat;
+	background-size: 80%;
+}
+
+#tool-brush-img {
+	background: url("/images/icons/artist3.png") center no-repeat;
+	background-size: 100%;
+}
+
+#tool-square-brush-img {
+	background: url("/images/icons/roller-brush.png") center no-repeat;
+	background-size: 80%;
+}
+
+#tool-gradient-brush-img {
+	background: url("/images/icons/painter11.png") center no-repeat;
+	background-size: 80%;
+}
+
+
+#tool-rainbow-brush-img {
+	background: url("/images/icons/star42.png") center no-repeat;
+	background-size: 80%;
+}
+
+#tool-dropper-img {
+	background: url("/images/icons/color8.png") center no-repeat;
+	background-size: 100%;
+}
+
+#tool-shape-img {
+	background: url("/images/icons/square194.png") center no-repeat;
+	background-size: 80%;
+}
+
+/*Shapes*/
+#tool-shape-rect-img{
+	background: url("/images/icons/square.png") center no-repeat;
+	background-size: 80%;	
+}
+
+
+#tool-shape-circle-img{
+	background: url("/images/icons/circle.png") center no-repeat;
+	background-size: 80%;	
+}
+
+#tool-grid-img {
+	background: url("/images/icons/grid.png") center no-repeat;
+	background-size: 80%;
+}
+
+#tool-line-img {
+	background: url("/images/icons/divide4.png") center no-repeat;
+	background-size: 80%;
+}
+
+
+#tool-eraser-img {
+	background: url("/images/icons/erase2.png") center no-repeat;
+	background-size: 80%;
+}
+
+#tool-clear-img {
+	background: url("/images/icons/trash30.png") center no-repeat;
+	background-size: 80%;
+}
+
+#tool-save-img {
+	background: url("/images/icons/download174.png") center no-repeat;
+	background-size: 80%;
+}
+
+#tool-text-img {
+	background: url("/images/icons/font13.png") center no-repeat;
+	background-size: 100%;
+}
+#tool-col-pick{
+	margin: 10px;
+	border:2px solid #000;
+	width:600px;
+	height:260;
+}
+
+#tool-col-pick > #color-picker{
+	float: left;
+	cursor:crosshair;
+}
+#tool-col-pick > #tool-rgb-val{
+	float: right;
+}
+#tool-rgb-val label{
+
+}
+#tool-rgb-val span{
+	display: block;
+}
+#tool-rgb-val input{
+	width: 80px;
+}
+
+#canvas, #pointer-canvas {
+	cursor: none;
+}
+
+.table-scroll {
+	display: block;
+	width: 100%;
+	overflow:auto;
+	max-height: 496px;
+	vertical-align: middle;	
+}
+
+#room-list-headers {
+	margin-top: 16px;
+}
+
+#room-id {
+	text-align: left;
+	width: 186px;
+}
+
+#no-users {
+	text-align: left;
+	width: 140px;
+}
+
+#last-activity {
+	text-align: left;
+	width: 240px;
+}
+
+#room-list tbody td {
+	width: 186px;
+}
+
+#room-list tbody td + td{
+	width: 140px;
+}
+
+#room-list tbody td + td + td{
+	width: 240px;
+}
+
+/*---------------------------------
+	Chat
+---------------------------------*/
+#chat-box {
+	height:276px;
+	width:306px;
+	border:0px solid #ccc;
+	background-color: #4d5159;
+	padding: 2px;
+	margin: 0;
+	overflow: auto;
+}
+
+#chat-message {
+	border: none;
+	-webkit-appearance: none;
+	width: 260px;
+	outline: 0;
+	color: black;
+}
+
+.message {
+	width: 289px;
+}
+
+.message p {
+	word-wrap: break-word;
+	padding: 0;
+	margin: 0;
+}
+
+#name-taken, #room-full {
+	color: red;
+}
+
+#users-chat-tab a, #users-online-tab a {
+	padding-right: 5px;
+}
+
+.orange-notification {
+	display: inline-block;
+	height: 15px;
+	padding: 3px;
+	line-height: 15px;
+	border-radius: 5px;
+	background-color: orange;
+}
+
+span.value {
+	display: inline-block;
+	width: 50px;
+}
+
+.paletteLeftCol, .paletteArrowCol, .paletteRightCol {
+    float: left;
+    display: inline-block;
+    position: relative;
+}
+
+.arrow-left {
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 10px solid #ccc;
+    z-index: 0;
+}
+
+#draw-content {
+	position: relative;
+}
+
+#chat-message-box {
+	padding-top: 5px;
+}
+
+.regular-settings, #rainbow-settings, #line-settings {
+	padding-top: 14px;
+	height: 41px;
+	display: inline-block;
+	vertical-align: top;
+}
+
+.regular-settings span, #rainbow-settings span, #line-settings span {
+	vertical-align: middle;
+}
+
+.regular-settings input, #rainbow-settings input, #line-settings select {
+	vertical-align: middle;
+}
+
+
+/**
+Progress Bars
+**/
+
+/* Progress Bar */
+.progress-bar {
+	margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    background-color: #1a1a1a;
+    height: 25px;
+    line-height: 25px;
+    text-align: left;
+    padding: 5px;
+    width: 290px;        
+    border-radius: 5px;
+    box-shadow: 0 1px 5px #000 inset, 0 1px 0 #444;
+    color: white;           
+}
+
+.progress-bar p {
+    margin: 0;
+    padding: 0;
+    margin-left: 10px;
+    text-shadow: 1px 1px #000000;
+}
+
+.progress-bar span {
+    display: inline-block;
+    height: 100%;
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;
+    transition: width .4s ease-in-out;    
+}
+
+/* Gradients */
+
+.blue span {
+    background-color: #34c2e3;   
+    background-image: -webkit-linear-gradient(top, #34c2e3, #006EFF);  
+    background-image: -moz-linear-gradient(top, #34c2e3, #006EFF); 
+    background-image: linear-gradient(top, #34c2e3, #006EFF);  
+    float: left;
+}
+
+.orange span {
+    background-color: #FF9233;
+    background-image: -webkit-linear-gradient(top, #fecf23, #fd9215);  
+    background-image: -moz-linear-gradient(top, #fecf23, #fd9215); 
+    background-image: linear-gradient(top, #fecf23, #fd9215);  
+    float: left;
+} 
+
+.red span {
+    background-color: #FF4747;
+    background-image: -webkit-linear-gradient(top, #FF4747, #D40000);  
+    background-image: -moz-linear-gradient(top, #FF4747, #D40000); 
+    background-image: linear-gradient(top, #FF4747, #D40000);  
+    float: left;
+} 
+
+.purple span {
+    background-color: #A647FF;
+    background-image: -webkit-linear-gradient(top, #A647FF, #6F00D6);  
+    background-image: -moz-linear-gradient(top, #A647FF, #6F00D6); 
+    background-image: linear-gradient(top, #A647FF, #6F00D6);  
+    float: left;
+} 
+
+.green span {
+    background-color: #a5df41;
+    background-image: -webkit-linear-gradient(top, #a5df41, #4ca916);  
+    background-image: -moz-linear-gradient(top, #a5df41, #4ca916);  
+    background-image: linear-gradient(top, #a5df41, #4ca916); 
+    float:left; 
+}
+
+.sky-blue span {
+    background-color: #99ACFF;
+    background-image: -webkit-linear-gradient(top, #B0BDF7, #99ACFF);  
+    background-image: -moz-linear-gradient(top, #B0BDF7, #99ACFF); 
+    background-image: linear-gradient(top, #B0BDF7, #99ACFF);  
+    float: left;
+} 
+
+.dark-red span {
+    background-color: #B3090B;
+    background-image: -webkit-linear-gradient(top, #D63E40, #4ca916);  
+    background-image: -moz-linear-gradient(top, #D63E40, #4ca916);  
+    background-image: linear-gradient(top, #D63E40, #4ca916); 
+    float:left; 
+}
+
+/* Stripes */
+
+.stripes span {
+    background-size: 30px 30px;
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+                        transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+                        transparent 75%, transparent);       
+    background-image: -webkit-linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+                        transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+                        transparent 75%, transparent);       
+    background-image: -moz-linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+                        transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+                        transparent 75%, transparent);    
+    
+    animation: animate-stripes 3s linear infinite;       
+    -webkit-animation: animate-stripes 3s linear infinite;     
+    -moz-animation: animate-stripes 3s linear infinite;        
+}
+
+@-webkit-keyframes animate-stripes {
+    0% {background-position: 0 0;} 100% {background-position: 60px 0;}
+}
+
+@keyframes animate-stripes {
+    0% {background-position: 0 0;} 100% {background-position: 60px 0;}
+}
+
+/* Canvas query*/
+@media (max-width: 1299px) {
+	#draw-content {
+		width: 960px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	#left-col {
+		width: 100%;
+	}
+
+	#right-col {
+		width: 100%;
+		margin-top: 10px;
+	}
+
+	#colour-picker {
+		width: 320px;
+	}
+
+	#user-tools {
+		vertical-align: top;
+		width: 635px;
+		height: 255px;
+	}
+
+	#users-chat {
+		width: 635px;
+	}
+
+	.users-border {
+		width: none;
+	}
+
+	.row {
+		display: inline-block;
+		width: 310px;
+	}
+
+	#chat-box {
+		width: 620px;
+		height: 150px;
+	}
+
+	#chat-message {
+		width: 575px;
+	}
+
+	.message {
+		width: 600px;
+	}
+
+	[data-tip]:before {
+		content: none;
+	}
+
+	#name-wrap, #clear-wrap, #save-wrap {
+		height: 898px;
+		min-height: 898px;
+	}
+}
+
+@media (max-width: 985px) {
+	#draw-content {
+		min-width: 0;
+		width: 100%;
+		overflow-x: scroll;
+		overflow-y: hidden;
+	}
+
+	#right-col {
+		min-width: 960px;
+	}
+
+	#chat-box {
+		margin: 0;
+	}
+}
