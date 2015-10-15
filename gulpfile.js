@@ -6,7 +6,6 @@ gulp.task('canvasjs', function() {
 		'public/js/functions.js',
 		'public/js/gl-matrix.js',
 		'public/js/canvas/shaders.js',
-		'public/js/canvas/room.js',
 		'public/js/canvas/tools/tools.js',
 		'public/js/canvas/tools/brush.js',
 		'public/js/canvas/tools/text-tool.js',

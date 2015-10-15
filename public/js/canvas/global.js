@@ -26,7 +26,6 @@ var pointerContext = pointerCanvas.getContext('2d');
 var canDraw = false;
 
 var tool = new ToolSet();
-var room = new Room();
 	
 var name;
 var randomNames;
@@ -58,23 +57,6 @@ function loadCanvasPage() {
 	var roomId = document.getElementById('room-id').innerHTML;
 	socket.emit('does room exist', roomId);
 }
-
-socket.on('does room exist result', function(data) {
-	if(data == true) {
-		document.getElementById('name-box').className = "";
-		document.getElementById('name-content').className = "";
-	} else {
-		document.getElementById('name-box').className = "";
-		document.getElementById('room-not-exist').className = "";
-		document.getElementById('name-content').className = "Invisible";
-	}
-});
-
-socket.on('room does not exist', function(data) {
-	document.getElementById('name-box').className = "";
-	document.getElementById('room-not-exist').className = "";
-	document.getElementById('name-content').className = "Invisible";
-});
 
 function sendChatMessage() {
 	var data = {
@@ -140,24 +122,6 @@ function getNameList() {
 	txtFile.send(null);
 }
 
-
-/*function createRoom() {
-	var isPublic = document.getElementById('myonoffswitch').checked;
-	socket.emit('create room', isPublic);
-}*/
-
-/*function joinRoom() {
-	insertURLParam("room", selectedRoom);
-}*/
-
-/*socket.on('cannot create room', function(data) {
-	alert(data);
-});*/
-
-socket.on('room result', function(data) {
-	insertURLParam("room", data);
-});
-
 function sync() {
 	if(hasSynced === false) {
 		var roomId = document.getElementById('room-id').innerHTML;
@@ -171,6 +135,23 @@ function sync() {
 		socket.emit('im online', me);
 	}
 }
+
+socket.on('does room exist result', function(data) {
+	if(data == true) {
+		document.getElementById('name-box').className = "";
+		document.getElementById('name-content').className = "";
+	} else {
+		document.getElementById('name-box').className = "";
+		document.getElementById('room-not-exist').className = "";
+		document.getElementById('name-content').className = "Invisible";
+	}
+});
+
+socket.on('room does not exist', function(data) {
+	document.getElementById('name-box').className = "";
+	document.getElementById('room-not-exist').className = "";
+	document.getElementById('name-content').className = "Invisible";
+});
 
 socket.on('name taken', function() {
 	document.getElementById('name-taken').className = "";
@@ -386,7 +367,6 @@ function clearVote(vote) {
 /*
 	Canvas Methods
 */
-
 function clearCanvas() {
    	socket.emit('vote clear');
 	document.getElementById('voteButtons').className = "invisible";
@@ -449,7 +429,6 @@ function addUser(name, colour) {
 /**
 ** Helper Functions
 **/
-
 function getRandomColor() {
     var letters = '0123456789ABCDEF'.split('');
     var color = '#';
@@ -465,7 +444,6 @@ function getMousePos(evt) {
        	y: evt.clientY
     };
 }
-
 
 document.getElementById('brushSelection').addEventListener("input", function(evt){
 	tool.brush.setBrushSize(this.value);
@@ -485,7 +463,6 @@ function changeLineTip() {
 	var e = document.getElementById("lineTip");
 	tool.brush.lineTip = e.options[e.selectedIndex].value;
 }
-
 
 function inputColourChange() {
 	var rgb = {
@@ -517,7 +494,6 @@ function onColourChange(rgb) {
 	tool.brush.setColour(hex);
 }
 
-
 function applyText() {
 	if(readyForText == true) {
 		var cr = canvas.getBoundingClientRect();
@@ -537,7 +513,6 @@ function applyText() {
 		document.getElementById('text-tool-text').blur();
 	}
 }
-
 
 /*------------------------------------------
 	Events (Mouse)
@@ -680,12 +655,13 @@ document.addEventListener("mousedown", function(evt) {
     	}
 	}
 });
+
 document.addEventListener("mouseup", function(evt) {
 	canvas.className = ""; // Reverts to no classname
 	if(evt.button === 0) {
     	mouseDown = false;
     	if(readyForShape === true) {
-    		pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+    		pointerContext.clearRect(0 ,0 , pointerCanvas.width, pointerCanvas.height);
     		canvasRect = canvas.getBoundingClientRect();
     		if(tool.getBrushType() === "shape"){
     			if(currentlyVoting === false && currentlySaving === false) {
@@ -737,11 +713,9 @@ document.addEventListener("mouseup", function(evt) {
 	}
 });
 
-
 /*------------------------------------------
 	Events (Keys)
 ------------------------------------------*/
-
 document.body.addEventListener("keydown", function(e) {
 	if(readyForText === true) {
 		if(currentlyVoting === false && currentlySaving === false) {
@@ -764,15 +738,9 @@ document.body.addEventListener("keyup", function(e) {
 	}
 });
 
-
 /*------------------------------------------
 	Events (onChange)
 ------------------------------------------*/
-// Search room
-/*document.getElementById('room-search').addEventListener('change', function(evt){
-	room.searchRoom();
-});*/
-
 // Change fonts
 document.getElementById('fontSel').addEventListener('change', function(evt){
 	tool.textTool.changeFont();
@@ -803,7 +771,6 @@ document.getElementById('brush').addEventListener('click', function(evt){
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "inline-block";
 
-
 	document.getElementById('canvas').style.cursor = "none";
 	document.getElementById('pointer-canvas').style.cursor = "none";
 });
@@ -813,7 +780,6 @@ document.getElementById('square-brush').addEventListener('click', function(evt){
 	tool.brush.setBrushType('square-brush');
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "inline-block";
-
 
 	document.getElementById('canvas').style.cursor = "none";
 	document.getElementById('pointer-canvas').style.cursor = "none";
@@ -825,7 +791,6 @@ document.getElementById('gradient-brush').addEventListener('click', function(evt
 	this.className = "button bselect tool";
 	document.getElementById('brush-settings').className = "";
 	document.getElementById('rainbow-settings').className = "inline-block";
-
 
 	document.getElementById('canvas').style.cursor = "none";
 	document.getElementById('pointer-canvas').style.cursor = "none";
@@ -874,7 +839,6 @@ document.getElementById('shape-tool').addEventListener('click', function(evt){
 	document.getElementById('shape-settings').className = "";
 });
 
-
 document.getElementById('shapeRect').addEventListener('click', function(evt){
 	resetSubCategoryFlags();
 	tool.shapeTool.setShapeType(this, 'rectangle');
@@ -886,7 +850,6 @@ document.getElementById('shapeCircle').addEventListener('click', function(evt){
 	tool.shapeTool.setShapeType(this, 'circle');
 	document.getElementById('shape-settings').className = "inline-block";
 });
-
 
 document.getElementById('text-tool').addEventListener('click', function(evt){
 	resetCategoryFlags();
@@ -920,9 +883,8 @@ function resetCategoryFlags() {
 	//document.getElementById('grid-tool').className = "button tool";
 	document.getElementById('text-tool').className = "button tool";
 	document.getElementById('shape-tool').className = "button tool";
-};
-
-
+	pointerContext.clearRect(0, 0, pointerCanvas.width, pointerCanvas.height);
+}
 
 function resetSubCategoryFlags(){
 	document.getElementById('brush').className = "button tool";
@@ -942,8 +904,5 @@ function resetSubCategoryFlags(){
 	document.getElementById('text-settings').className = "invisible";
 	document.getElementById('shape-settings').className = "invisible";
 	document.getElementById('line-settings').className = "invisible";
+	pointerContext.clearRect(0, 0, pointerCanvas.width, pointerCanvas.height);
 }
-
-/*document.getElementById('fillBucket').addEventListener('click', function(evt){
-	tool.brush.setBrushType('fillBucket');
-}); */
