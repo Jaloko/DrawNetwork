@@ -1,11 +1,10 @@
 var gulp = require('gulp');
 var closureCompiler = require('gulp-closure-compiler');
+/*var concat = require('gulp-concat');*/
 
 gulp.task('canvasjs', function() {
 	return gulp.src([
 		'public/js/functions.js',
-		'public/js/gl-matrix.js',
-		'public/js/canvas/shaders.js',
 		'public/js/canvas/tools/tools.js',
 		'public/js/canvas/tools/brush.js',
 		'public/js/canvas/tools/text-tool.js',
@@ -27,6 +26,7 @@ gulp.task('canvasjs', function() {
 			},
 			fileName: 'dn.min.js',
 		}))
+		/*.pipe(concat('dn.min.js'))*/
 		.pipe(gulp.dest('public/js'));
 });
 

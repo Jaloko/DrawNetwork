@@ -112,24 +112,16 @@
 					</div>
 				</div>
 			</div>
-			<div id="right-col">
+			<div id="right-col" class="unselectable">
 				<div id="colour-picker" class="unselectable">
-					<div class="paletteLeftCol" onmousedown="return false">
-						<canvas id="webgl-temp" width="255" height="255" style="display: none;"></canvas>
-						<canvas id="tint" width="255" height="255"></canvas>
-						<!-- Causing home button to break -->
-						<canvas id="tint-pointer" style="position:absolute; left: 0; top: 0;" width="255" height="255"></canvas>
-						<canvas id="hue" width="30" height="255"></canvas>
+					<div class="paletteLeftCol">
+						<canvas id="tint" width="256" height="256"></canvas>
+						<canvas id="tint-pointer" width="256" height="256" style="position: absolute; top: 0; left: 0;"></canvas>
 					</div>
-					<div class="paletteArrowCol">
-						<div id="palette-arrow" class="arrow-left" style="position: absolute;"></div>
-					</div>
-					<div style="display: none;" class="paletteRightCol">
-						<span class="value">R:</span>  <input id="rValue" onchange="inputColourChange()" type="text"></input></br>
-						<span class="value">G:</span>	<input id="gValue" onchange="inputColourChange()" type="text"></input></br>
-						<span class="value">B:</span>	<input id="bValue" onchange="inputColourChange()" type="text"></input></br>
-						<span class="value">Hex:</span>	<input id="hexValue" onchange="onHexChange()" type="text"></input></br>
-						<div id="currentColour"></div>
+					<div class="paletteRightCol" style="padding-left: 7.5px; padding-right: 7.5px">
+						<div id="hue-arrow-left"></div>
+						<canvas id="hue" width="20" height="256"></canvas>
+						<div id="hue-arrow-right"></div>
 					</div>
 				</div>
 				<div id="user-tools">

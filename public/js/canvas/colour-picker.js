@@ -1,361 +1,81 @@
-/**
-** Global Variables
-**/
-var squareVertexPositionBuffer;
-var squareVertexColorBuffer;
-var blackVertexColorBuffer;
-var gl;
-var mvMatrix = mat4.create();
-var pMatrix = mat4.create();
-var shaderProgram;
-var pickedColour = {
-    r: 255,
-    g: 0,
-    b: 0
-}
-var tintCtx;
-var tintPointerCtx;
-var hueCtx;
-var image;
-var webglCanvas;
-var hueCanvas;
-var tintCanvas;
-var tintPointerCanvas;
-var tintPointer = {
-    x: 0,
-    y: 0
-}
-var huePointer = {
-    y: 0
-}
+/* ------------------------------------ 
+	Object Definitions
+ ------------------------------------ */
+var Colour = function(r, g, b) {
+	this.r = r,
+	this.g = g,
+	this.b = b
+};
+
+var Position = function(x, y) {
+	this.x = x,
+	this.y = y
+};
+
+/* ------------------------------------ 
+	Globals
+ ------------------------------------ */
+var tintPosition = new Position(0, 0);
+var huePosition = new Position(0, 0);
 var canMoveTintPointer = false;
 var canMoveHuePointer = false;
 var colourTimer = new Date().getTime();
+var tintImage = new Image();
+tintImage.src = "/images/tint.png";
+tintImage.onload = function() {
+   createTint(getTintContext(), new Colour(255, 0, 0)); 
+};
 
-/**
-** WebGL Functions
-**/
-function webGLStart() {
-    webglCanvas = document.getElementById("webgl-temp");
-    tintCanvas = document.getElementById("tint");
-    tintCtx = tintCanvas.getContext('2d');
-    tintPointerCanvas = document.getElementById("tint-pointer");
-    tintPointerCtx = tintPointerCanvas.getContext('2d');
-    hueCanvas = document.getElementById("hue");
-    hueCtx = hueCanvas.getContext('2d');
-    image = new Image();
-    image.onload = function() {
-        hueCtx.drawImage(image, 0, 0);
-    },
-    image.src = "/images/colour-range.png";
-    initGL(webglCanvas);
-    initShaders();
-    initBuffers();
+/* ------------------------------------ 
+	Functions
+ ------------------------------------ */
+function initColourPicker() {
+    document.getElementById('colour-picker').style.cursor = "crosshair";
+	createTint(getTintContext(), new Colour(255, 0, 0));
+	createHue(getHueContext());
+	drawTintPointer(getTintPointerContext(), new Position(0, 0));
+}
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.disable(gl.DEPTH_TEST);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+function createTint(ctx, colour) {
+	ctx.fillStyle = rgbToHex(colour);
+	ctx.fillRect(0, 0, 256, 256);
+	ctx.fillStyle = rgbToHex(colour);
+	ctx.drawImage(tintImage, 0, 0);
+}
 
-    drawColourSquare();
-    drawTintPointer();
-  }
-
-function initGL(canvas) {
-	try {
-		gl = canvas.getContext("webgl",{'alpha': false }) || canvas.getContext("experimental-webgl",{'alpha': false });
-		gl.viewportWidth = canvas.width;
-		gl.viewportHeight = canvas.height;
-	} catch(e) {
-	}
-	if (!gl) {
-		alert("Could not initialise WebGL, sorry :-( ");
+function createHue(ctx) {
+	for(var x = 0; x <= ctx.canvas.width; x++) {
+		for(var y = 0; y <= 255; y++) {
+			ctx.fillStyle = rgbToHex(hsvToRgb(1 - (y / 256), 1, 1));
+			ctx.fillRect(x, y, x + 1, y + 1);
+		}
 	}
 }
 
-function initShaders() {
-	var fragmentShader = getShaderFromVar(basicFragShader, "Frag");
-	var vertexShader = getShaderFromVar(basicVertShader, "Vert");
-	shaderProgram = gl.createProgram();
-	gl.attachShader(shaderProgram, vertexShader);
-	gl.attachShader(shaderProgram, fragmentShader);
-	gl.linkProgram(shaderProgram);
-
-	if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-	alert("Could not initialise shaders");
-	}
-	gl.useProgram(shaderProgram);
-	shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-    shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-    gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
-    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-    shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-}
-
-function getShaderFromVar(shaderSrc, type) {
-    var shader;
-    if(type == "Vert" || type == "Vertex" || type == "VertexShader") {
-        shader = gl.createShader(gl.VERTEX_SHADER);  
-    } else if(type == "Frag" || type == "Fragment" || type == "FragmentShader") {
-        shader = gl.createShader(gl.FRAGMENT_SHADER); 
-    } else {
-        console.log("Error: Cannot get shader. Invalid type provided.");
-        return;
-    }
-    gl.shaderSource(shader, shaderSrc);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        alert(gl.getShaderInfoLog(shader));
-        return null;
-    }
-    return shader;
-}
-
-function initBuffers() {
-    squareVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-    vertices = [
-         1.0,  1.0,  0.0,
-        -1.0,  1.0,  0.0,
-         1.0, -1.0,  0.0,
-        -1.0, -1.0,  0.0
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    squareVertexPositionBuffer.itemSize = 3;
-    squareVertexPositionBuffer.numItems = 4;
-
-    blackVertexColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, blackVertexColorBuffer);
-        var colors = [
-        0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 1.0030,
-        0.0, 0.0, 0.0, 1.0030
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
-    blackVertexColorBuffer.itemSize = 4;
-    blackVertexColorBuffer.numItems = 4;
-
-    squareVertexColorBuffer = gl.createBuffer();
-    var col = checkPrimaryColour(pickedColour.r, pickedColour.g, pickedColour.b);
-     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
-    var colors = [
-        1.0015, 1.0015, 1.0015, 1.0,
-        (pickedColour.r / 255) + col.r, (pickedColour.g / 255) + col.g, (pickedColour.b / 255) + col.b, 1.0,
-        1.0015, 1.0015, 1.0015, 1.0,
-        (pickedColour.r / 255) + col.r, (pickedColour.g / 255) + col.g, (pickedColour.b / 255) + col.b, 1.0
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
-    squareVertexColorBuffer.itemSize = 4;
-    squareVertexColorBuffer.numItems = 4;
-}
-
-
-function updateColourBuffer() {
-    gl.bindBuffer(gl.ARRAY_BUFFER, blackVertexColorBuffer);
-        var colors = [
-        0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 1.0030,
-        0.0, 0.0, 0.0, 1.0030
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
-    blackVertexColorBuffer.itemSize = 4;
-    blackVertexColorBuffer.numItems = 4;
-
-    var col = checkPrimaryColour(pickedColour.r, pickedColour.g, pickedColour.b);
-     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
-    var colors = [
-        1.0015, 1.0015, 1.0015, 1.0,
-        (pickedColour.r / 255) + col.r, (pickedColour.g / 255) + col.g, (pickedColour.b / 255) + col.b, 1.0,
-        1.0015, 1.0015, 1.0015, 1.0,
-        (pickedColour.r / 255) + col.r, (pickedColour.g / 255) + col.g, (pickedColour.b / 255) + col.b, 1.0
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
-    squareVertexColorBuffer.itemSize = 4;
-    squareVertexColorBuffer.numItems = 4;
-
-    drawColourSquare();
-}
-
-function checkPrimaryColour(r, g, b) {
-    var obj = {
-        r: 0,
-        g: 0,
-        b: 0
-    }
-    if(r == 255) {
-        obj.r = 0.0030;
-    }
-
-    if(g == 255) {
-        obj.g = 0.0030;
-    }
-
-    if(b == 255) {
-        obj.b = 0.0030;
-    }
-    return obj;
-}
-
-function setMatrixUniforms() {
-	gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-	gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-}
-
-function drawColourSquare() {
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, 0.1, 100.0);
-    mat4.identity(mvMatrix);
-    mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -1.0]);
-    setMatrixUniforms();
-
-    // First gradient
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, squareVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
-
-    //Second gradient
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, blackVertexColorBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, blackVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
-
-    tintCtx.drawImage(webglCanvas, 0, 0);
-}
-
-function drawTintPointer() {
-     // Draw the colour pointer
-    tintPointerCtx.clearRect ( 0 , 0 , tintPointerCanvas.width, tintPointerCanvas.height );
-    tintPointerCtx.beginPath();
-    tintPointerCtx.strokeStyle = 'white';
-    tintPointerCtx.arc(tintPointer.x,tintPointer.y,5,0,2*Math.PI);
-    tintPointerCtx.stroke();
-    tintPointerCtx.beginPath();
-    tintPointerCtx.strokeStyle = 'black';
-    tintPointerCtx.arc(tintPointer.x,tintPointer.y,6,0,2*Math.PI);
-    tintPointerCtx.stroke();
-    tintPointerCtx.beginPath();
-    tintPointerCtx.strokeStyle = 'white';
-    tintPointerCtx.arc(tintPointer.x,tintPointer.y,7,0,2*Math.PI);
-    tintPointerCtx.stroke();
-}
-
-/**
-** Colour Picker Functions
-**/
 function changeColour() {
-    var rgb = {
-        r: 0,
-        g: 0,
-        b: 0
-    };
-    if(canMoveTintPointer === true) {
-        var tintRect = tintCanvas.getBoundingClientRect();
-        if(mouseIsHoveringCanvas(tintCanvas)) {
-            tintPointer = mousePos;
-            tintPointer.x -= tintRect.left;
-            tintPointer.y -= tintRect.top;
-        } else {
-            var pos = mousePos;
-            if(pos.x < tintRect.left && pos.y < tintRect.top) {
-                tintPointer.x = 0;
-                tintPointer.y = 0;
-            } else if(pos.x >= tintRect.right && pos.y < tintRect.top) {
-                tintPointer.x = 255;
-                tintPointer.y = 0;
-            } else if(pos.x >= tintRect.right && pos.y >= tintRect.bottom) {
-                tintPointer.x = 255; 
-                tintPointer.y = 255;
-            } else if(pos.x < tintRect.left && pos.y >= tintRect.bottom) {
-                tintPointer.x = 0;
-                tintPointer.y = 255;
-            } else if(pos.x < tintRect.left) {
-                tintPointer.x = 0;
-                tintPointer.y = pos.y - tintRect.top;
-            }  else if(pos.x >= tintRect.right) {
-                tintPointer.x = 255;
-                tintPointer.y = pos.y - tintRect.top;
-            } else if(pos.y < tintRect.top) {
-                tintPointer.x = pos.x - tintRect.left;
-                tintPointer.y = 0; 
-            } else if(pos.y >= tintRect.bottom) {
-                tintPointer.x = pos.x - tintRect.left;
-                tintPointer.y = 255; 
-            }
-        }
+	if(canMoveHuePointer) {
+		var hueRect = getHueContext().canvas.getBoundingClientRect();
+		var huePosition = new Position(mousePos.x - hueRect.left, mousePos.y - hueRect.top);
+		enforceHueBounds(huePosition);
+        createTint(getTintContext(), getColourOnHueCanvas(getHueContext(), huePosition));
 
-        rgb = getColourOnTintCanvas();
-        pickedColour.r = rgb.r;
-        pickedColour.g = rgb.g;
-        pickedColour.b = rgb.b;
-        tool.brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
+		getHueArrows()[0].style.top = huePosition.y - 7;
+		getHueArrows()[1].style.top = huePosition.y - 7;
+        // Set Colours
         var currentColour = document.getElementById('currentColour');
-        currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
-        assignHTMLValues();
-
-        // Draw the tint pointer because it has moved
-        drawTintPointer();
-    } else if(canMoveHuePointer === true) {
-        var hueRect = hueCanvas.getBoundingClientRect();
-        if(mouseIsHoveringCanvas(hueCanvas)) {
-            huePointer.y = mousePos.y - hueRect.top;
-        } else {
-            var pos = mousePos;
-            if(pos.x < hueRect.left && pos.y < hueRect.top) {
-                huePointer.x = 0;
-                huePointer.y = 0;
-            } else if(pos.x >= hueRect.right && pos.y < hueRect.top) {
-                huePointer.x = 0;
-                huePointer.y = 0;
-            } else if(pos.x >= hueRect.right && pos.y >= hueRect.bottom) {
-                huePointer.x = 0; 
-                huePointer.y = 255;
-            } else if(pos.x < hueRect.left && pos.y >= hueRect.bottom) {
-                huePointer.x = 0;
-                huePointer.y = 255;
-            } else if(pos.x < hueRect.left) {
-                huePointer.x = 0;
-                huePointer.y = pos.y - hueRect.top;
-            }  else if(pos.x >= hueRect.right) {
-                huePointer.x = 0;
-                huePointer.y = pos.y - hueRect.top;
-            } else if(pos.y < hueRect.top) {
-                huePointer.x = pos.x - hueRect.left;
-                huePointer.y = 0; 
-            } else if(pos.y >= hueRect.bottom) {
-                huePointer.x = pos.x - hueRect.left;
-                huePointer.y = 255; 
-            }
-        }
-        rgb = getColourOnHueCanvas();
-        pickedColour.r = rgb.r;
-        pickedColour.g = rgb.g;
-        pickedColour.b = rgb.b;
-        tool.brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
+        currentColour.style.backgroundColor = rgbToHex(getColourOnHueCanvas(getHueContext(), huePosition));
+        tool.brush.setColour(rgbToHex(getColourOnHueCanvas(getHueContext(), huePosition)));
+	}
+	if(canMoveTintPointer) {
+		var tintRect = getTintContext().canvas.getBoundingClientRect();
+		tintPosition = new Position(mousePos.x - tintRect.left, mousePos.y - tintRect.top);
+		enforceTintBounds(tintPosition);
+		drawTintPointer(getTintPointerContext(), tintPosition);
+        // Set Colours
         var currentColour = document.getElementById('currentColour');
-        currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
-        var paletteArrow = document.getElementById('palette-arrow');
-        paletteArrow.style.top = huePointer.y - 10 + "px";
-        assignHTMLValues();
-        updateColourBuffer();
-                
-        // Apply tint based on tint pointer
-        rgb = getColourOnTintCanvas();
-        pickedColour.r = rgb.r;
-        pickedColour.g = rgb.g;
-        pickedColour.b = rgb.b;
-        tool.brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
-        var currentColour = document.getElementById('currentColour');
-        currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
-        assignHTMLValues();
-    }
+        currentColour.style.backgroundColor = rgbToHex(getColourOnTintCanvas(getTintContext(), tintPosition));
+        tool.brush.setColour(rgbToHex(getColourOnTintCanvas(getTintContext(), tintPosition)));
+	}
     if(new Date().getTime() > colourTimer + 200) {
         colourTimer = new Date().getTime();
         socket.emit('update colour', tool.brush.colour); 
@@ -363,36 +83,56 @@ function changeColour() {
 }
 
 function updateColour() {
-    rgb = getColourOnHueCanvas();
-    pickedColour.r = rgb.r;
-    pickedColour.g = rgb.g;
-    pickedColour.b = rgb.b;
-    tool.brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
     var currentColour = document.getElementById('currentColour');
-    currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
-    var paletteArrow = document.getElementById('palette-arrow');
-
-    paletteArrow.style.top = (huePointer.y - 10) + "px";
-    assignHTMLValues();
-    updateColourBuffer();
-       
-    // Apply tint based on tint pointer
-    rgb = getColourOnTintCanvas();
-    pickedColour.r = rgb.r;
-    pickedColour.g = rgb.g;
-    pickedColour.b = rgb.b;
-    tool.brush.setColour(convertRGBToHex(rgb.r, rgb.g, rgb.b));
-    var currentColour = document.getElementById('currentColour');
-    currentColour.style.backgroundColor = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
-    assignHTMLValues(); 
-    drawTintPointer();
+    currentColour.style.backgroundColor = rgbToHex(getColourOnTintCanvas(getTintContext(), tintPosition));
+    tool.brush.setColour(rgbToHex(getColourOnTintCanvas(getTintContext(), tintPosition)));
+    getHueArrows()[0].style.top = huePosition.y - 7;
+    getHueArrows()[1].style.top = huePosition.y - 7;
+    createTint(getTintContext(), getColourOnHueCanvas(getHueContext(), huePosition));
+    drawTintPointer(getTintPointerContext(), tintPosition);
+    if(new Date().getTime() > colourTimer + 200) {
+        colourTimer = new Date().getTime();
+        socket.emit('update colour', tool.brush.colour); 
+    }
 }
 
-function getScrollAmount() {
-    var doc = document.documentElement;
-    var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
-    var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
-    return {x: left, y: top}; 
+/* ------------------------------------ 
+	Helper Functions
+ ------------------------------------ */
+function getTintContext() {
+	var tint = document.getElementById("tint");
+	return tint.getContext("2d");
+}
+
+function getHueContext() {
+	var hue = document.getElementById("hue");
+	return hue.getContext("2d");
+}
+
+function getTintPointerContext() {
+	var tintPointer = document.getElementById("tint-pointer");
+	return tintPointer.getContext("2d");
+}
+
+function getHueArrows() {
+	return[document.getElementById("hue-arrow-left"),
+	document.getElementById("hue-arrow-right")];
+}
+
+function isMouseHoveringTintCanvas() {
+	if(mouseIsHoveringCanvas(getTintContext().canvas)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function isMouseHoveringHueCanvas() {
+	if(mouseIsHoveringCanvas(getHueContext().canvas)) {
+		return true
+	} else {
+		return false;
+	}
 }
 
 function mouseIsHoveringCanvas(canvas) {
@@ -406,30 +146,36 @@ function mouseIsHoveringCanvas(canvas) {
     }
 }
 
-function assignHTMLValues() {
-    var rValue = document.getElementById('rValue');
-    rValue.value = pickedColour.r;
-    var gValue = document.getElementById('gValue');
-    gValue.value = pickedColour.g;
-    var bValue = document.getElementById('bValue');
-    bValue.value = pickedColour.b;
-    var hexValue = document.getElementById('hexValue');
-    hexValue.value = convertRGBToHex(pickedColour.r, pickedColour.g, pickedColour.b);
+function drawTintPointer(ctx, position) {
+    // Draw the colour pointer
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.width);
+    ctx.beginPath();
+    ctx.strokeStyle = 'white';
+    ctx.arc(position.x,position.y,5,0,2*Math.PI);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.strokeStyle = 'black';
+    ctx.arc(position.x,position.y,6,0,2*Math.PI);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.strokeStyle = 'white';
+    ctx.arc(position.x,position.y,7,0,2*Math.PI);
+    ctx.stroke();
 }
 
-function getColourOnTintCanvas() {
-    var x = tintPointer.x;
-    var y = tintPointer.y;
+function getColourOnTintCanvas(ctx, position) {
+    var x = position.x;
+    var y = position.y;
 
     // Make sure within array bounds
-    if(x >= 254) {
-        x = 254;
+    if(x >= 255) {
+        x = 255;
     }
-    if(y >= 254) {
-        y = 254;
+    if(y >= 255) {
+        y = 255;
     }
 
-    var data = tintCtx.getImageData(x, y, 1, 1);
+    var data = ctx.getImageData(x, y, 1, 1);
     var pixels = data.data;
     var rgba = {
         r: pixels[0],
@@ -437,18 +183,18 @@ function getColourOnTintCanvas() {
         b: pixels[2],
         a: pixels[3]
     };
-    return rgba;
+    return new Colour(rgba.r, rgba.g, rgba.b);
 }
 
-function getColourOnHueCanvas() {
-    var y = huePointer.y;
+function getColourOnHueCanvas(ctx, position) {
+    var y = position.y;
 
     // Make sure within array bounds
-    if(y >= 254) {
-        y = 254;
+    if(y >= 255) {
+        y = 255;
     }
 
-    var data = hueCtx.getImageData(0, y, 1, y + 1);
+    var data = ctx.getImageData(0, y, 1, y + 1);
     var pixels = data.data;
     var rgba = {
         r: pixels[0],
@@ -456,9 +202,10 @@ function getColourOnHueCanvas() {
         b: pixels[2],
         a: pixels[3]
     };
-    return rgba;
+    return new Colour(rgba.r, rgba.g, rgba.b);
 }
 
+// To be removed in the future - still currently used
 function getColourOnCanvas(canvas, ctx){
     var rect = canvas.getBoundingClientRect();
     var doc = document.documentElement;
@@ -478,19 +225,65 @@ function getColourOnCanvas(canvas, ctx){
     return rgba;
 }
 
-/**
-** Helper Functions
-**/
-
-function convertRGBToHex(red, green, blue){
-    var r = red.toString(16);
-    var g = green.toString(16);
-    var b = blue.toString(16);
-
-    return "#" + binaryResult(r) + binaryResult(g) + binaryResult(b);
+function enforceTintBounds(position) {
+	var tintRect = getTintContext().canvas.getBoundingClientRect();
+    var pos = mousePos;
+    if(pos.x < tintRect.left && pos.y < tintRect.top) {
+        position.x = 0;
+        position.y = 0;
+    } else if(pos.x >= tintRect.right && pos.y < tintRect.top) {
+        position.x = 255;
+        position.y = 0;
+    } else if(pos.x >= tintRect.right && pos.y >= tintRect.bottom) {
+        position.x = 255; 
+        position.y = 255;
+    } else if(pos.x < tintRect.left && pos.y >= tintRect.bottom) {
+        position.x = 0;
+        position.y = 255;
+    } else if(pos.x < tintRect.left) {
+        position.x = 0;
+        position.y = pos.y - tintRect.top;
+    }  else if(pos.x >= tintRect.right) {
+        position.x = 255;
+        position.y = pos.y - tintRect.top;
+    } else if(pos.y < tintRect.top) {
+        position.x = pos.x - tintRect.left;
+        position.y = 0; 
+    } else if(pos.y >= tintRect.bottom) {
+        position.x = pos.x - tintRect.left;
+        position.y = 255; 
+    }
 }
 
-function convertHexToRGB(hex) {
+function enforceHueBounds(position) {
+	var hueRect = getHueContext().canvas.getBoundingClientRect();
+    var pos = mousePos;
+    if((pos.x < hueRect.left && pos.y < hueRect.top) || (pos.x >= hueRect.right && pos.y < hueRect.top)) {
+        position.x = 0;
+        position.y = 0;
+    } else if((pos.x >= hueRect.right && pos.y >= hueRect.bottom) || (pos.x < hueRect.left && pos.y >= hueRect.bottom)) {
+        position.x = 0; 
+        position.y = 256;
+    } else if(pos.x < hueRect.left || pos.x >= hueRect.right) {
+        position.x = 0;
+        position.y = pos.y - hueRect.top;
+    } else if(pos.y < hueRect.top) {
+        position.x = pos.x - hueRect.left;
+        position.y = 0; 
+    } else if(pos.y >= hueRect.bottom) {
+               position.x = pos.x - hueRect.left;
+        position.y = 256;  
+    }
+} 
+
+/* ------------------------------------ 
+	Colour Helper Functions
+ ------------------------------------ */
+function rgbToHex(colour) {
+	return "#" + ((1 << 24) + (colour.r << 16) + (colour.g << 8) + colour.b).toString(16).slice(1);
+}
+
+function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
         r: parseInt(result[1], 16),
@@ -499,18 +292,28 @@ function convertHexToRGB(hex) {
     } : null;
 }
 
-function binaryResult(col){
-    return col.length === 1 ? "0" + col : col;
+function hsvToRgb(h, s, v) {
+    var r, g, b, i, f, p, q, t;
+    if (arguments.length === 1) {
+        s = h.s, v = h.v, h = h.h;
+    }
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return new Colour(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255));
 }
 
-function assignRGBToDom(red, green, blue, hex){
-    rgbInputs.r.value = red;
-    rgbInputs.g.value = green;
-    rgbInputs.b.value = blue;
-    rgbInputs.hex.value = hex;
-}
-
-function convertRGBToHSV() {
+function rgbToHsv() {
     var rr, gg, bb,
         r = arguments[0] / 255,
         g = arguments[1] / 255,
