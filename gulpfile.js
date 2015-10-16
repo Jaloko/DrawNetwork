@@ -1,8 +1,11 @@
 var gulp = require('gulp');
 var closureCompiler = require('gulp-closure-compiler');
+var del = require('del');
+var sourcemaps = require('gulp-sourcemaps');
+var concat = require('gulp-concat');
 
-gulp.task('canvasjs', function() {
-	return gulp.src([
+var config = {
+	js: [
 		'public/js/functions.js',
 		'public/js/gl-matrix.js',
 		'public/js/canvas/shaders.js',
@@ -15,7 +18,20 @@ gulp.task('canvasjs', function() {
 		'public/js/canvas/colour-picker.js',
 		'public/js/canvas/tabs.js',
 		'public/js/closure/exports.js',
-		'public/js/closure/functions-exports.js'])
+		'public/js/closure/functions-exports.js'
+	],
+	css: [
+		'public/css/**/.css'
+	],
+
+	tasks: {
+		default: ['clean', 'canvasjs', 'functionsjs'],
+		dev: ['clean', 'dev-canvas', 'dev-functions']
+	}
+}
+
+gulp.task('canvasjs', function() {
+	return gulp.src(config.js)
 		.pipe(closureCompiler({
 			compilerPath: 'node_modules/google-closure-compiler/compiler.jar',
 			compilerFlags: {
@@ -42,4 +58,25 @@ gulp.task('functionsjs', function() {
 		.pipe(gulp.dest('public/js'));
 });
 
-gulp.task('default', ['canvasjs','functionsjs']);
+gulp.task('clean', function(){
+	return del(['public/js/dn.min.js', 'public/js/functions.min.js']);
+});
+
+gulp.task('dev-canvas', ['clean'], function(){
+	return gulp.src(config.js)
+	.pipe(sourcemaps.init())
+	.pipe(concat('dn.min.js'))
+	.pipe(sourcemaps.write())
+	.pipe(gulp.dest('public/js'));
+});
+
+gulp.task('dev-functions', ['clean'], function(){
+	return gulp.src('public/js/functions.js')
+	.pipe(sourcemaps.init())
+	.pipe(concat('functions.min.js'))
+	.pipe(sourcemaps.write())
+	.pipe(gulp.dest('public/js'));
+});
+
+gulp.task('default', config.tasks.default);
+gulp.task('dev', config.tasks.dev);
