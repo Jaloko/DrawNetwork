@@ -102,7 +102,7 @@ function setNameTextBox() {
 function init() {
 	context.fillStyle = "white";
 	context.fillRect(0, 0, canvas.width, canvas.height);
-	webGLStart();
+	initColourPicker();
 	getNameList();
 }
 
@@ -375,6 +375,7 @@ function clearCanvas() {
 function distanceBetween(point1, point2) {
   return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
 }
+
 function angleBetween(point1, point2) {
   return Math.atan2( point2.x - point1.x, point2.y - point1.y );
 }
@@ -475,21 +476,16 @@ function inputColourChange() {
 
 function onHexChange() {
 	if(document.getElementById("hexValue").value.length == 7) {
-		var rgb = convertHexToRGB(document.getElementById("hexValue").value);
+		var rgb = hexToRgb(document.getElementById("hexValue").value);
 		onColourChange(rgb);
 	}
 }
 
 function onColourChange(rgb) {
-	var hex = convertRGBToHex(rgb.r, rgb.g, rgb.b);
-	var hsv = convertRGBToHSV(rgb.r, rgb.g, rgb.b);
-	tintPointer = {
-		x: Math.ceil((100 - hsv.s) * 2.55),
-		y: Math.ceil((100 - hsv.v) * 2.55)
-	};
-	huePointer = {
-		y: Math.ceil((360 - hsv.h) / 360 * 255)
-	};
+	var hex = rgbToHex(rgb);
+	var hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+	tintPosition = new Position(Math.ceil((100 - hsv.s) * 2.55), Math.ceil((100 - hsv.v) * 2.55));
+	huePosition = new Position(0, Math.ceil((360 - hsv.h) / 360 * 255));
 	updateColour();
 	tool.brush.setColour(hex);
 }
@@ -594,10 +590,10 @@ document.addEventListener("mousedown", function(evt) {
     		if(hasSynced === true) {
     			// Located in colour-picker2.js
 	    		if(canMoveTintPointer === false) {
-			        if(mouseIsHoveringCanvas(tintCanvas)) {
+			        if(isMouseHoveringTintCanvas()) {
 			            canMoveTintPointer = true;
 			            canDraw = false;
-			        }  else if(mouseIsHoveringCanvas(hueCanvas)) {
+			        }  else if(isMouseHoveringHueCanvas()) {
 			        	canMoveHuePointer = true;
 			        	canDraw = false;
 			        } 

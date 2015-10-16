@@ -105,7 +105,7 @@ var Brush = function(){
 	this.gradientDraw = function() {
 		if(currentlyVoting === false && currentlySaving === false) {
 			canvasRect = canvas.getBoundingClientRect();
-			var rgb = convertHexToRGB(tool.brush.colour);
+			var rgb = hexToRgb(tool.brush.colour);
 			rgb.r -= this.gradientTimer;
 			rgb.g -= this.gradientTimer;
 			rgb.b -= this.gradientTimer;
@@ -119,7 +119,7 @@ var Brush = function(){
 			if(rgb.b <= 0) {
 				rgb.b = 0;
 			}
-			var hex = convertRGBToHex(rgb.r, rgb.g, rgb.b);
+			var hex = rgbToHex(rgb);
 			var json = {
 				'name': name,
 				'x': mousePos.x - canvasRect.left,
@@ -140,13 +140,10 @@ var Brush = function(){
 	this.rainbowDraw = function() {
 		if(currentlyVoting === false && currentlySaving === false) {
 			canvasRect = canvas.getBoundingClientRect();
-			var rgb = convertHexToRGB(tool.brush.colour);
-			huePointer = {
-				x: 0,
-				y: this.rainbowPointer
-			}
-			var rgba = getColourOnHueCanvas();
-			var hex = convertRGBToHex(rgba.r, rgba.g, rgba.b);
+			var rgb = hexToRgb(tool.brush.colour);
+			huePosition = new Position(0, this.rainbowPointer);
+			var rgb = getColourOnHueCanvas(getHueContext(), huePosition);
+			var hex = rgbToHex(rgb);
 			var json = {
 				'name': name,
 				'x': mousePos.x - canvasRect.left,

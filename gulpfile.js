@@ -7,8 +7,6 @@ var concat = require('gulp-concat');
 var config = {
 	js: [
 		'public/js/functions.js',
-		'public/js/gl-matrix.js',
-		'public/js/canvas/shaders.js',
 		'public/js/canvas/tools/tools.js',
 		'public/js/canvas/tools/brush.js',
 		'public/js/canvas/tools/text-tool.js',
