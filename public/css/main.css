@@ -259,6 +259,7 @@ th {
 td {
 	border-top: 1px solid #4e515a;
 	border-right: 1px solid #4e515a;
+	color: #cfd2da;
 }
 
 tr:last-child th:last-child { 	
@@ -277,7 +278,7 @@ tr:last-child td:last-child {
 }
 
 .row-selected {
-	background-color: #434857;
+	background-color: #4e515a;
 }
 
 tbody.cursor-pointer {
