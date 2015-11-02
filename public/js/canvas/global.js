@@ -759,6 +759,9 @@ document.getElementById('brushes').addEventListener('click', function(evt){
 
 	var brush = document.getElementById('brush');
 	brush.className = "button bselect tool";
+	
+	document.getElementById('canvas').style.cursor = "none";
+	document.getElementById('pointer-canvas').style.cursor = "none";
 });
 
 document.getElementById('brush').addEventListener('click', function(evt){

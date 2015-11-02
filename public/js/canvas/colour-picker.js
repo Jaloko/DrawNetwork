@@ -63,8 +63,8 @@ function changeColour() {
 		getHueArrows()[1].style.top = huePosition.y - 7;
         // Set Colours
         var currentColour = document.getElementById('currentColour');
-        currentColour.style.backgroundColor = rgbToHex(getColourOnHueCanvas(getHueContext(), huePosition));
-        tool.brush.setColour(rgbToHex(getColourOnHueCanvas(getHueContext(), huePosition)));
+        currentColour.style.backgroundColor = rgbToHex(getColourOnTintCanvas(getTintContext(), tintPosition));
+        tool.brush.setColour(rgbToHex(getColourOnTintCanvas(getTintContext(), tintPosition)));
 	}
 	if(canMoveTintPointer) {
 		var tintRect = getTintContext().canvas.getBoundingClientRect();
