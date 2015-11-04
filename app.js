@@ -2,8 +2,6 @@ var express = require('express'),
 	app = express(),
 	server = require('http').createServer(app),
 	io = require('socket.io').listen(server);
-	// Deprecated
-	//fs = require('fs');
 	app.use(express.static('public'));
 var passport = require('passport');
 var passportLocal = require('passport-local');
@@ -220,9 +218,14 @@ function createRoom(req, res, location) {
 			// socket.handshake.address || socket.client.conn.remoteAddress || socket.conn.remoteAddress
 /*			var ip = req.socket.request.connection.remoteAddress;*/
 			if(ip != null) {
-				var newRoom = new Room(id, ip, newData.isPublic)
+				var newRoom = new Room(id, ip, newData.isPublic);
 				rooms.push(newRoom);
-				db.run('INSERT OR IGNORE INTO rooms(id, owner, public, activity) VALUES("' + newRoom.id + '", "' + newRoom.owner + '", ' + (newRoom.public ? 1 : 0) + ', ' + newRoom.activity + ')');
+				db.run('INSERT OR IGNORE INTO rooms(id, owner, public, activity) VALUES($id, $owner, $public, $activity)', {
+					$id: newRoom.id,
+					$owner: newRoom.owner,
+					$public: newRoom.public ? 1 : 0,
+					$activity: newRoom.activity
+				});
 				//socket.emit('room result', id);
 				res.redirect('/rooms/' + newRoom.id);
 				var isPublic;
@@ -234,12 +237,10 @@ function createRoom(req, res, location) {
 				console.log("Room: " + id + " (" + isPublic + ") created by: " + ip + "!");
 			} else {
 				// Insert error handling here
-				//socket.emit('cannot create room', 'Error identifying remote address. Try again.');
 				res.redirect(location + '?error=2');
 			}
 		} else {
 			// Insert error handling here
-			//socket.emit('cannot create room', 'You have already created 5 rooms!');
 			res.redirect(location + '?error=1');
 		}
 	}
@@ -253,42 +254,6 @@ app.get('/rooms/:uid', function(req, res){
     	roomId: uid
     });
 });
-
-
-/*// Create the file if it doesnt exist
-fs.exists(__dirname + "/rooms.txt", function(exists) {
-    if (!exists) {
-		fs.writeFile(__dirname + "/rooms.txt", '', function(){});
-    }
-    readFile();
-});*/
-
-// Deprecated
-/*function readFile() {
-	// Load room data from the file
-	fs.readFile(__dirname + "/rooms.txt", function(err, data) {
-	    if(err) throw err;
-	    var array = data.toString().split("\n");
-	    if(array.length <= 1) {
-			rooms.push(new Room(generateId(), "admin", true));
-			console.log("No rooms in file, created new room.");
-	    } else {
-		    for(var r = 0; r < array.length / 5; r++) {
-		    	var isPublic;
-		    	if(array[r * 5 + 2] == "true") {
-		    		isPublic = true;
-		    	} else {
-		    		isPublic = false;
-		    	}
-		    	var room = new Room(array[r * 5], array[r * 5 + 1], isPublic);
-		    	room.storedCanvas = array[r * 5 + 3];
-		    	room.activity = array[r * 5 + 4];
-		    	rooms.push(room);
-		    }
-		    console.log("Successfully loaded rooms from file.");
-	    }
-	});
-}*/
 
 var timer = new Date().getTime();
 var saveRoomsTimer = new Date().getTime();
@@ -317,21 +282,6 @@ function Room(id, owner, public) {
 server.listen(8080);
 
 io.sockets.on('connection', function(socket) {
-
-/*	socket.on('get room list', function() {
-		var theRooms = [];
-		for(var i = 0; i < rooms.length; i++) {
-			if(rooms[i].public === true) {
-				var obj = {
-					id: rooms[i].id,
-					users: rooms[i].users.length,
-					activity: rooms[i].activity
-				};
-				theRooms.push(obj);
-			}
-		}
-		socket.emit('recieve room list', theRooms);
-	});*/
 
 	socket.on('sync', function() {
 		var index = getRoomIndex(socket);
@@ -642,7 +592,7 @@ io.sockets.on('connection', function(socket) {
 						rooms[index].users.push(newData);
 						var serverUser = {
 							id: socket.id,
-							ip: socket.handshake.address || socket.client.conn.remoteAddress || socket.conn.remoteAddress,
+							ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
 							hasSynced: false,
 							canSync: false,
 							hasVoted: false,
@@ -871,32 +821,6 @@ function updateRoomsInDB() {
 		updateRoomInDB(r);
 	}
 }
-
-// Deprecated
-/*function writeRoomsToFile() {
-	fs.writeFile(__dirname + "/rooms.txt", '', function(){});
-	fs.writeFile(__dirname + "/rooms.txt", saveRooms(), function(err) {
-	    if(err) {
-	        console.log(err);
-	    }
-	});
-}
-*/
-// Deprecated
-/*function saveRooms() {
-	var text = "";
-	for(var r = 0; r < rooms.length; r++) {
-		text += rooms[r].id + "\n";
-		text += rooms[r].owner + "\n";
-		text += rooms[r].public + "\n";
-		text += rooms[r].storedCanvas + "\n";
-		text += rooms[r].activity;
-		if(r != rooms.length -1) {
-			text += "\n";
-		}
-	}
-	return text;
-} */
 
 function generateId(){
     var text = "";
