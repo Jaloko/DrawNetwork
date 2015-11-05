@@ -592,7 +592,7 @@ io.sockets.on('connection', function(socket) {
 						rooms[index].users.push(newData);
 						var serverUser = {
 							id: socket.id,
-							ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+							ip: socket.handshake.headers['x-forwarded-for'] || socket.handshake.address.address,
 							hasSynced: false,
 							canSync: false,
 							hasVoted: false,
