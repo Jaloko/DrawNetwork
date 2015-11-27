@@ -494,7 +494,8 @@ io.sockets.on('connection', function(socket) {
 			y: data.y,
 			lastX: data.lastX,
 			lastY: data.lastY,
-			size: data.size
+			size: data.size,
+			colour: data.colour
 		};
 		if(index != null) {
 			if(validateText(newData.name) && newData.name.length <= 30

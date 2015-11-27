@@ -194,7 +194,7 @@ socket.on('sync erase', function(data) {
 });
 
 socket.on('sync draw square', function(data) {
-	tool.shapeTool.drawRect(data['x'], data['y'], data['lastX'], data['lastY'], data['size'], "white");
+	tool.shapeTool.drawRect(data['x'], data['y'], data['lastX'], data['lastY'], data['size'], data['colour']);
 });
 
 socket.on('sync result', function(data) {
