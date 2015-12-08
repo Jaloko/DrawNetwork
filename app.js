@@ -439,6 +439,48 @@ io.sockets.on('connection', function(socket) {
 		}
 	});
 
+	socket.on('draw pentagon', function(data) {
+		var index = getRoomIndex(socket);
+		var newData = {
+			x: data.x,
+			y: data.y,
+			endX: data.endX,
+			endY: data.endY,
+			colour: data.colour
+		};
+		if(index != null) {
+			if(validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.endX) 
+				&& validateNumber(newData.endY) && validateHex(newData.colour)) {
+				if(rooms[index].users != null) {
+					if(rooms[index].clearVote.vote == false) {
+						socket.broadcast.to(rooms[index].id).emit('sync draw pentagon', newData);
+					}
+				}
+			}
+		}
+	});
+
+	socket.on('draw hexagon', function(data) {
+		var index = getRoomIndex(socket);
+		var newData = {
+			x: data.x,
+			y: data.y,
+			endX: data.endX,
+			endY: data.endY,
+			colour: data.colour
+		};
+		if(index != null) {
+			if(validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.endX) 
+				&& validateNumber(newData.endY) && validateHex(newData.colour)) {
+				if(rooms[index].users != null) {
+					if(rooms[index].clearVote.vote == false) {
+						socket.broadcast.to(rooms[index].id).emit('sync draw hexagon', newData);
+					}
+				}
+			}
+		}
+	});
+
 	socket.on('draw line', function(data) {
 		var index = getRoomIndex(socket);
 		var newData = {
@@ -500,7 +542,8 @@ io.sockets.on('connection', function(socket) {
 		if(index != null) {
 			if(validateText(newData.name) && newData.name.length <= 30
 				&& validateNumber(newData.x) && validateNumber(newData.y) && validateNumber(newData.lastX)
-				&& validateNumber(newData.lastY) && validateNumber(newData.size) && newData.size > 0 && newData.size <= 100) {
+				&& validateNumber(newData.lastY) && validateNumber(newData.size) && newData.size > 0 && newData.size <= 100
+				&& validateHex(newData.colour)) {
 				if(rooms[index].users != null) {
 					if(rooms[index].clearVote.vote == false) {
 						socket.broadcast.to(rooms[index].id).emit('sync draw square', newData);

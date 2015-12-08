@@ -363,6 +363,16 @@
 	background-size: 80%;	
 }
 
+#tool-shape-pentagon-img{
+	background: url("/images/icons/pentagon1.png") center no-repeat;
+	background-size: 80%;	
+}
+
+#tool-shape-hexagon-img{
+	background: url("/images/icons/hexagon7.png") center no-repeat;
+	background-size: 80%;	
+}
+
 #tool-grid-img {
 	background: url("/images/icons/grid.png") center no-repeat;
 	background-size: 80%;

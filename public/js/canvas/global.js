@@ -38,7 +38,7 @@ var textPos = {
 	y: 0
 };
 var readyForShape = false;
-// Cannot remove shapeType as it introduces a bug where cirlce can never be toogled
+// Cannot remove shapeType as it introduces a bug where circle can never be toogled
 var shapeType = "rectangle"; 
 
 var shapePos = {
@@ -183,6 +183,14 @@ socket.on('sync draw rect', function(data) {
 
 socket.on('sync draw circle', function(data) {
 	tool.shapeTool.drawShapeCircle(data['x'], data['y'], data['endX'], data['endY'], data['colour']);
+});
+
+socket.on('sync draw pentagon', function(data) {
+	tool.shapeTool.drawShapeRegularPolygon(5, data['x'], data['y'], data['endX'], data['endY'], data['colour']);
+});
+
+socket.on('sync draw hexagon', function(data) {
+	tool.shapeTool.drawShapeRegularPolygon(6, data['x'], data['y'], data['endX'], data['endY'], data['colour']);
 });
 
 socket.on('sync draw line', function(data) {
@@ -560,11 +568,16 @@ document.addEventListener('mousemove', function(evt) {
 		} else if(tool.getBrushType() === "shape"){
 	    	if(readyForShape === true) {
 	    		if(currentlyVoting === false && currentlySaving === false) {
+	    			tool.shapeTool.ready = true;
 		    		shapeEndPos = mousePos;
 		    		if(shapeType === "rectangle") {
 		    			tool.shapeTool.drawTempRect(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
 		    		} else if(shapeType === "circle") {
 		    			tool.shapeTool.drawTempCircle(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
+		    		} else if(shapeType === "pentagon") {
+		    			tool.shapeTool.drawTempRegularPolygon(5, shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
+		    		} else if(shapeType === "hexagon") {
+		    			tool.shapeTool.drawTempRegularPolygon(6, shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
 		    		}
 	    		}
 	    	}
@@ -642,7 +655,9 @@ document.addEventListener("mousedown", function(evt) {
 				    	}
 					} else if(tool.getBrushType() === "eraser"){
 			    		tool.brush.erase();
-					} else if(tool.getBrushType() === "fillBucket") {
+					}  else if(tool.getBrushType() === "square-brush"){
+		    			tool.brush.drawSquare();
+		    		} else if(tool.getBrushType() === "fillBucket") {
 						fillBucket(context, tool.brush.colour);
 						tool.brush.setBrushType("freeroam");
 					}
@@ -668,13 +683,23 @@ document.addEventListener("mouseup", function(evt) {
 		    			'endY': shapeEndPos.y - canvasRect.top,
 		    			'colour': tool.brush.colour
 		    		}
-		    		if(shapeType === "rectangle") {
-			    		tool.shapeTool.drawShapeRect(shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
-			    		socket.emit('draw rect', shapeData);
-		    		} else if(shapeType === "circle") {
-			    		tool.shapeTool.drawShapeCircle(shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
-			    		socket.emit('draw circle', shapeData);
-	    			}
+		    		// Only work if shapes
+		    		if(tool.shapeTool.ready === true) {
+			    		if(shapeType === "rectangle") {
+				    		tool.shapeTool.drawShapeRect(shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
+				    		socket.emit('draw rect', shapeData);
+			    		} else if(shapeType === "circle") {
+				    		tool.shapeTool.drawShapeCircle(shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
+				    		socket.emit('draw circle', shapeData);
+		    			} else if(shapeType === "pentagon") {
+				    		tool.shapeTool.drawShapeRegularPolygon(5, shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
+				    		socket.emit('draw pentagon', shapeData);
+		    			} else if(shapeType === "hexagon") {
+				    		tool.shapeTool.drawShapeRegularPolygon(6, shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
+				    		socket.emit('draw hexagon', shapeData);
+		    			}
+		    			tool.shapeTool.ready = false;
+		    		}
     			}
     		} else if(tool.getBrushType() === "line") {
   				if(currentlyVoting === false && currentlySaving === false) {
@@ -850,6 +875,18 @@ document.getElementById('shapeCircle').addEventListener('click', function(evt){
 	document.getElementById('shape-settings').className = "inline-block";
 });
 
+document.getElementById('shapePentagon').addEventListener('click', function(evt){
+	resetSubCategoryFlags();
+	tool.shapeTool.setShapeType(this, 'pentagon');
+	document.getElementById('shape-settings').className = "inline-block";
+});
+
+document.getElementById('shapeHexagon').addEventListener('click', function(evt){
+	resetSubCategoryFlags();
+	tool.shapeTool.setShapeType(this, 'hexagon');
+	document.getElementById('shape-settings').className = "inline-block";
+});
+
 document.getElementById('text-tool').addEventListener('click', function(evt){
 	resetCategoryFlags();
 	resetSubCategoryFlags();	
@@ -895,6 +932,8 @@ function resetSubCategoryFlags(){
 	// Shapes
 	document.getElementById('shapeRect').className = "button tool";
 	document.getElementById('shapeCircle').className = "button tool";
+	document.getElementById('shapePentagon').className = "button tool";
+	document.getElementById('shapeHexagon').className = "button tool";
 
 	// Tool Settings
 	document.getElementById('brush-settings').className = "invisible";

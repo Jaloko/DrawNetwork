@@ -1,5 +1,6 @@
 var ShapeTool = function(){
 	this.shapeType = "rectangle",
+	this.ready = false,
 
 	this.getShapeType = function(){
 		return this.shapeType;
@@ -93,6 +94,43 @@ var ShapeTool = function(){
 		}
 		context.arc(x, y, radius, 0, 2 * Math.PI, false);
 		context.fillStyle = colour;
+		context.fill();
+	}
+
+
+	this.drawTempRegularPolygon = function(numberOfVertices, x, y, endX, endY, colour) {
+		var cr = pointerCanvas.getBoundingClientRect();
+		pointerContext.clearRect ( 0 , 0 , pointerCanvas.width, pointerCanvas.height );
+		var dist = 0;
+		if(Math.abs((endX - x)) > Math.abs((endY - y))) {
+			dist = Math.abs((endX - x));
+		} else {
+			dist = Math.abs((endY - y));
+		}
+
+		pointerContext.fillStyle = colour;
+		pointerContext.beginPath();
+		for(var i = 0; i < numberOfVertices; i++) {
+			pointerContext.lineTo( (x - cr.left) - Math.sin(i/numberOfVertices*2*Math.PI) * dist, (y - cr.top) - Math.cos(i/numberOfVertices*2*Math.PI) * dist);
+        }
+		pointerContext.closePath();
+		pointerContext.fill();
+	}
+
+	this.drawShapeRegularPolygon = function(numberOfVertices, x, y, endX, endY, colour) {
+		var dist = 0;
+		if(Math.abs((endX - x)) > Math.abs((endY - y))) {
+			dist = Math.abs((endX - x));
+		} else {
+			dist = Math.abs((endY - y));
+		}
+
+		context.fillStyle = colour;
+		context.beginPath();
+		for(var i = 0; i < numberOfVertices; i++) {
+			context.lineTo( (x) - Math.sin(i/numberOfVertices*2*Math.PI) * dist, (y) - Math.cos(i/numberOfVertices*2*Math.PI) * dist);
+        }
+		context.closePath();
 		context.fill();
 	}
 };
