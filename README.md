@@ -26,5 +26,5 @@ npm run build
 
 This will build the production version, which uses `Googles Closure Complier` on the JavaScript. However if you need to run in development with source maps you can do so via this command:
 ```
-npm run build dev 
+npm run build:dev 
 ```

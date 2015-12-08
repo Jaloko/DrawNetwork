@@ -364,12 +364,12 @@
 }
 
 #tool-shape-pentagon-img{
-	background: url("/images/icons/pentagon1.png") center no-repeat;
+	background: url("/images/icons/pentagon.png") center no-repeat;
 	background-size: 80%;	
 }
 
 #tool-shape-hexagon-img{
-	background: url("/images/icons/hexagon7.png") center no-repeat;
+	background: url("/images/icons/hexagon.png") center no-repeat;
 	background-size: 80%;	
 }
 
