@@ -1,6 +1,7 @@
 {
   "scripts": {
     "start":"node app.js",
+    "start:dev": "npm run build:dev && node app.js",
     "build": "gulp",
     "build:dev": "gulp dev"
   },

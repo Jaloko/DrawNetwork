@@ -7,15 +7,7 @@
 	Events - Click
 ------------------------------------------*/
 
-var mouseDown = false;
-var mousePos = {
-	x : 0,
-	y : 0
-}
-var lastPos = {
-	x: 0,
-	y: 0
-}
+
 var socket = io.connect();
 var hasSynced = false;
 var canvas = document.getElementById('canvas');
@@ -37,9 +29,6 @@ var textPos = {
 	x: 0,
 	y: 0
 };
-var readyForShape = false;
-// Cannot remove shapeType as it introduces a bug where circle can never be toogled
-var shapeType = "rectangle"; 
 
 var shapePos = {
 	x: 0,
@@ -102,7 +91,7 @@ function setNameTextBox() {
 function init() {
 	context.fillStyle = "white";
 	context.fillRect(0, 0, canvas.width, canvas.height);
-	initColourPicker();
+	ColourPicker.initColourPicker();
 	getNameList();
 }
 
@@ -447,13 +436,6 @@ function getRandomColor() {
     return color;
 }
 
-function getMousePos(evt) {
-    return {
-        x: evt.clientX,
-       	y: evt.clientY
-    };
-}
-
 document.getElementById('brushSelection').addEventListener("input", function(evt){
 	tool.brush.setBrushSize(this.value);
 });
@@ -473,7 +455,7 @@ function changeLineTip() {
 	tool.brush.lineTip = e.options[e.selectedIndex].value;
 }
 
-function inputColourChange() {
+/*function inputColourChange() {
 	var rgb = {
 		r: document.getElementById("rValue").value | 0,
 		g: document.getElementById("gValue").value | 0,
@@ -484,19 +466,11 @@ function inputColourChange() {
 
 function onHexChange() {
 	if(document.getElementById("hexValue").value.length == 7) {
-		var rgb = hexToRgb(document.getElementById("hexValue").value);
+		var rgb = Util.hexToRgb(document.getElementById("hexValue").value);
+		// Moved to dropper.js
 		onColourChange(rgb);
 	}
-}
-
-function onColourChange(rgb) {
-	var hex = rgbToHex(rgb);
-	var hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
-	tintPosition = new Position(Math.ceil((100 - hsv.s) * 2.55), Math.ceil((100 - hsv.v) * 2.55));
-	huePosition = new Position(0, Math.ceil((360 - hsv.h) / 360 * 255));
-	updateColour();
-	tool.brush.setColour(hex);
-}
+}*/
 
 function applyText() {
 	if(readyForText == true) {
@@ -522,213 +496,186 @@ function applyText() {
 	Events (Mouse)
 ------------------------------------------*/
 document.addEventListener('mousemove', function(evt) {
-	lastPos = mousePos;
-	mousePos = getMousePos(evt);
-	if(tool.getBrushType() === "freeroam" || tool.getBrushType() === "gradient-brush" || tool.getBrushType() === "rainbow-brush") {
-		tool.brush.drawBrushOutline(mousePos.x, mousePos.y);
-	} else if(tool.getBrushType() === "eraser" || tool.getBrushType() === "square-brush"){
-		tool.brush.drawEraserOutline(mousePos.x, mousePos.y);
+	// update Mouse Positions
+	Input.lastPos = Input.mousePos;
+	Input.mousePos = Input.getMousePos(evt);
+	// Based on brush type draw an outline for the brush on the pointer canvas
+	switch(tool.getBrushType()) {
+		case ToolTypes.FREE_ROAM:
+		case ToolTypes.GRADIENT_BRUSH:
+		case ToolTypes.RAINBOW_BRUSH:
+			tool.brush.drawBrushOutline(Input.mousePos.x, Input.mousePos.y);
+			break;
+		case ToolTypes.ERASER:
+		case ToolTypes.SQUARE_BRUSH:
+			tool.brush.drawEraserOutline(Input.mousePos.x, Input.mousePos.y);
+			break;
 	}
-	if(mouseDown === true && hasSynced === true && canDraw === true) {
-		if(tool.getBrushType() === "freeroam") {
-			tool.brush.draw();
-		} else if(tool.getBrushType() === "gradient-brush") {
-			if(tool.brush.gradientTimer >= 255) {
-				tool.brush.gradientSwitch = true;
-			} else if(tool.brush.gradientTimer <= 0) {
-				tool.brush.gradientSwitch = false;
-			}
-			if(tool.brush.gradientSwitch === true) {
-				tool.brush.gradientTimer -= tool.brush.gradientSpeed;
-			} else {
-				tool.brush.gradientTimer += tool.brush.gradientSpeed;
-			}
-
-			tool.brush.gradientDraw();
-		}  else if(tool.getBrushType() === "rainbow-brush") {
-	    	tool.brush.rainbowPointer+=tool.brush.rainbowSpeed;
-	    	if(tool.brush.rainbowPointer >= 255) {
-	    		tool.brush.rainbowPointer = 0;
-	    	}
-	    	tool.brush.rainbowDraw();
-		} else if(tool.getBrushType() === "dropper"){
-	    	if(mouseIsHoveringCanvas(canvas)) {
-	    		if(currentlyVoting === false && currentlySaving === false) {
-    				var rgb = getColourOnCanvas(canvas, context);
-					onColourChange(rgb);
+	// Enter this scope if the user is wanting to draw
+	if(Input.mouseDown === true && hasSynced === true && canDraw === true && 
+		currentlyVoting === false && currentlySaving === false) {
+		// Handle what tools do on mouse move	
+		switch(tool.getBrushType()) {
+			case ToolTypes.FREE_ROAM:
+				tool.brush.draw();
+				break;
+			case ToolTypes.GRADIENT_BRUSH:
+				tool.updateGradientBrush();
+				tool.brush.gradientDraw();
+				break;
+			case ToolTypes.RAINBOW_BRUSH:
+				tool.updateRainbowBrush();
+				tool.brush.rainbowDraw();
+				break;
+			case ToolTypes.DROPPER:
+				tool.dropper.updateColour();
+				break;
+			case ToolTypes.ERASER:
+				tool.brush.erase();
+				break;
+			case ToolTypes.SQUARE_BRUSH:
+				tool.brush.drawSquare();
+				break;
+			case ToolTypes.TEXT_TOOL:
+				textPos = Input.mousePos;
+				tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
+				break;
+			case ToolTypes.SHAPE_TOOL:
+				// Means the shapes initial position has been set
+				if(tool.shapeTool.readyToDraw === true) {
+					tool.shapeTool.sizingReady = true;
+					shapeEndPos = Input.mousePos;
+					tool.shapeTool.drawTemp(shapePos, shapeEndPos);
 				}
-			}
-		} else if(tool.getBrushType() === "eraser"){
-		    tool.brush.erase();
-		} else if(tool.getBrushType() === "square-brush"){
-		    tool.brush.drawSquare();
-		}  else if(tool.getBrushType() === "text"){
-			textPos = mousePos;
-			tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
-		} else if(tool.getBrushType() === "shape"){
-	    	if(readyForShape === true) {
-	    		if(currentlyVoting === false && currentlySaving === false) {
-	    			tool.shapeTool.ready = true;
-		    		shapeEndPos = mousePos;
-		    		if(shapeType === "rectangle") {
-		    			tool.shapeTool.drawTempRect(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
-		    		} else if(shapeType === "circle") {
-		    			tool.shapeTool.drawTempCircle(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
-		    		} else if(shapeType === "pentagon") {
-		    			tool.shapeTool.drawTempRegularPolygon(5, shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
-		    		} else if(shapeType === "hexagon") {
-		    			tool.shapeTool.drawTempRegularPolygon(6, shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
-		    		}
-	    		}
-	    	}
-		} else if(tool.getBrushType() === "line"){
-	    	if(readyForShape === true) {
-	    		if(currentlyVoting === false && currentlySaving === false) {
-	    			shapeEndPos = mousePos;
-	    			tool.brush.drawTempLine(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour, tool.brush.size, tool.brush.lineTip);
-	    		}
-	    	}
+				break;
+			case ToolTypes.LINE_TOOL:
+				// Means the lines initial position has been set
+				if(tool.shapeTool.readyToDraw === true) {
+					tool.shapeTool.sizingReady = true;
+					shapeEndPos = Input.mousePos;
+					tool.brush.drawTempLine(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour, tool.brush.size, tool.brush.lineTip);
+				}
+				break;
 		}
-
-	} else if(hasSynced === true) {
-		changeColour();
+	} 
+	// Unsure why this needs to be here
+	else if(hasSynced === true) {
+		ColourPicker.changeColour();
 	}
 }, false);
 
 document.addEventListener("mousedown", function(evt) {
 	canvas.className = "dragged";
 	if(evt.button === 0) {
-    	mouseDown = true;
-    	if(mouseDown === true) {
-    		if(hasSynced === true) {
-    			// Located in colour-picker2.js
-	    		if(canMoveTintPointer === false) {
-			        if(isMouseHoveringTintCanvas()) {
-			            canMoveTintPointer = true;
-			            canDraw = false;
-			        }  else if(isMouseHoveringHueCanvas()) {
-			        	canMoveHuePointer = true;
-			        	canDraw = false;
-			        } 
-			    }
-			    // To stop drawing when dragging tint pointer
-			    if(canDraw === false) {
-	    			if(mouseIsHoveringCanvas(canvas)) {
-						canDraw = true;
-					}
-	    		}
-	    		changeColour();
-	    		if(canDraw === true) {
-				    if(tool.getBrushType() === "freeroam") {
-				    	tool.brush.draw();
-				    } else if(tool.getBrushType() === "gradient-brush") {
-			    		tool.brush.gradientTimer = 0;
-			    		tool.brush.gradientDraw();
-				    } else if(tool.getBrushType() === "rainbow-brush") {
-				    	tool.brush.rainbowDraw();
-				    } else if(tool.getBrushType() === "dropper"){
-				    	if(mouseIsHoveringCanvas(canvas)) {
-			    			if(currentlyVoting === false && currentlySaving === false) {
-		    					var rgb = getColourOnCanvas(canvas, context);
-								onColourChange(rgb);
-							}
-						}
-					} else if(tool.getBrushType() === "text"){
-				    	if(currentlyVoting === false && currentlySaving === false) {
-					    	readyForText = true;
-					    	textPos = mousePos;
-				    	}
-						tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
-					} else if(tool.getBrushType() === "shape"){
-				    	if(readyForShape === false) {
-				    		if(currentlyVoting === false && currentlySaving === false) {
-					    		readyForShape = true;
-					    		shapePos = mousePos;
-			    			}
-				    	}
-					} else if(tool.getBrushType() === "line"){
-				    	if(readyForShape === false) {
-				    		if(currentlyVoting === false && currentlySaving === false) {
-					    		readyForShape = true;
-				    			shapePos = mousePos;
-				    		}
-				    	}
-					} else if(tool.getBrushType() === "eraser"){
-			    		tool.brush.erase();
-					}  else if(tool.getBrushType() === "square-brush"){
-		    			tool.brush.drawSquare();
-		    		} else if(tool.getBrushType() === "fillBucket") {
-						fillBucket(context, tool.brush.colour);
-						tool.brush.setBrushType("freeroam");
-					}
+		Input.mouseDown = true;
+		if(Input.mouseDown === true && hasSynced === true &&
+		currentlyVoting === false && currentlySaving === false) {
+			// Located in colour-picker2.js
+			if(ColourPicker.canMoveTintPointer === false) {
+				if(Util.isMouseOnCanvas(ColourPicker.getTintContext().canvas)) {
+					ColourPicker.canMoveTintPointer = true;
+					canDraw = false;
+				}  else if(Util.isMouseOnCanvas(ColourPicker.getHueContext().canvas)) {
+					ColourPicker.canMoveHuePointer = true;
+					canDraw = false;
+				} 
+			}
+			// To stop drawing when dragging tint pointer
+			if(canDraw === false) {
+				if(Util.isMouseOnCanvas(canvas)) {
+					canDraw = true;
 				}
-    		}
-    	}
+			}
+			ColourPicker.changeColour();
+			if(canDraw === true) {
+				// Handle what tools do on mouse down	
+				switch(tool.getBrushType()) {
+					case ToolTypes.FREE_ROAM:
+						tool.brush.draw();
+						break;
+					case ToolTypes.GRADIENT_BRUSH:
+						tool.brush.gradientTimer = 0;
+						tool.brush.gradientDraw();
+						break;
+					case ToolTypes.RAINBOW_BRUSH:
+						tool.brush.rainbowDraw();
+						break;
+					case ToolTypes.DROPPER:
+						tool.dropper.updateColour();
+						break;
+					case ToolTypes.ERASER:
+						tool.brush.erase();
+						break;
+					case ToolTypes.SQUARE_BRUSH:
+						tool.brush.drawSquare();
+						break;
+					case ToolTypes.TEXT_TOOL:
+						readyForText = true;
+						textPos = Input.mousePos;
+						break;
+					case ToolTypes.SHAPE_TOOL:
+					case ToolTypes.LINE_TOOL:
+						if(tool.shapeTool.readyToDraw === false) {
+							tool.shapeTool.readyToDraw = true;
+							shapePos = Input.mousePos;
+						}
+						break;
+				}
+			}
+		}
 	}
-});
+	});
 
 document.addEventListener("mouseup", function(evt) {
 	canvas.className = ""; // Reverts to no classname
 	if(evt.button === 0) {
-    	mouseDown = false;
-    	if(readyForShape === true) {
-    		pointerContext.clearRect(0 ,0 , pointerCanvas.width, pointerCanvas.height);
-    		canvasRect = canvas.getBoundingClientRect();
-    		if(tool.getBrushType() === "shape"){
-    			if(currentlyVoting === false && currentlySaving === false) {
-		    		var shapeData = {
-		    			'x': shapePos.x - canvasRect.left,
-		    			'y': shapePos.y - canvasRect.top,
-		    			'endX': shapeEndPos.x - canvasRect.left,
-		    			'endY': shapeEndPos.y - canvasRect.top,
-		    			'colour': tool.brush.colour
-		    		}
-		    		// Only work if shapes
-		    		if(tool.shapeTool.ready === true) {
-			    		if(shapeType === "rectangle") {
-				    		tool.shapeTool.drawShapeRect(shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
-				    		socket.emit('draw rect', shapeData);
-			    		} else if(shapeType === "circle") {
-				    		tool.shapeTool.drawShapeCircle(shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
-				    		socket.emit('draw circle', shapeData);
-		    			} else if(shapeType === "pentagon") {
-				    		tool.shapeTool.drawShapeRegularPolygon(5, shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
-				    		socket.emit('draw pentagon', shapeData);
-		    			} else if(shapeType === "hexagon") {
-				    		tool.shapeTool.drawShapeRegularPolygon(6, shapeData['x'], shapeData['y'], shapeData['endX'], shapeData['endY'], shapeData['colour']);
-				    		socket.emit('draw hexagon', shapeData);
-		    			}
-		    			tool.shapeTool.ready = false;
-		    		}
-    			}
-    		} else if(tool.getBrushType() === "line") {
-  				if(currentlyVoting === false && currentlySaving === false) {
-	    			var lineData = {
-		    			'x': shapePos.x - canvasRect.left,
-		    			'y': shapePos.y - canvasRect.top,
-		    			'endX': shapeEndPos.x - canvasRect.left,
-		    			'endY': shapeEndPos.y - canvasRect.top,
-		    			'lineTip': tool.brush.lineTip,
-		    			'size': tool.brush.size,
-		    			'colour': tool.brush.colour
-		    		};
-			    	tool.brush.drawShapeLine(lineData['x'], lineData['y'], lineData['endX'], lineData['endY'], lineData['colour'], lineData['size'], lineData['lineTip']);
-			    	socket.emit('draw line', lineData);
-		    	}
-    		}
-    		readyForShape = false;
-    	}
-    	readyForShape = false;
-	    // Located in colour-picker2.js
-	    if(canMoveTintPointer === true) {
-	        canMoveTintPointer = false;
-	    }
+		Input.mouseDown = false;
+		if(tool.shapeTool.sizingReady === true && currentlyVoting === false && currentlySaving === false) {
+			pointerContext.clearRect(0 ,0 , pointerCanvas.width, pointerCanvas.height);
+			canvasRect = canvas.getBoundingClientRect();
+			switch(tool.getBrushType()) {
+				case ToolTypes.SHAPE_TOOL:
+					var shapeData = {
+						'x': shapePos.x - canvasRect.left,
+						'y': shapePos.y - canvasRect.top,
+						'endX': shapeEndPos.x - canvasRect.left,
+						'endY': shapeEndPos.y - canvasRect.top,
+						'colour': tool.brush.colour
+					}
 
-	    if(canMoveHuePointer === true) {
-	    	canMoveHuePointer = false;
-	    }
+					// Only work if shapes
+					if(tool.shapeTool.readyToDraw === true) {
+						tool.shapeTool.draw(shapeData);
+					}
+					break;
+				case ToolTypes.LINE_TOOL:
+					var lineData = {
+						'x': shapePos.x - canvasRect.left,
+						'y': shapePos.y - canvasRect.top,
+						'endX': shapeEndPos.x - canvasRect.left,
+						'endY': shapeEndPos.y - canvasRect.top,
+						'lineTip': tool.brush.lineTip,
+						'size': tool.brush.size,
+						'colour': tool.brush.colour
+					};
+					tool.brush.drawShapeLine(lineData['x'], lineData['y'], lineData['endX'], lineData['endY'], lineData['colour'], lineData['size'], lineData['lineTip']);
+					socket.emit('draw line', lineData);
+					tool.shapeTool.sizingReady = false;
+					break;
+			}
+			tool.shapeTool.readyToDraw = false;
+		}
+		tool.shapeTool.readyToDraw = false;
+		// Located in colour-picker2.js
+		if(ColourPicker.canMoveTintPointer === true) {
+			ColourPicker.canMoveTintPointer = false;
+		}
 
-    	if(canDraw === true) {
+		if(ColourPicker.canMoveHuePointer === true) {
+			ColourPicker.canMoveHuePointer = false;
+		}
+
+		if(canDraw === true) {
 			canDraw = false;
 		}
 	}
@@ -738,24 +685,20 @@ document.addEventListener("mouseup", function(evt) {
 	Events (Keys)
 ------------------------------------------*/
 document.body.addEventListener("keydown", function(e) {
-	if(readyForText === true) {
-		if(currentlyVoting === false && currentlySaving === false) {
-			tool.textTool.textToRender = document.getElementById('text-tool-text').value;	
-			tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
-			document.getElementById('text-tool-text').focus();
-			if(e.keyCode == 13) {
-		    	applyText();
-		    }
+	if(readyForText === true && currentlyVoting === false && currentlySaving === false) {
+		tool.textTool.textToRender = document.getElementById('text-tool-text').value;	
+		tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
+		document.getElementById('text-tool-text').focus();
+		if(e.keyCode == 13) {
+			applyText();
 		}
 	}
 });
  
 document.body.addEventListener("keyup", function(e) {
-	if(readyForText === true) {
-		if(currentlyVoting === false && currentlySaving === false) {
-			tool.textTool.textToRender = document.getElementById('text-tool-text').value;	
-			tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
-		}
+	if(readyForText === true && currentlyVoting === false && currentlySaving === false) {
+		tool.textTool.textToRender = document.getElementById('text-tool-text').value;	
+		tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 	}
 });
 
@@ -923,12 +866,14 @@ function resetCategoryFlags() {
 }
 
 function resetSubCategoryFlags(){
+	// Brushes
 	document.getElementById('brush').className = "button tool";
 	document.getElementById('square-brush').className = "button tool";
 	document.getElementById('gradient-brush').className = "button tool";
 	document.getElementById('rainbow-brush').className = "button tool";
 	document.getElementById('line-tool').className = "button tool";
 	document.getElementById('eraser').className = "button tool";
+
 	// Shapes
 	document.getElementById('shapeRect').className = "button tool";
 	document.getElementById('shapeCircle').className = "button tool";
@@ -942,5 +887,7 @@ function resetSubCategoryFlags(){
 	document.getElementById('text-settings').className = "invisible";
 	document.getElementById('shape-settings').className = "invisible";
 	document.getElementById('line-settings').className = "invisible";
+
+	// Clear brush outline
 	pointerContext.clearRect(0, 0, pointerCanvas.width, pointerCanvas.height);
 }

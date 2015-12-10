@@ -6,11 +6,14 @@ var concat = require('gulp-concat');
 
 var config = {
 	js: [
+		'public/js/canvas/input.js',
+		'public/js/canvas/util.js',
 		'public/js/functions.js',
 		'public/js/canvas/tools/tools.js',
 		'public/js/canvas/tools/brush.js',
 		'public/js/canvas/tools/text-tool.js',
 		'public/js/canvas/tools/shape-tool.js',
+		'public/js/canvas/tools/dropper.js',
 		'public/js/canvas/global.js',
 		'public/js/canvas/fill-bucket.js',
 		'public/js/canvas/colour-picker.js',

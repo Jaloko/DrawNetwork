@@ -1,5 +1,5 @@
 window['changeLineTip'] = changeLineTip;
-window['inputColourChange'] = inputColourChange;
+/*window['inputColourChange'] = inputColourChange;*/
 window['sendChatMessage'] = sendChatMessage;
 window['clearVote'] = clearVote;
 window['init'] = init;
