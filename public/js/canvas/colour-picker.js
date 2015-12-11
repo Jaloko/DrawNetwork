@@ -58,7 +58,7 @@ ColourPicker.createHue = function(ctx) {
 ColourPicker.changeColour = function() {
 	if(this.canMoveHuePointer) {
 		var hueRect = this.getHueContext().canvas.getBoundingClientRect();
-		this.huePosition = new Position(mousePos.x - hueRect.left, mousePos.y - hueRect.top);
+		this.huePosition = new Position(Input.mousePos.x - hueRect.left, Input.mousePos.y - hueRect.top);
 		this.enforceHueBounds(this.huePosition);
 		this.createTint(this.getTintContext(), this.getColourOnHueCanvas(this.getHueContext(), this.huePosition));
 
@@ -71,7 +71,7 @@ ColourPicker.changeColour = function() {
 	}
 	if(this.canMoveTintPointer) {
 		var tintRect = this.getTintContext().canvas.getBoundingClientRect();
-		this.tintPosition = new Position(mousePos.x - tintRect.left, mousePos.y - tintRect.top);
+		this.tintPosition = new Position(Input.mousePos.x - tintRect.left, Input.mousePos.y - tintRect.top);
 		this.enforceTintBounds(this.tintPosition);
 		this.drawTintPointer(this.getTintPointerContext(), this.tintPosition);
 		// Set Colours
@@ -181,8 +181,8 @@ ColourPicker.getColourOnCanvas = function(canvas, ctx){
 	var doc = document.documentElement;
 	var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
 	var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
-	var x = mousePos.x - rect.left;
-	var y = mousePos.y - rect.top;
+	var x = Input.mousePos.x - rect.left;
+	var y = Input.mousePos.y - rect.top;
 
 	var data = ctx.getImageData(x, y, 1, 1);
 	var pixels = data.data;
@@ -197,7 +197,7 @@ ColourPicker.getColourOnCanvas = function(canvas, ctx){
 
 ColourPicker.enforceTintBounds = function(position) {
 	var tintRect = this.getTintContext().canvas.getBoundingClientRect();
-	var pos = mousePos;
+	var pos = Input.mousePos;
 	if(pos.x < tintRect.left && pos.y < tintRect.top) {
 		position.x = 0;
 		position.y = 0;
@@ -227,7 +227,7 @@ ColourPicker.enforceTintBounds = function(position) {
 
 ColourPicker.enforceHueBounds = function(position) {
 	var hueRect = this.getHueContext().canvas.getBoundingClientRect();
-	var pos = mousePos;
+	var pos = Input.mousePos;
 	if((pos.x < hueRect.left && pos.y < hueRect.top) || (pos.x >= hueRect.right && pos.y < hueRect.top)) {
 		position.x = 0;
 		position.y = 0;

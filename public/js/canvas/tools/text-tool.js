@@ -1,6 +1,11 @@
 var TextTool = function(){
 	this.textToRender = "",
-	this.textFont = "20px Arial"
+	this.textFont = "20px Arial",
+	this.ready = false,
+	this.textPos = {
+		x: 0,
+		y: 0
+	}
 };
 
 

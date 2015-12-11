@@ -17,8 +17,8 @@ var Input = {
  * Returns the mouse position - must be used in an event listener
  */
 Input.getMousePos = function(evt) {
-    return {
-        x: evt.clientX,
-       	y: evt.clientY
-    };
+	return {
+		x: evt.clientX,
+		y: evt.clientY
+	};
 }

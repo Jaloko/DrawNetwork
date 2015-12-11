@@ -9,38 +9,34 @@
 
 
 var socket = io.connect();
-var hasSynced = false;
+
 var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
 var pointerCanvas = document.getElementById('pointer-canvas');
 var pointerContext = pointerCanvas.getContext('2d');
 
-var canDraw = false;
-
 var tool = new ToolSet();
-	
-var name;
-var randomNames;
-var connectedUsers;
-var currentlyVoting = false;
-var readyForText = false;
-var currentlySaving = false;
-var textPos = {
-	x: 0,
-	y: 0
+
+var client = {
+	// Name of the current user
+	name: null,
+	// Used during initialization to check if the clients canvas has synced to the server
+	hasSynced: false,
+	// Is set to true when the mouse hovers over the drawing canvas
+	canDraw: false,
+	// Stops the client drawing while the voting screen is active
+	currentlyVoting: false,
+	// Stops the client drawing while the saving screen is active
+	currentlySaving: false,
+	// Number of messages sent while users tab is active
+	messageCounter: 0,
+	// Number of user join/leaves while chat tab is active
+	userJoinCounter: 0
 };
 
-var shapePos = {
-	x: 0,
-	y: 0
-};
-var shapeEndPos = {
-	x: 0,
-	y: 0
-};
-var messageCounter = 0;
-var userJoinCounter = 0;
-var canvasRect = canvas.getBoundingClientRect();
+function getConnectedUsers() {
+	return document.getElementById('users').children.length;
+}
 
 function loadCanvasPage() {
 	var roomId = document.getElementById('room-id').innerHTML;
@@ -49,7 +45,7 @@ function loadCanvasPage() {
 
 function sendChatMessage() {
 	var data = {
-		'name': name,
+		'name': client.name,
 		'message': document.getElementById('chat-message').value
 	}
 	if(data.message.length > 0) {
@@ -77,47 +73,29 @@ document.getElementById('name').onkeypress = function(e){
     }
 }
 
-function pickRandomName() {
-	var rand = Math.floor(Math.random() * randomNames.length);
-	return randomNames[rand];
-}
 
-function setNameTextBox() {
-	var theName = pickRandomName();
-	document.getElementById('name').value = theName;
-	name = theName;
-}
 
 function init() {
 	context.fillStyle = "white";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	ColourPicker.initColourPicker();
-	getNameList();
+	Util.getNameList(function() {
+		// Set name to input box after the name list has been retrieved
+		var theName = Util.pickRandomName();
+		document.getElementById('name').value = theName;
+		client.name = theName;
+	});
 }
 
-function getNameList() {
-	var txtFile = new XMLHttpRequest();
-	txtFile.open("GET", "/files/names.txt", true);
-	txtFile.onreadystatechange = function() {
-		if (txtFile.readyState === 4) {  // document is ready to parse.
-		    if (txtFile.status === 200) {  // file is found
-		      	allText = txtFile.responseText; 
-		      	lines = txtFile.responseText.split("\n");
-		      	randomNames = lines;
-		      	setNameTextBox();
-		    }
-		}
-	}
-	txtFile.send(null);
-}
+
 
 function sync() {
-	if(hasSynced === false) {
+	if(client.hasSynced === false) {
 		var roomId = document.getElementById('room-id').innerHTML;
-		name = document.getElementById('name').value;
+		client.name = document.getElementById('name').value;
 		var me = {
 			'id': roomId,
-			'name' : name,
+			'name' : client.name,
 			'colour': tool.brush.colour
 		}
 		socket.emit('join room', roomId);
@@ -203,7 +181,7 @@ socket.on('sync result', function(data) {
 		};
 		img.src = data;
 	}
-	hasSynced = true;
+	client.hasSynced = true;
 });
 
 socket.on('send canvas', function() {
@@ -213,7 +191,6 @@ socket.on('send canvas', function() {
 socket.on('user list', function(data) {
 	clearUsers();
 	if(data.length != 0) {
-		connectedUsers = data.length;
 		for(var i = 0; i < data.length; i++) {
 			if(data[i] != null) {
 				if(data[i].name == name) {
@@ -225,13 +202,13 @@ socket.on('user list', function(data) {
 		}
 		var ele = document.getElementById('users-online-tab');
 		if(ele.className != "tab selected") {
-			userJoinCounter++;
+			client.userJoinCounter++;
 			ele.innerHTML = '<a>Users Online</a>' +
 					'<div class="orange-notification">' +
-							userJoinCounter +
+							client.userJoinCounter +
 					'</div>';
 		} else {
-			userJoinCounter = 0;
+			client.userJoinCounter = 0;
 		}
 	}
 });
@@ -263,7 +240,7 @@ socket.on('recieve clear canvas', function() {
 });
 
 socket.on('send vote clear', function(data) {
-	currentlyVoting = true;
+	client.currentlyVoting = true;
 	var clearVoteBox = document.getElementById('clear-canvas-vote-box');
 	clearVoteBox.className = "";
 	document.getElementById('timeRemain').innerHTML = data;
@@ -279,7 +256,7 @@ socket.on('send clear vote timer', function(data) {
 	document.getElementById('pYes').innerHTML = "Yes: " + data['yesVotes'];
 	document.getElementById('pNo').innerHTML = "No: " + data['noVotes'];
 	document.getElementById('pTotal').innerHTML = "Total Possible: " + data['total'];
-	if(currentlyVoting === false) {
+	if(client.currentlyVoting === false) {
 		document.getElementById('voteButtons').className = "invisible";
 	}
 });
@@ -297,7 +274,7 @@ socket.on('cannot start vote', function(data) {
 });
 
 socket.on('unlock canvas', function(data) {
-	currentlyVoting = false;
+	client.currentlyVoting = false;
 	document.getElementById('clear-wrap').className = "invisible";
 	document.getElementById('voteButtons').className = "";	
 });
@@ -306,13 +283,13 @@ socket.on('sync chat message', function(data) {
 	addChatMessage(data);
 	var ele = document.getElementById('users-chat-tab');
 	if(ele.className != "tab selected") {
-		messageCounter++;
+		client.messageCounter++;
 		ele.innerHTML = '<a>Chat</a>' +
 				'<div class="orange-notification">' +
-						messageCounter +
+						client.messageCounter +
 				'</div>';
 	} else {
-		messageCounter = 0;
+		client.messageCounter = 0;
 	}
 });
 
@@ -324,7 +301,7 @@ socket.on('canvas saved', function(data) {
 		document.getElementById('save-wrap').className ="invisible";
 		document.getElementById('save-complete').className = "invisible";
 		document.getElementById('save-progress').className = "";
-		currentlySaving = false;
+		client.currentlySaving = false;
 	}, 1500)
 });
 
@@ -333,12 +310,12 @@ socket.on('room does not exist', function() {
 });
 
 function clearChatNotifs() {
-	messageCounter = 0;
+	client.messageCounter = 0;
 	document.getElementById('users-chat-tab').innerHTML = '<a>Chat</a>';
 }
 
 function clearUserCounter() {
-	userJoinCounter = 0;
+	client.userJoinCounter = 0;
 	document.getElementById('users-online-tab').innerHTML = '<a>Users Online</a>';
 }
 
@@ -387,7 +364,7 @@ myEvent(chkevent, function(e) { // For >=IE7, Chrome, Firefox
 		'name': name,
 		'colour': tool.brush.colour
 	};
-	if(connectedUsers <= 1) {
+	if(getConnectedUsers() <= 1) {
 		me['canvas'] = canvas.toDataURL();
 		socket.emit('im offline store canvas', me);	
 	} else {
@@ -396,8 +373,8 @@ myEvent(chkevent, function(e) { // For >=IE7, Chrome, Firefox
 });
 
 function saveRoom() {
-	if(hasSynced === true) {
-		currentlySaving = true;
+	if(client.hasSynced === true) {
+		client.currentlySaving = true;
 		document.getElementById('save-wrap').className = "table-visible";
 		document.getElementById('save-progress').className = "";
 		var me = {
@@ -473,11 +450,11 @@ function onHexChange() {
 }*/
 
 function applyText() {
-	if(readyForText == true) {
-		var cr = canvas.getBoundingClientRect();
+	if(tool.textTool.ready === true) {
+		var cr = canvas.getBoundingclientRect();
 		var data = {
-			'x': textPos.x - cr.left,
-			'y': textPos.y - cr.top,
+			'x': tool.textTool.textPos.x - cr.left,
+			'y': tool.textTool.textPos.y - cr.top,
 			'font': tool.textTool.textFont,
 			'colour': tool.brush.colour,
 			'text': tool.textTool.textToRender
@@ -486,8 +463,8 @@ function applyText() {
 		tool.textTool.drawText(data['x'], data['y'], tool.textTool.textFont, data['colour'], tool.textTool.textToRender);
 		tool.textTool.textToRender = "";
 		document.getElementById('text-tool-text').value = "";
-		tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, data['colour'], tool.textTool.textToRender);
-		readyForText = false;
+		tool.textTool.drawTempText(tool.textTool.textPos.x, tool.textTool.textPos.y, tool.textTool.textFont, data['colour'], tool.textTool.textToRender);
+		tool.textTool.ready = false;
 		document.getElementById('text-tool-text').blur();
 	}
 }
@@ -512,8 +489,8 @@ document.addEventListener('mousemove', function(evt) {
 			break;
 	}
 	// Enter this scope if the user is wanting to draw
-	if(Input.mouseDown === true && hasSynced === true && canDraw === true && 
-		currentlyVoting === false && currentlySaving === false) {
+	if(Input.mouseDown === true && client.hasSynced === true && client.canDraw === true && 
+		client.currentlyVoting === false && client.currentlySaving === false) {
 		// Handle what tools do on mouse move	
 		switch(tool.getBrushType()) {
 			case ToolTypes.FREE_ROAM:
@@ -537,29 +514,29 @@ document.addEventListener('mousemove', function(evt) {
 				tool.brush.drawSquare();
 				break;
 			case ToolTypes.TEXT_TOOL:
-				textPos = Input.mousePos;
-				tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
+				tool.textTool.textPos = Input.mousePos;
+				tool.textTool.drawTempText(tool.textTool.textPos.x, tool.textTool.textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 				break;
 			case ToolTypes.SHAPE_TOOL:
 				// Means the shapes initial position has been set
 				if(tool.shapeTool.readyToDraw === true) {
 					tool.shapeTool.sizingReady = true;
-					shapeEndPos = Input.mousePos;
-					tool.shapeTool.drawTemp(shapePos, shapeEndPos);
+					tool.shapeTool.shapeEndPos = Input.mousePos;
+					tool.shapeTool.drawTemp();
 				}
 				break;
 			case ToolTypes.LINE_TOOL:
 				// Means the lines initial position has been set
 				if(tool.shapeTool.readyToDraw === true) {
 					tool.shapeTool.sizingReady = true;
-					shapeEndPos = Input.mousePos;
-					tool.brush.drawTempLine(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour, tool.brush.size, tool.brush.lineTip);
+					tool.shapeTool.shapeEndPos = Input.mousePos;
+					tool.brush.drawTempLine(tool.shapeTool.shapePos.x, tool.shapeTool.shapePos.y, tool.shapeTool.shapeEndPos.x, tool.shapeTool.shapeEndPos.y, tool.brush.colour, tool.brush.size, tool.brush.lineTip);
 				}
 				break;
 		}
 	} 
 	// Unsure why this needs to be here
-	else if(hasSynced === true) {
+	else if(client.hasSynced === true) {
 		ColourPicker.changeColour();
 	}
 }, false);
@@ -568,26 +545,26 @@ document.addEventListener("mousedown", function(evt) {
 	canvas.className = "dragged";
 	if(evt.button === 0) {
 		Input.mouseDown = true;
-		if(Input.mouseDown === true && hasSynced === true &&
-		currentlyVoting === false && currentlySaving === false) {
+		if(Input.mouseDown === true && client.hasSynced === true &&
+		client.currentlyVoting === false && client.currentlySaving === false) {
 			// Located in colour-picker2.js
 			if(ColourPicker.canMoveTintPointer === false) {
 				if(Util.isMouseOnCanvas(ColourPicker.getTintContext().canvas)) {
 					ColourPicker.canMoveTintPointer = true;
-					canDraw = false;
+					client.canDraw = false;
 				}  else if(Util.isMouseOnCanvas(ColourPicker.getHueContext().canvas)) {
 					ColourPicker.canMoveHuePointer = true;
-					canDraw = false;
+					client.canDraw = false;
 				} 
 			}
 			// To stop drawing when dragging tint pointer
-			if(canDraw === false) {
+			if(client.canDraw === false) {
 				if(Util.isMouseOnCanvas(canvas)) {
-					canDraw = true;
+					client.canDraw = true;
 				}
 			}
 			ColourPicker.changeColour();
-			if(canDraw === true) {
+			if(client.canDraw === true) {
 				// Handle what tools do on mouse down	
 				switch(tool.getBrushType()) {
 					case ToolTypes.FREE_ROAM:
@@ -610,14 +587,14 @@ document.addEventListener("mousedown", function(evt) {
 						tool.brush.drawSquare();
 						break;
 					case ToolTypes.TEXT_TOOL:
-						readyForText = true;
-						textPos = Input.mousePos;
+						tool.textTool.ready = true;
+						tool.textTool.textPos = Input.mousePos;
 						break;
 					case ToolTypes.SHAPE_TOOL:
 					case ToolTypes.LINE_TOOL:
 						if(tool.shapeTool.readyToDraw === false) {
 							tool.shapeTool.readyToDraw = true;
-							shapePos = Input.mousePos;
+							tool.shapeTool.shapePos = Input.mousePos;
 						}
 						break;
 				}
@@ -630,16 +607,16 @@ document.addEventListener("mouseup", function(evt) {
 	canvas.className = ""; // Reverts to no classname
 	if(evt.button === 0) {
 		Input.mouseDown = false;
-		if(tool.shapeTool.sizingReady === true && currentlyVoting === false && currentlySaving === false) {
+		if(tool.shapeTool.sizingReady === true && client.currentlyVoting === false && client.currentlySaving === false) {
 			pointerContext.clearRect(0 ,0 , pointerCanvas.width, pointerCanvas.height);
-			canvasRect = canvas.getBoundingClientRect();
+			var canvasRect = canvas.getBoundingClientRect();
 			switch(tool.getBrushType()) {
 				case ToolTypes.SHAPE_TOOL:
 					var shapeData = {
-						'x': shapePos.x - canvasRect.left,
-						'y': shapePos.y - canvasRect.top,
-						'endX': shapeEndPos.x - canvasRect.left,
-						'endY': shapeEndPos.y - canvasRect.top,
+						'x': tool.shapeTool.shapePos.x - canvasRect.left,
+						'y': tool.shapeTool.shapePos.y - canvasRect.top,
+						'endX': tool.shapeTool.shapeEndPos.x - canvasRect.left,
+						'endY': tool.shapeTool.shapeEndPos.y - canvasRect.top,
 						'colour': tool.brush.colour
 					}
 
@@ -650,10 +627,10 @@ document.addEventListener("mouseup", function(evt) {
 					break;
 				case ToolTypes.LINE_TOOL:
 					var lineData = {
-						'x': shapePos.x - canvasRect.left,
-						'y': shapePos.y - canvasRect.top,
-						'endX': shapeEndPos.x - canvasRect.left,
-						'endY': shapeEndPos.y - canvasRect.top,
+						'x': tool.shapeTool.shapePos.x - canvasRect.left,
+						'y': tool.shapeTool.shapePos.y - canvasRect.top,
+						'endX': tool.shapeTool.shapeEndPos.x - canvasRect.left,
+						'endY': tool.shapeTool.shapeEndPos.y - canvasRect.top,
 						'lineTip': tool.brush.lineTip,
 						'size': tool.brush.size,
 						'colour': tool.brush.colour
@@ -666,7 +643,7 @@ document.addEventListener("mouseup", function(evt) {
 			tool.shapeTool.readyToDraw = false;
 		}
 		tool.shapeTool.readyToDraw = false;
-		// Located in colour-picker2.js
+		// Located in colour-picker.js
 		if(ColourPicker.canMoveTintPointer === true) {
 			ColourPicker.canMoveTintPointer = false;
 		}
@@ -675,8 +652,8 @@ document.addEventListener("mouseup", function(evt) {
 			ColourPicker.canMoveHuePointer = false;
 		}
 
-		if(canDraw === true) {
-			canDraw = false;
+		if(client.canDraw === true) {
+			client.canDraw = false;
 		}
 	}
 });
@@ -685,9 +662,9 @@ document.addEventListener("mouseup", function(evt) {
 	Events (Keys)
 ------------------------------------------*/
 document.body.addEventListener("keydown", function(e) {
-	if(readyForText === true && currentlyVoting === false && currentlySaving === false) {
+	if(tool.textTool.ready === true && client.currentlyVoting === false && client.currentlySaving === false) {
 		tool.textTool.textToRender = document.getElementById('text-tool-text').value;	
-		tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
+		tool.textTool.drawTempText(tool.textTool.textPos.x, tool.textTool.textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 		document.getElementById('text-tool-text').focus();
 		if(e.keyCode == 13) {
 			applyText();
@@ -696,9 +673,9 @@ document.body.addEventListener("keydown", function(e) {
 });
  
 document.body.addEventListener("keyup", function(e) {
-	if(readyForText === true && currentlyVoting === false && currentlySaving === false) {
+	if(tool.textTool.ready === true && client.currentlyVoting === false && client.currentlySaving === false) {
 		tool.textTool.textToRender = document.getElementById('text-tool-text').value;	
-		tool.textTool.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
+		tool.textTool.drawTempText(tool.textTool.textPos.x, tool.textTool.textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 	}
 });
 
@@ -855,7 +832,7 @@ document.getElementById('saveCanvas').addEventListener('click', function(evt){
 
 function resetCategoryFlags() {
 	tool.textTool.textToRender = "";
-	readyForText = false;
+	tool.textTool.ready = false;
 	// Tools
 	document.getElementById('brushes').className = "button tool";
 	document.getElementById('colourDrop').className = "button tool";

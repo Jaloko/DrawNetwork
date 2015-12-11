@@ -1,7 +1,42 @@
 /**
  * Abstract Utilities Class with Static Methods
  */
-var Util = { };
+var Util = { 
+	randomNames: null
+};
+
+/* ------------------------------------ 
+	Naming Helper Functions
+ ------------------------------------ */
+/**
+ * Collects a list of names from a text file
+ */
+Util.getNameList = function(callback) {
+	var txtFile = new XMLHttpRequest();
+	var tmp = this;
+	txtFile.open("GET", "/files/names.txt", true);
+	txtFile.onreadystatechange = function() {
+		if (txtFile.readyState === 4) {  // document is ready to parse.
+			if (txtFile.status === 200) {  // file is found
+				allText = txtFile.responseText; 
+				lines = txtFile.responseText.split("\n");
+				tmp.randomNames = lines;
+
+				callback();
+			}
+		}
+	}
+	txtFile.send(null);
+};
+
+/**
+ * Picks a random name from the name list
+ */
+Util.pickRandomName = function() {
+	var rand = Math.floor(Math.random() * this.randomNames.length);
+	return this.randomNames[rand];
+};
+
 
 /* ------------------------------------ 
 	General Canvas Helper Functions

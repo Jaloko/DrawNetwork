@@ -1,7 +1,15 @@
 var ShapeTool = function(){
 	this.shapeType = "rectangle",
 	this.sizingReady = false,
-	this.readyToDraw = false
+	this.readyToDraw = false,
+	this.shapePos = {
+		x: 0,
+		y: 0
+	},
+	this.shapeEndPos = {
+		x: 0,
+		y: 0
+	}
 };
 
 ShapeTool.prototype.getShapeType = function(){
@@ -137,19 +145,19 @@ ShapeTool.prototype.drawShapeRegularPolygon = function(numberOfVertices, x, y, e
 	context.fill();
 };
 
-ShapeTool.prototype.drawTemp = function(shapePos, shapeEndPos) {
+ShapeTool.prototype.drawTemp = function() {
 	switch(this.getShapeType()) {
 		case ShapeTypes.RECTANGLE:
-			this.drawTempRect(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
+			this.drawTempRect(this.shapePos.x, this.shapePos.y, this.shapeEndPos.x, this.shapeEndPos.y, tool.brush.colour);
 			break;
 		case ShapeTypes.CIRCLE:
-			this.drawTempCircle(shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
+			this.drawTempCircle(this.shapePos.x, this.shapePos.y, this.shapeEndPos.x, this.shapeEndPos.y, tool.brush.colour);
 			break;
 		case ShapeTypes.PENTAGON:
-			this.drawTempRegularPolygon(5, shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
+			this.drawTempRegularPolygon(5, this.shapePos.x, this.shapePos.y, this.shapeEndPos.x, this.shapeEndPos.y, tool.brush.colour);
 			break;
 		case ShapeTypes.HEXAGON:
-			this.drawTempRegularPolygon(6, shapePos.x, shapePos.y, shapeEndPos.x, shapeEndPos.y, tool.brush.colour);
+			this.drawTempRegularPolygon(6, this.shapePos.x, this.shapePos.y, this.shapeEndPos.x, this.shapeEndPos.y, tool.brush.colour);
 			break;
 	}
 };
