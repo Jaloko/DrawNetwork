@@ -17,9 +17,6 @@ ShapeTool.prototype.getShapeType = function(){
 };
 
 ShapeTool.prototype.setShapeType = function(ele, shape) {
-	// Need to update this later
-	document.getElementById('shapeRect').className = "button tool";
-	document.getElementById('shapeCircle').className = "button tool";
 	ele.className = "button bselect tool";
 	this.shapeType = shape;
 };

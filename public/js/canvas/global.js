@@ -451,7 +451,7 @@ function onHexChange() {
 
 function applyText() {
 	if(tool.textTool.ready === true) {
-		var cr = canvas.getBoundingclientRect();
+		var cr = canvas.getBoundingClientRect();
 		var data = {
 			'x': tool.textTool.textPos.x - cr.left,
 			'y': tool.textTool.textPos.y - cr.top,
@@ -482,6 +482,9 @@ document.addEventListener('mousemove', function(evt) {
 		case ToolTypes.GRADIENT_BRUSH:
 		case ToolTypes.RAINBOW_BRUSH:
 			tool.brush.drawBrushOutline(Input.mousePos.x, Input.mousePos.y);
+			break;
+		case ToolTypes.TEXT_TOOL:
+			tool.textTool.drawTempText(tool.textTool.textPos.x, tool.textTool.textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 			break;
 		case ToolTypes.ERASER:
 		case ToolTypes.SQUARE_BRUSH:
@@ -515,7 +518,6 @@ document.addEventListener('mousemove', function(evt) {
 				break;
 			case ToolTypes.TEXT_TOOL:
 				tool.textTool.textPos = Input.mousePos;
-				tool.textTool.drawTempText(tool.textTool.textPos.x, tool.textTool.textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 				break;
 			case ToolTypes.SHAPE_TOOL:
 				// Means the shapes initial position has been set
