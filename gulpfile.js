@@ -4,6 +4,7 @@ var del = require('del');
 var sourcemaps = require('gulp-sourcemaps');
 var concat = require('gulp-concat');
 var addsrc = require('gulp-add-src');
+var uglify = require('gulp-uglify');
 
 var config = {
 	js: [
@@ -34,7 +35,9 @@ var config = {
 
 gulp.task('canvasjs', function() {
 	return gulp.src(config.js)
-		.pipe(closureCompiler({
+		.pipe(uglify())
+		.pipe(concat('dn.min.js'))
+/*		.pipe(closureCompiler({
 			compilerPath: 'node_modules/google-closure-compiler/compiler.jar',
 			compilerFlags: {
 				compilation_level: 'ADVANCED_OPTIMIZATIONS',
@@ -44,7 +47,7 @@ gulp.task('canvasjs', function() {
 				warning_level: 'QUIET',
 			},
 			fileName: 'dn.min.js',
-		}))
+		}))*/
 		.pipe(gulp.dest('public/js'));
 });
 
