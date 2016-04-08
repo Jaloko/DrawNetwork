@@ -3,6 +3,7 @@ var closureCompiler = require('gulp-closure-compiler');
 var del = require('del');
 var sourcemaps = require('gulp-sourcemaps');
 var concat = require('gulp-concat');
+var addsrc = require('gulp-add-src');
 
 var config = {
 	js: [
@@ -26,8 +27,8 @@ var config = {
 	],
 
 	tasks: {
-		default: ['clean', 'canvasjs', 'functionsjs'],
-		dev: ['clean', 'dev-canvas', 'dev-functions']
+		default: ['clean', 'canvasjs', 'functionsjs', 'chartjs'],
+		dev: ['clean', 'dev-canvas', 'dev-functions', 'chartjs']
 	}
 }
 
@@ -76,6 +77,11 @@ gulp.task('dev-functions', ['clean'], function(){
 	.pipe(sourcemaps.init())
 	.pipe(concat('functions.min.js'))
 	.pipe(sourcemaps.write())
+	.pipe(gulp.dest('public/js'));
+});
+
+gulp.task('chartjs', function() {
+	return addsrc('node_modules/chart.js/Chart.min.js')
 	.pipe(gulp.dest('public/js'));
 });
 
