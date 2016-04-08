@@ -66,13 +66,12 @@ db.serialize(function() {
 		if(row.rows == 0) {
 			db.run("INSERT OR IGNORE INTO visitors(id, date, unique_visitors, total_page_hits) VALUES(NULL, date('now'), 0, 0)");
 		} else {
-			var date = new Date("01-02-2016");
+			/* Generate test analytic data*/
+/*			var date = new Date("01-02-2016");
 			for(var i = 0; i < 200; i++) {
 				db.run("INSERT OR IGNORE INTO visitors(id, date, unique_visitors, total_page_hits) VALUES(NULL,'" + getDate(date) + "'," + Math.floor(Math.random() * 10) + ", 0)");
 				date.setDate(date.getDate() +1);
-			}
-
-
+			}*/
 		}
 	});
 
