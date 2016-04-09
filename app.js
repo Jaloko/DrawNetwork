@@ -31,6 +31,13 @@ db.serialize(function() {
 			'activity integer NOT NULL' +
 			')');
 
+	db.run('CREATE TABLE IF NOT EXISTS visitors(' +
+			'id integer PRIMARY KEY NOT NULL,' +
+			'date date UNIQUE NOT NULL,' +
+			'unique_visitors integer NOT NULL,' +
+			'total_page_hits integer NOT NULL' +
+			')');
+
 	var salt = String(crypto.randomBytes(16));
 	var passwordHash = hashPassword("admin215", salt);
 	db.run('INSERT OR IGNORE INTO users(id, username, password, salt, administrator) VALUES(1, "admin", "' + passwordHash + '", "' + salt + '", 1)');
@@ -53,6 +60,21 @@ db.serialize(function() {
 			});
 		}
 	});
+
+	db.get('SELECT COUNT(*) AS rows FROM visitors', function(err, row) {
+
+		if(row.rows == 0) {
+			db.run("INSERT OR IGNORE INTO visitors(id, date, unique_visitors, total_page_hits) VALUES(NULL, date('now'), 0, 0)");
+		} else {
+			/* Generate test analytic data*/
+/*			var date = new Date("01-02-2016");
+			for(var i = 0; i < 200; i++) {
+				db.run("INSERT OR IGNORE INTO visitors(id, date, unique_visitors, total_page_hits) VALUES(NULL,'" + getDate(date) + "'," + Math.floor(Math.random() * 10) + ", 0)");
+				date.setDate(date.getDate() +1);
+			}*/
+		}
+	});
+
 });
 
 // Set the view engine
@@ -61,6 +83,46 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded( { extended: true } ));
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+// Set a cookie
+app.use(function (req, res, next) {
+	// Check if client sent cookie
+	var cookie = req.cookies.uniqueId;
+	if (cookie === undefined)
+	{
+		// Generate a unique cookie. Only possible collision is if generated at the exact same time
+		var randomNumber=Math.random().toString() + Date.now();
+		randomNumber=randomNumber.substring(2,randomNumber.length);
+		res.cookie('uniqueId',randomNumber, { expires: false, httpOnly: true });
+
+		// Update analytics datanase
+		var currentDate = getDate();
+		db.get('SELECT * FROM visitors WHERE date = ?', currentDate, function(err, row) {
+			if(row != undefined) {
+				db.run('UPDATE visitors SET unique_visitors = ' + (row.unique_visitors + 1) + ', total_page_hits = ' + (row.total_page_hits + 1) + ' WHERE date = "' + row.date + '"');
+			} else {
+				db.run("INSERT OR IGNORE INTO visitors(id, date, unique_visitors, total_page_hits) VALUES(null, date('now'), 0, 0)");
+				db.run('UPDATE visitors SET unique_visitors = ' + (row.unique_visitors + 1) + ', total_page_hits = ' + (row.total_page_hits + 1) + ' WHERE date = "' + currentDate + '"');
+			}
+		});
+	} 
+	else
+	{
+		// Update analytics datanase
+		var currentDate = getDate();
+		db.get('SELECT * FROM visitors WHERE date = ?', currentDate, function(err, row) {
+			if(row != undefined) {
+				db.run('UPDATE visitors SET total_page_hits = ' + (row.total_page_hits + 1) + ' WHERE date = "' + row.date + '"');
+			} else {
+				db.run("INSERT OR IGNORE INTO visitors(id, date, unique_visitors, total_page_hits) VALUES(null, date('now'), 0, 0)");
+				db.run('UPDATE visitors SET total_page_hits = ' + (row.total_page_hits + 1) + ' WHERE date = "' + currentDate + '"');
+			}
+		});
+	} 
+	next(); // <-- important!
+});
+
+
 app.use(expressSession( { 
 	secret: process.env.SESSION_SECRET || 'secret',
 	resave: false,
@@ -104,13 +166,25 @@ app.get('/acp', function(req, res) {
 	if(!req.isAuthenticated()) {
 		res.redirect('/login');
 	} else {
+		res.redirect('/acp/rooms');
+/*		res.render('acp', {
+			user: req.user,
+			isAuthenticated: req.isAuthenticated()
+		});*/
+	}
+});
+
+app.get('/acp/rooms', function(req, res) {
+	if(!req.isAuthenticated()) {
+		res.redirect('/login');
+	} else {
 		var error = 0;
 		if(req.query.error == 1) {
 			error = 1;
 		} else if(req.query.error == 2) {
 			error = 2;
 		}
-		res.render('acp', {
+		res.render('acp-rooms', {
 			user: req.user,
 			isAuthenticated: req.isAuthenticated(),
 			rooms: rooms,
@@ -119,7 +193,51 @@ app.get('/acp', function(req, res) {
 	}
 });
 
-app.post('/acp', function(req, res) {
+app.get('/acp/analytics', function(req, res) {
+	if(!req.isAuthenticated()) {
+		res.redirect('/login');
+	} else {
+		var json = {
+			day: null,
+			week: Array(),
+			month: Array()
+		}
+
+		// Get todays stats
+		db.get("SELECT * FROM visitors WHERE date = date('now')", function(err, row) {
+			if(row != undefined) {
+				json.day = row;
+			}
+			// Get this weeks stats
+			var d = new Date(getDate());
+	 		d.setDate(d.getDate()-6);
+			db.each("SELECT * FROM visitors WHERE date BETWEEN date('" + getDate(d) + "') AND date('now')", function(err, row) {
+				if(row != undefined) {
+					json.week.push(row);
+				}
+			}, function() {
+				// Get this months stats
+				var d = new Date(getDate());
+	 			d.setDate(d.getDate()-daysInMonth(new Date()));
+				db.each("SELECT * FROM visitors WHERE date BETWEEN date('" + getDate(d) + "') AND date('now')", function(err, row) {
+					if(row != undefined) {
+						json.month.push(row);
+					}
+				}, function() {
+					res.render('acp-analytics', {
+						user: req.user,
+						isAuthenticated: req.isAuthenticated(),
+						analytics: json
+					});
+				});
+			});
+		});
+
+	}
+});
+
+
+app.post('/acp/rooms', function(req, res) {
 	if(req.isAuthenticated()) {
 		var roomsToDelete = Object.keys(req.body).map(function(k) { return req.body[k] });
 
@@ -136,10 +254,8 @@ app.post('/acp', function(req, res) {
 				}
 			}
 		}
-		// Deprecated
-		//writeRoomsToFile();
 	}
-	res.redirect('/acp');
+	res.redirect('/acp/rooms');
 });
 
 app.post('/login', passport.authenticate('local', {
@@ -770,8 +886,6 @@ setInterval(function() {
 			if(new Date().getTime() > parseInt(rooms[i].activity) + 259200000) {
 				deleteRoomInDB(i);
 				rooms.splice(i, 1);
-				// Deprecated
-				//writeRoomsToFile();
 				continue;
 			}
 		}
@@ -837,15 +951,11 @@ setInterval(function() {
 			finalSaveRooms = true;
 			saveRoomsTimer = new Date().getTime();
 			updateRoomsInDB();
-			// Deprecated
-			//writeRoomsToFile();
 		}
 	} else{
 		if(finalSaveRooms === true) {
 			finalSaveRooms = false;
 			updateRoomsInDB();
-			// Deprecated
-			//writeRoomsToFile();
 		}
 	}
 
@@ -927,6 +1037,18 @@ function validateImOffline(room, newData, socket) {
 		io.sockets.in(room.id).emit('user list', room.users);
 	}
 }
+
+function getDate(date) {
+	var date = date || new Date();
+	var month = ("0" + (date.getMonth() + 1)).slice(-2);
+	var day = ("0" + date.getDate()).slice(-2);
+	return date.getFullYear() + "-" + month + "-" + day;
+}
+
+function daysInMonth(date) {
+    return new Date(date.getFullYear(), date.getMonth(), 0).getDate();
+}
+
 
 function validateText(text) {
 	if(new RegExp('^[A-Za-z0-9 ]+$').test(text)) {

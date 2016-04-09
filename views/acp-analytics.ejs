@@ -1,0 +1,115 @@
+<% include /partials/acp/acp-top %>
+	<script src="/js/Chart.min.js"></script>
+	<h3>Analytics</h3>
+	<div>
+		<h4>Day</h4>
+		<div class="left-col" style="width: 49%">
+			<h5>Unique visitors & total page hits</h4>
+			<canvas id="day-visitors"></canvas>
+		</div>
+		<div class="right-col">
+
+		</div>
+	</div>
+	<hr>
+	<div id="week-analytics">
+		<h4>Week</h4>
+		<div class="chart-container-left">
+			<h5>Unique visitors</h4>
+			<canvas id="week-unique-visitors"></canvas>
+		</div>
+		<div class="chart-container-right">
+			<h5>Total page hits</h4>
+			<canvas id="week-page-hits"></canvas>
+		</div>
+		<div class="clear">
+		</div>
+	</div>
+	<hr>
+	<div>
+		<h4>Month</h4>
+		<div style="width: 100%">
+			<h5>Unique visitors</h4>
+			<canvas id="month-unique-visitors"></canvas>
+		</div>
+		<div style="width: 100%">
+			<h5>Total page hits</h4>
+			<canvas id="month-page-hits"></canvas>
+		</div>
+	</div>
+
+	<script>
+	// All graph canvas objects
+	var dayVisitors = document.getElementById('day-visitors').getContext('2d');
+	var weekUniqueVisitors = document.getElementById('week-unique-visitors').getContext('2d');
+	var weekPageHits = document.getElementById('week-page-hits').getContext('2d');
+	var monthUniqueVisitors = document.getElementById('month-unique-visitors').getContext('2d');
+	var monthPageHits = document.getElementById('month-page-hits').getContext('2d');
+
+	var options = {
+		maintainAspectRatio: true,
+		responsive: true
+	};
+
+	// Pie Graphs
+	var data = <%- JSON.stringify(analytics) %>;
+	var pieData = [
+		{
+			value: data.day.unique_visitors,
+			label: 'Unique visitors',
+			color: '#1ca8dd'
+		},
+		{
+			value: data.day.total_page_hits,
+			label: 'Total page hits',
+			color: 'rgba(28, 168, 221, 0.3)'
+		}
+	];
+
+	new Chart(dayVisitors).Pie(pieData, options);
+
+	// Line Graphs
+	var chartData = {
+		labels : [],
+		datasets : [
+			{
+				fillColor : "rgba(28, 168, 221, 0.3)",
+				strokeColor : "#1ca8dd",
+				pointColor : "#fff",
+				pointStrokeColor : "#9DB86D",
+				data : []
+			}
+		]
+	}
+
+	var labels = Array();
+	var uniqueData = Array();
+	var regularData = Array();
+	for(var i = 0; i < data.week.length; i++) {
+		labels.push(new Date(data.week[i].date).toDateString());
+		uniqueData.push(data.week[i].unique_visitors);
+		regularData.push(data.week[i].total_page_hits);
+	}
+
+	chartData.labels = labels;
+	chartData.datasets[0].data = uniqueData;
+	new Chart(weekUniqueVisitors).Line(chartData, options);
+	chartData.datasets[0].data = regularData;
+	new Chart(weekPageHits).Line(chartData, options);
+
+	labels = Array();
+	uniqueData = Array();
+	regularData = Array();
+	for(var i = 0; i < data.month.length; i++) {
+		labels.push(new Date(data.month[i].date).toDateString());
+		uniqueData.push(data.month[i].unique_visitors);
+		regularData.push(data.month[i].total_page_hits);
+	}
+	chartData.labels = labels;
+	chartData.datasets[0].data = uniqueData;
+	new Chart(monthUniqueVisitors).Line(chartData, options);
+	chartData.datasets[0].data = regularData;
+	new Chart(monthPageHits).Line(chartData, options);
+
+	</script>
+<% include /partials/acp/acp-bottom %>

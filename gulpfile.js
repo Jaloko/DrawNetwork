@@ -3,6 +3,7 @@ var closureCompiler = require('gulp-closure-compiler');
 var del = require('del');
 var sourcemaps = require('gulp-sourcemaps');
 var concat = require('gulp-concat');
+var addsrc = require('gulp-add-src');
 
 var config = {
 	js: [
@@ -26,24 +27,17 @@ var config = {
 	],
 
 	tasks: {
-		default: ['clean', 'canvasjs', 'functionsjs'],
-		dev: ['clean', 'dev-canvas', 'dev-functions']
+		default: ['clean', 'canvasjs', 'functionsjs', 'chartjs'],
+		dev: ['clean', 'dev-canvas', 'dev-functions', 'chartjs']
 	}
 }
 
 gulp.task('canvasjs', function() {
 	return gulp.src(config.js)
 		.pipe(closureCompiler({
-			compilerPath: 'node_modules/google-closure-compiler/compiler.jar',
-			compilerFlags: {
-				compilation_level: 'ADVANCED_OPTIMIZATIONS',
-				externs: [
-					'public/js/closure/socket.io-externs.js'
-				],
-				warning_level: 'QUIET',
-			},
-			fileName: 'dn.min.js',
-		}))
+	      compilerPath: 'node_modules/google-closure-compiler/compiler.jar',
+	      fileName: 'dn.min.js'
+	    }))
 		.pipe(gulp.dest('public/js'));
 });
 
@@ -76,6 +70,11 @@ gulp.task('dev-functions', ['clean'], function(){
 	.pipe(sourcemaps.init())
 	.pipe(concat('functions.min.js'))
 	.pipe(sourcemaps.write())
+	.pipe(gulp.dest('public/js'));
+});
+
+gulp.task('chartjs', function() {
+	return addsrc('node_modules/chart.js/Chart.min.js')
 	.pipe(gulp.dest('public/js'));
 });
 
