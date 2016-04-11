@@ -185,7 +185,7 @@ socket.on('sync result', function(data) {
 });
 
 socket.on('send canvas', function() {
-	socket.emit('recieve canvas', canvas.toDataURL());
+	socket.emit('receive canvas', canvas.toDataURL());
 });
 
 socket.on('user list', function(data) {
@@ -234,7 +234,7 @@ socket.on('sync user colour', function(data) {
 	}	
 });
 
-socket.on('recieve clear canvas', function() {
+socket.on('receive clear canvas', function() {
 	context.fillStyle = "white";
    	context.fillRect(0, 0, canvas.width, canvas.height);
 });
@@ -334,7 +334,7 @@ function addChatMessage(data) {
 }
 
 function clearVote(vote) {
-	socket.emit('recieve clear vote', vote);
+	socket.emit('receive clear vote', vote);
 	document.getElementById('voteButtons').className = "invisible";
 }
 

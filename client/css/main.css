@@ -151,6 +151,16 @@ body {
 	padding-left: 20px;
 }
 
+.link {
+	color: white;
+	text-decoration: none;
+}
+
+.link:hover {
+	color: #1ca8dd;
+}
+
+
 /*--------------------------------
 	Buttons
 ---------------------------------*/
