@@ -55,12 +55,12 @@
 	var data = <%- JSON.stringify(analytics) %>;
 	var pieData = [
 		{
-			value: data.day.unique_visitors,
+			value: data.day.unique_visitors || 0,
 			label: 'Unique visitors',
 			color: '#1ca8dd'
 		},
 		{
-			value: data.day.total_page_hits,
+			value: data.day.total_page_hits || 0,
 			label: 'Total page hits',
 			color: 'rgba(28, 168, 221, 0.3)'
 		}

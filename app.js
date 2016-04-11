@@ -102,7 +102,7 @@ app.use(function (req, res, next) {
 				db.run('UPDATE visitors SET unique_visitors = ' + (row.unique_visitors + 1) + ', total_page_hits = ' + (row.total_page_hits + 1) + ' WHERE date = "' + row.date + '"');
 			} else {
 				db.run("INSERT OR IGNORE INTO visitors(id, date, unique_visitors, total_page_hits) VALUES(null, date('now'), 0, 0)");
-				db.run('UPDATE visitors SET unique_visitors = ' + (row.unique_visitors + 1) + ', total_page_hits = ' + (row.total_page_hits + 1) + ' WHERE date = "' + currentDate + '"');
+				db.run('UPDATE visitors SET unique_visitors = ' + 1 + ', total_page_hits = ' + 1 + ' WHERE date = "' + currentDate + '"');
 			}
 		});
 	} 
@@ -111,11 +111,12 @@ app.use(function (req, res, next) {
 		// Update analytics datanase
 		var currentDate = getDate();
 		db.get('SELECT * FROM visitors WHERE date = ?', currentDate, function(err, row) {
+			console.log(currentDate + " " + row);
 			if(row != undefined) {
 				db.run('UPDATE visitors SET total_page_hits = ' + (row.total_page_hits + 1) + ' WHERE date = "' + row.date + '"');
 			} else {
 				db.run("INSERT OR IGNORE INTO visitors(id, date, unique_visitors, total_page_hits) VALUES(null, date('now'), 0, 0)");
-				db.run('UPDATE visitors SET total_page_hits = ' + (row.total_page_hits + 1) + ' WHERE date = "' + currentDate + '"');
+				db.run('UPDATE visitors SET total_page_hits = ' + 1 + ' WHERE date = "' + currentDate + '"');
 			}
 		});
 	} 
@@ -204,14 +205,14 @@ app.get('/acp/analytics', function(req, res) {
 		}
 
 		// Get todays stats
-		db.get("SELECT * FROM visitors WHERE date = date('now')", function(err, row) {
+		db.get("SELECT * FROM visitors WHERE date = date('" + getDate() + "')", function(err, row) {
 			if(row != undefined) {
 				json.day = row;
 			}
 			// Get this weeks stats
 			var d = new Date(getDate());
 	 		d.setDate(d.getDate()-6);
-			db.each("SELECT * FROM visitors WHERE date BETWEEN date('" + getDate(d) + "') AND date('now')", function(err, row) {
+			db.each("SELECT * FROM visitors WHERE date BETWEEN date('" + getDate(d) + "') AND date('" + getDate() + "')", function(err, row) {
 				if(row != undefined) {
 					json.week.push(row);
 				}
@@ -219,7 +220,7 @@ app.get('/acp/analytics', function(req, res) {
 				// Get this months stats
 				var d = new Date(getDate());
 	 			d.setDate(d.getDate()-daysInMonth(new Date()));
-				db.each("SELECT * FROM visitors WHERE date BETWEEN date('" + getDate(d) + "') AND date('now')", function(err, row) {
+				db.each("SELECT * FROM visitors WHERE date BETWEEN date('" + getDate(d) + "') AND date('" + getDate() + "')", function(err, row) {
 					if(row != undefined) {
 						json.month.push(row);
 					}
