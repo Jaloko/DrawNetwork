@@ -124,7 +124,7 @@ Brush.prototype.gradientDraw = function() {
 	}
 	var hex = Util.rgbToHex(rgb);
 	var json = {
-		'name': name,
+		'name': client.name,
 		'x': Input.mousePos.x - canvasRect.left,
 		'y': Input.mousePos.y - canvasRect.top,
 		'lastX': Input.lastPos.x - canvasRect.left,
@@ -146,7 +146,7 @@ Brush.prototype.rainbowDraw = function() {
 	var rgb = ColourPicker.getColourOnHueCanvas(ColourPicker.getHueContext(), ColourPicker.huePosition);
 	var hex = Util.rgbToHex(rgb);
 	var json = {
-		'name': name,
+		'name': client.name,
 		'x': Input.mousePos.x - canvasRect.left,
 		'y': Input.mousePos.y - canvasRect.top,
 		'lastX': Input.lastPos.x - canvasRect.left,
@@ -192,7 +192,7 @@ Brush.prototype.drawShapeLine = function(x, y, endX, endY, colour, size, lineTip
 Brush.prototype.draw = function() {
 	canvasRect = canvas.getBoundingClientRect();
 	var json = {
-		'name': name,
+		'name': client.name,
 		'x': Input.mousePos.x - canvasRect.left,
 		'y': Input.mousePos.y - canvasRect.top,
 		'lastX': Input.lastPos.x - canvasRect.left,
@@ -207,7 +207,7 @@ Brush.prototype.draw = function() {
 Brush.prototype.erase = function() {
 	canvasRect = canvas.getBoundingClientRect();
 	var json = {
-		'name': name,
+		'name': client.name,
 		'x': Input.mousePos.x - canvasRect.left,
 		'y': Input.mousePos.y - canvasRect.top,
 		'lastX': Input.lastPos.x - canvasRect.left,
@@ -222,7 +222,7 @@ Brush.prototype.erase = function() {
 Brush.prototype.drawSquare = function() {
 	canvasRect = canvas.getBoundingClientRect();
 	var json = {
-		'name': name,
+		'name': client.name,
 		'x': Input.mousePos.x - canvasRect.left,
 		'y': Input.mousePos.y - canvasRect.top,
 		'lastX': Input.lastPos.x - canvasRect.left,
