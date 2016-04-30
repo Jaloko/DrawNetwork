@@ -1,0 +1,122 @@
+<% include /partials/acp/acp-top %>
+	<h3>Rooms</h3>
+	<% include /partials/errors/rooms-error %>
+	<div class="content-wrap">
+		<div class="left-col float-left">
+			<form action="/acp/rooms/create" method="post" class="no-margin">
+				<a class="btn outline" type="submit" onclick="this.parentNode.submit()">Create Room</a>
+				<div class="onoffswitch">
+				    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+					<label class="onoffswitch-label" for="myonoffswitch">
+					    <span class="onoffswitch-inner"></span>
+					    <span class="onoffswitch-switch"></span>
+					</label>
+				</div>
+			</form>
+		</div>
+		<div class="right-col float-right">
+			<input id="room-search" type="text" placeholder="Search Room ID..." onkeydown="searchRoom()" onkeyup="searchRoom()"/>
+			<a class="btn outline" onclick="searchRoom()">Search</a>
+		</div>
+		<div class="clear">
+		</div>
+	</div>
+	<div id="room-radios" class="invisible">
+		<!-- For Loop To Generate Radio Boxes Here -->
+		<%	for(var i = 0; i < rooms.length; i++) {
+				if(i == 0) { %>
+		<input id="<%= rooms[i].id %>-radio" type="radio" name="rooms" value="<%= rooms[i].id %>" checked="true">
+		<% } else { %>
+		<input id="<%= rooms[i].id %>-radio" type="radio" name="rooms" value="<%= rooms[i].id %>">
+		<% } }%>
+	</div>
+	<form action="/acp" method="post">
+		<div class="table-wrap content-wrap scroll-overflow">
+			<table id="rooms">
+				<thead>
+					<tr>
+						<th>Room ID</th>
+						<th>Owner</th>
+						<th>Number of Users</th>
+						<th>Last Activity</th>
+						<th>Public</th>
+						<th>Delete Room</th>
+					</tr>
+				</thead>
+				<tbody class="cursor-pointer">
+					<!-- For Loop To Generate Table Rows Here -->						
+					<%	for(var i = 0; i < rooms.length; i++) {
+					if(i == 0) { %>
+					<tr id="<%= rooms[i].id %>" onclick="selectACPElement(this)"  class="row-selected">
+						<td><%= rooms[i].id %></td>
+						<td><%= rooms[i].owner %></td>
+						<td><%= rooms[i].users.length %>/10</td>
+						<td><%= convertTime((new Date().getTime() - rooms[i].activity) / 1000) %></td>
+						<td><%= rooms[i].public %></td>
+						<td><input type="checkbox" name="<%= rooms[i].id %>" value="true" disabled></td>
+					</tr>
+					<% } else { %>
+					<tr id="<%= rooms[i].id %>" onclick="selectACPElement(this)">
+						<td><%= rooms[i].id %></td>
+						<td><%= rooms[i].owner %></td>
+						<td><%= rooms[i].users.length %>/10</td>
+						<td><%= convertTime((new Date().getTime() - rooms[i].activity) / 1000) %></td>
+						<td><%= rooms[i].public %></td>
+						<td><input type="checkbox" name="<%=i%>" value="true"></td>
+					</tr>
+					<% } }%>
+				</tbody>
+			</table>
+		</div>
+		<div class="content-wrap center">
+			<a class="btn outline" type="submit" onclick="this.parentNode.parentNode.submit()">Submit</a>
+			<a class="btn outline" onclick="redirectToRoom()">Join Room</a>
+		</div>
+	</form>
+	<hr>
+	<h3>Users</h3>
+	<form action="/acp" method="post">
+		<div class="table-wrap">
+			<table id="room-users">
+				<thead>
+					<tr>
+						<th>Username</th>
+						<th>IP Address</th>
+					</tr>
+				</thead>
+				<tbody class="cursor-pointer">
+					<!-- For Loop To Generate Table Rows Here -->
+					<%  for(var i = 0; i < rooms.length; i++) { 
+							if(rooms[i].users.length == 0) { 
+								if(i == 0) { %>
+								<tr id="<%=rooms[i].id%>">
+									<td>(Empty)</td>
+									<td>(Empty)</td>
+								</tr>
+					<%			} else { %>
+								<tr class="invisible" id="<%=rooms[i].id%>">
+									<td>(Empty)</td>
+									<td>(Empty)</td>
+								</tr>
+					<%			}
+							} else {
+								for(var u = 0; u < rooms[i].users.length; u++) { 
+									if(i == 0) {%>							
+									<tr id="<%=rooms[i].id%>">
+										<td><%= rooms[i].users[u].name %></td>
+										<td><%= rooms[i].serverUsers[u].ip %></td>
+									</tr>
+									<% 	}else { %>
+									<tr class="invisible" id="<%=rooms[i].id%>">
+										<td><%= rooms[i].users[u].name %></td>
+										<td><%= rooms[i].serverUsers[u].ip %></td>
+									</tr>
+						<%			}		
+								}
+							}
+						} %>
+				</tbody>
+			</table>
+		</div>
+	</form>
+<% include /partials/acp/acp-bottom %>

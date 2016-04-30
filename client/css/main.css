@@ -151,6 +151,16 @@ body {
 	padding-left: 20px;
 }
 
+.link {
+	color: white;
+	text-decoration: none;
+}
+
+.link:hover {
+	color: #1ca8dd;
+}
+
+
 /*--------------------------------
 	Buttons
 ---------------------------------*/
@@ -306,10 +316,12 @@ h3 {
 
 h4 {
 	font-size: 1.5em;
+	margin-bottom: 10;
 }
 
 h5 {
 	font-size: 1.3em;
+	margin-bottom: 10;
 }
 
 /*--------------------------------
@@ -363,6 +375,61 @@ h5 {
     right: 0px; 
 }
 
+/*--------------------------------
+	ACP
+---------------------------------*/
+
+.container .menu {
+	vertical-align: top;
+	background-color: #1b1e25;
+	border-radius: 5px;
+	padding: 5px;
+	position: absolute;
+	width:200px;
+	box-sizing: border-box;
+}
+
+.container .menu ul {
+	text-decoration: none;
+	list-style-type: none;
+	text-indent: none;
+	padding: 0;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.container .menu .link {
+	color: #656f86;
+	text-decoration: none;
+}
+
+.container .menu .link:hover {
+	color: #1ca8dd;
+}
+
+.container .content {
+	width:100%;
+	-moz-box-sizing: border-box; /*The rest of the browsers support this now*/
+	box-sizing: border-box;
+	margin:0;
+	padding:0;
+	padding-left:225px;
+}
+
+.chart-container-left, .chart-container-right {
+	display: inline-block;
+	vertical-align: top;
+	width: 49%;
+}
+
+.chart-container-left {
+	float: left;
+}
+
+.chart-container-right {
+	float: right;
+}
+
 @media (max-width: 1291px) {
 	.right-margin {
 		right-margin: 0;
@@ -387,4 +454,31 @@ h5 {
 		display: block;
 		width: auto;
 	}
+}
+
+/* ACP */
+@media (max-width: 1025px) {
+
+	.container .menu {
+		vertical-align: top;
+		background-color: #1b1e25;
+		border-radius: 5px;
+		padding: 5px;
+		position: relative;
+		width:100%;
+
+	}
+
+	.container .content {
+		padding-left: 0;
+	}
+}
+
+@media (max-width: 850px) {
+	.chart-container-left, .chart-container-right {
+		float: none;
+		width: 100%;
+		display: block;
+	}
+
 }

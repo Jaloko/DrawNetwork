@@ -3,49 +3,46 @@ var closureCompiler = require('gulp-closure-compiler');
 var del = require('del');
 var sourcemaps = require('gulp-sourcemaps');
 var concat = require('gulp-concat');
+var addsrc = require('gulp-add-src');
 
 var config = {
 	js: [
-		'public/js/functions.js',
-		'public/js/canvas/tools/tools.js',
-		'public/js/canvas/tools/brush.js',
-		'public/js/canvas/tools/text-tool.js',
-		'public/js/canvas/tools/shape-tool.js',
-		'public/js/canvas/global.js',
-		'public/js/canvas/fill-bucket.js',
-		'public/js/canvas/colour-picker.js',
-		'public/js/canvas/tabs.js',
-		'public/js/closure/exports.js',
-		'public/js/closure/functions-exports.js'
+		'client/js/canvas/input.js',
+		'client/js/canvas/util.js',
+		'client/js/functions.js',
+		'client/js/canvas/tools/tools.js',
+		'client/js/canvas/tools/brush.js',
+		'client/js/canvas/tools/text-tool.js',
+		'client/js/canvas/tools/shape-tool.js',
+		'client/js/canvas/tools/dropper.js',
+		'client/js/canvas/global.js',
+		'client/js/canvas/fill-bucket.js',
+		'client/js/canvas/colour-picker.js',
+		'client/js/canvas/tabs.js',
+		'client/js/closure/exports.js',
+		'client/js/closure/functions-exports.js'
 	],
 	css: [
-		'public/css/**/.css'
+		'client/css/**/.css'
 	],
 
 	tasks: {
-		default: ['clean', 'canvasjs', 'functionsjs'],
-		dev: ['clean', 'dev-canvas', 'dev-functions']
+		default: ['clean', 'canvasjs', 'functionsjs', 'chartjs'],
+		dev: ['clean', 'dev-canvas', 'dev-functions', 'chartjs']
 	}
 }
 
 gulp.task('canvasjs', function() {
 	return gulp.src(config.js)
 		.pipe(closureCompiler({
-			compilerPath: 'node_modules/google-closure-compiler/compiler.jar',
-			compilerFlags: {
-				compilation_level: 'ADVANCED_OPTIMIZATIONS',
-				externs: [
-					'public/js/closure/socket.io-externs.js'
-				],
-				warning_level: 'QUIET',
-			},
-			fileName: 'dn.min.js',
-		}))
-		.pipe(gulp.dest('public/js'));
+	      compilerPath: 'node_modules/google-closure-compiler/compiler.jar',
+	      fileName: 'dn.min.js'
+	    }))
+		.pipe(gulp.dest('client/js'));
 });
 
 gulp.task('functionsjs', function() {
-	return gulp.src(['public/js/functions.js'])
+	return gulp.src(['client/js/functions.js'])
 		.pipe(closureCompiler({
 			compilerPath: 'node_modules/google-closure-compiler/compiler.jar',
 			compilerFlags: {
@@ -53,11 +50,11 @@ gulp.task('functionsjs', function() {
 			},
 			fileName: 'functions.min.js',
 		}))
-		.pipe(gulp.dest('public/js'));
+		.pipe(gulp.dest('client/js'));
 });
 
 gulp.task('clean', function(){
-	return del(['public/js/dn.min.js', 'public/js/functions.min.js']);
+	return del(['client/js/dn.min.js', 'client/js/functions.min.js']);
 });
 
 gulp.task('dev-canvas', ['clean'], function(){
@@ -65,15 +62,20 @@ gulp.task('dev-canvas', ['clean'], function(){
 	.pipe(sourcemaps.init())
 	.pipe(concat('dn.min.js'))
 	.pipe(sourcemaps.write())
-	.pipe(gulp.dest('public/js'));
+	.pipe(gulp.dest('client/js'));
 });
 
 gulp.task('dev-functions', ['clean'], function(){
-	return gulp.src('public/js/functions.js')
+	return gulp.src('client/js/functions.js')
 	.pipe(sourcemaps.init())
 	.pipe(concat('functions.min.js'))
 	.pipe(sourcemaps.write())
-	.pipe(gulp.dest('public/js'));
+	.pipe(gulp.dest('client/js'));
+});
+
+gulp.task('chartjs', function() {
+	return addsrc('node_modules/chart.js/Chart.min.js')
+	.pipe(gulp.dest('client/js'));
 });
 
 gulp.task('default', config.tasks.default);
