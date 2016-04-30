@@ -20,7 +20,7 @@ module.exports = function(app, db, crypto, passport, functions) {
 			// Generate a unique cookie. Only possible collision is if generated at the exact same time
 			var randomNumber=Math.random().toString() + Date.now();
 			randomNumber=randomNumber.substring(2,randomNumber.length);
-			res.cookie('uniqueId',randomNumber, { expires: false, httpOnly: true });
+			res.cookie('uniqueId',randomNumber, { maxAge: new Date(Date.now() + 999999999999999), httpOnly: true });
 
 			// Update analytics database
 			var currentDate = functions.getDate();
