@@ -1,5 +1,5 @@
 var gulp = require('gulp');
-var closureCompiler = require('gulp-closure-compiler');
+var uglify = require('gulp-uglify');
 var del = require('del');
 var sourcemaps = require('gulp-sourcemaps');
 var concat = require('gulp-concat');
@@ -18,9 +18,7 @@ var config = {
 		'client/js/canvas/global.js',
 		'client/js/canvas/fill-bucket.js',
 		'client/js/canvas/colour-picker.js',
-		'client/js/canvas/tabs.js',
-		'client/js/closure/exports.js',
-		'client/js/closure/functions-exports.js'
+		'client/js/canvas/tabs.js'
 	],
 	css: [
 		'client/css/**/.css'
@@ -34,22 +32,19 @@ var config = {
 
 gulp.task('canvasjs', function() {
 	return gulp.src(config.js)
-		.pipe(closureCompiler({
-	      compilerPath: 'node_modules/google-closure-compiler/compiler.jar',
-	      fileName: 'dn.min.js'
-	    }))
+		.pipe(sourcemaps.init())
+		.pipe(uglify())
+		.pipe(concat('dn.min.js'))
+		.pipe(sourcemaps.write())
 		.pipe(gulp.dest('client/js'));
 });
 
 gulp.task('functionsjs', function() {
 	return gulp.src(['client/js/functions.js'])
-		.pipe(closureCompiler({
-			compilerPath: 'node_modules/google-closure-compiler/compiler.jar',
-			compilerFlags: {
-				warning_level: 'QUIET',
-			},
-			fileName: 'functions.min.js',
-		}))
+		.pipe(sourcemaps.init())
+		.pipe(uglify())
+		.pipe(concat('functions.min.js'))
+		.pipe(sourcemaps.write())
 		.pipe(gulp.dest('client/js'));
 });
 

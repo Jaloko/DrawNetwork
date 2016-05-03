@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start":"node app.js",
+    "start": "node app.js",
     "start:dev": "npm run build:dev && node app.js",
     "build": "gulp",
     "build:dev": "gulp dev"
@@ -19,16 +19,14 @@
     "ejs": "1.0.0",
     "sqlite3": "3.1.0",
     "crypto-js": "3.1.5",
-    "chart.js": "1.1.1" 
+    "chart.js": "1.1.1"
   },
   "devDependencies": {
     "del": "^2.0.2",
-    "google-closure-compiler": "^20150920.0.0",
     "gulp": "^3.9.0",
-    "gulp-closure-compiler": "^0.3.1",
+    "gulp-add-src": "^0.2.0",
     "gulp-concat": "^2.6.0",
     "gulp-sourcemaps": "^1.6.0",
-    "gulp-concat": "^2.6.0",
-    "gulp-add-src": "^0.2.0"
+    "gulp-uglify": "^1.5.3"
   }
 }
