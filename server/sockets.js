@@ -16,9 +16,7 @@ module.exports = function(io, db, rooms, functions) {
 				id: data,
 			};
 			if(functions.validateText(newData.id)) {
-				if(socket.rooms.length <= 1) {
-					socket.join(newData.id);
-				}
+				socket.join(newData.id);
 			}
 		});
 
