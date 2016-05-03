@@ -19,12 +19,12 @@ npm run build && npm run start
 If you want to run it in development mode append `dev` after build
 
 ## Building
-DrawNetwork uses Gulp to minify JavaScript, CSS and the HTML. You can do this
+DrawNetwork uses Gulp to minify & concatenate the client code. You can do this
 ```
 npm run build
 ```
 
-This will build the production version, which uses `Googles Closure Complier` on the JavaScript. However if you need to run in development with source maps you can do so via this command:
+However if you need an un-minified build you can do so via this command:
 ```
 npm run build:dev 
 ```
