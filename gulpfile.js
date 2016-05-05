@@ -35,7 +35,7 @@ gulp.task('canvasjs', function() {
 		.pipe(sourcemaps.init())
 		.pipe(uglify())
 		.pipe(concat('dn.min.js'))
-		.pipe(sourcemaps.write())
+		.pipe(sourcemaps.write('./maps/'))
 		.pipe(gulp.dest('client/js'));
 });
 
@@ -44,7 +44,7 @@ gulp.task('functionsjs', function() {
 		.pipe(sourcemaps.init())
 		.pipe(uglify())
 		.pipe(concat('functions.min.js'))
-		.pipe(sourcemaps.write())
+		.pipe(sourcemaps.write('./maps/'))
 		.pipe(gulp.dest('client/js'));
 });
 
@@ -56,7 +56,7 @@ gulp.task('dev-canvas', ['clean'], function(){
 	return gulp.src(config.js)
 	.pipe(sourcemaps.init())
 	.pipe(concat('dn.min.js'))
-	.pipe(sourcemaps.write())
+	.pipe(sourcemaps.write('./maps/'))
 	.pipe(gulp.dest('client/js'));
 });
 
@@ -64,7 +64,7 @@ gulp.task('dev-functions', ['clean'], function(){
 	return gulp.src('client/js/functions.js')
 	.pipe(sourcemaps.init())
 	.pipe(concat('functions.min.js'))
-	.pipe(sourcemaps.write())
+	.pipe(sourcemaps.write('./maps/'))
 	.pipe(gulp.dest('client/js'));
 });
 
