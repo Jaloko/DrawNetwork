@@ -1,5 +1,6 @@
 node_modules/*
 public/js/*.min.js
 client/js/*.min.js
+client/js/maps/*
 database.db
 .vscode/*
