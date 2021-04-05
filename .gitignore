@@ -1,4 +1,5 @@
 node_modules/*
 public/js/*.min.js
+client/js/*.min.js
 database.db
 .vscode/*
