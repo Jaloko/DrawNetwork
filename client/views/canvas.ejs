@@ -1,4 +1,4 @@
-<% include /partials/header %>
+<%- include('partials/header'); -%>
 	<script src="/socket.io/socket.io.js"></script>
 	<div class="font_preload" style="opacity: 0; position: absolute; left: -99999px;">
 		<span style="font-family: 'Open Sans';">Test</span>
@@ -245,4 +245,4 @@
 		init();
 		loadCanvasPage();
 	</script>
-<% include /partials/footer %>
+<%- include('partials/footer'); -%>
