@@ -1,7 +1,7 @@
-<% include /partials/header %>
+<%- include('partials/header'); -%>
 	<div class="container">
 		<h2>Rooms</h2>
-		<% include /partials/errors/rooms-error %>
+		<%- include('partials/errors/rooms-error'); -%>
 		<div class="content-wrap">
 			<div class="left-col float-left">
 				<form action="/rooms/create" method="post" class="no-margin">
@@ -63,4 +63,4 @@
 			<a class="btn outline" onclick="joinRoom()">Join Room</a>
 		</div>
 	</div>
-<% include /partials/footer %>
+<%- include('partials/footer'); -%>

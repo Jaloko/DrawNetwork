@@ -1,6 +1,6 @@
-<% include /partials/acp/acp-top %>
+<%- include('partials/acp/acp-top'); -%>
 	<h3>Rooms</h3>
-	<% include /partials/errors/rooms-error %>
+	<%- include('partials/errors/rooms-error'); -%>
 	<div class="content-wrap">
 		<div class="left-col float-left">
 			<form action="/acp/rooms/create" method="post" class="no-margin">
@@ -119,4 +119,4 @@
 			</table>
 		</div>
 	</form>
-<% include /partials/acp/acp-bottom %>
+<%- include('partials/acp/acp-bottom'); -%>

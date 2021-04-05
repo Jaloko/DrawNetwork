@@ -1,8 +1,8 @@
-<% include /partials/header %>
+<%- include('partials/header'); -%>
 	<div class="container center">
 		<div class="content-wrap">
 			<h2>Log in</h2>
-			<% include /partials/errors/login-error %>
+			<%- include('partials/errors/login-error'); -%>
 			<form action="" method="post">
 				<div class="special-box">
 					<div class="content-wrap">
@@ -19,4 +19,4 @@
 			</form>
 		</div>
 	</div>
-<% include /partials/footer %>
+<%- include('partials/footer'); -%>

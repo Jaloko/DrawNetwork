@@ -1,4 +1,4 @@
-<% include /partials/acp/acp-top %>
+<%- include('partials/acp/acp-top'); -%>
 	<script src="/js/Chart.min.js"></script>
 	<h3>Analytics</h3>
 	<div>
@@ -112,4 +112,4 @@
 	new Chart(monthPageHits).Line(chartData, options);
 
 	</script>
-<% include /partials/acp/acp-bottom %>
+<%- include('partials/acp/acp-bottom'); -%>
