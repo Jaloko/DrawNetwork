@@ -636,7 +636,8 @@ module.exports = function(io, db, rooms, functions) {
 			}
 			// Boot users who have crashed.
 			for(var u = 0; u < rooms[i].serverUsers.length; u++) {
-				if(io.sockets.connected[rooms[i].serverUsers[u].id] == null) {
+				const userId = rooms[i].serverUsers[u].id;
+				if(!io.sockets.sockets.has(userId)) {
 					rooms[i].users.splice(u, 1);
 					rooms[i].serverUsers.splice(u, 1);
 				}

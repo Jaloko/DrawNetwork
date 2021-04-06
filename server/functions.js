@@ -82,7 +82,7 @@ module.exports.pickRandom = function(room, socket) {
 */
 module.exports.getRoomIndex = function(socket, rooms) {
 	for(var i = 0; i < rooms.length; i++) {
-		if(rooms[i].id in socket.rooms) {
+		if(socket.rooms.has(rooms[i].id)) {
 			return i;
 		}
 	}

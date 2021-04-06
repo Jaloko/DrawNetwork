@@ -1,7 +1,7 @@
 var express = require('express'),
 	app = express(),
 	server = require('http').createServer(app),
-	io = require('socket.io').listen(server),
+	io = require('socket.io')(server),
 	passport = require('passport'),
 	crypto = require('crypto'),
 	sqlite3 = require('sqlite3').verbose(),
