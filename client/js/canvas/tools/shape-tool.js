@@ -1,3 +1,5 @@
+
+import { socket, tool, pointerCanvas, pointerContext, context } from "../variables";
 var ShapeTool = function(){
 	this.shapeType = "rectangle",
 	this.sizingReady = false,
@@ -35,8 +37,8 @@ ShapeTool.prototype.drawRect = function(curX, curY, lastX, lastY, size, colour) 
 	var dist = distanceBetween(lastP, curP);
 		var angle = angleBetween(lastP, curP);
 	for (var i = 0; i < dist; i+=1) {
-		x = lastP.x + (Math.sin(angle) * i);
-		y = lastP.y + (Math.cos(angle) * i);
+		let x = lastP.x + (Math.sin(angle) * i);
+		let y = lastP.y + (Math.cos(angle) * i);
 		context.fillStyle = colour;
 		context.fillRect(x - size / 2, y - size / 2, size, size);
 	}
@@ -67,8 +69,8 @@ ShapeTool.prototype.drawCircle = function(curX, curY, lastX, lastY, size, colour
 	var dist = distanceBetween(lastP, curP);
 		var angle = angleBetween(lastP, curP);
 	for (var i = 0; i < dist; i+=1) {
-		x = lastP.x + (Math.sin(angle) * i);
-		y = lastP.y + (Math.cos(angle) * i);
+		let x = lastP.x + (Math.sin(angle) * i);
+		let y = lastP.y + (Math.cos(angle) * i);
 		context.beginPath();
 			context.fillStyle = colour;
 		context.arc(x, y, size / 2, false, Math.PI * 2, false);
@@ -181,9 +183,19 @@ ShapeTool.prototype.draw = function(shapeData) {
 	this.sizingReady = false;
 };
 
+function distanceBetween(point1, point2) {
+	return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
+}
+
+function angleBetween(point1, point2) {
+	return Math.atan2( point2.x - point1.x, point2.y - point1.y );
+}
+
 var ShapeTypes = {
 	RECTANGLE: "rectangle",
 	CIRCLE: "circle",
 	PENTAGON: "pentagon",
 	HEXAGON: "hexagon"
 };
+
+export default ShapeTool;

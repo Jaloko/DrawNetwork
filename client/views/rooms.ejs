@@ -16,8 +16,8 @@
 				</form>
 			</div>
 			<div class="right-col float-right">
-				<input id="room-search" type="text" placeholder="Search Room ID..." onkeydown="searchRoom()" onkeyup="searchRoom()"/>
-				<a class="btn outline" onclick="searchRoom()">Search</a>
+				<input id="room-search" type="text" placeholder="Search Room ID..."/>
+				<a class="btn outline search-btn">Search</a>
 			</div>
 			<div class="clear">
 			</div>
@@ -44,13 +44,13 @@
 					<!-- For Loop To Generate Table Rows Here -->
 					<%	for(var i = 0; i < rooms.length; i++) {
 						if(i == 0) { %>
-					<tr id="<%= rooms[i].id %>" onclick="selectElement(this)" class="row-selected">
+					<tr id="<%= rooms[i].id %>" class="room-item row-selected">
 						<td><%= rooms[i].id %></td>
 						<td><%= rooms[i].numberOfUsers %>/10</td>
 						<td><%= convertTime((new Date().getTime() - rooms[i].activity) / 1000) %></td>
 					</tr>
 					<% } else { %>
-					<tr id="<%= rooms[i].id %>" onclick="selectElement(this)">
+					<tr id="<%= rooms[i].id %>" class="room-item">
 						<td><%= rooms[i].id %></td>
 						<td><%= rooms[i].numberOfUsers %>/10</td>
 						<td><%= convertTime((new Date().getTime() - rooms[i].activity) / 1000) %></td>
@@ -60,7 +60,7 @@
 			</table>
 		</div>
 		<div class="content-wrap center">
-			<a class="btn outline" onclick="joinRoom()">Join Room</a>
+			<a class="btn outline join-btn">Join Room</a>
 		</div>
 	</div>
 <%- include('partials/footer'); -%>

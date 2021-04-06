@@ -1,3 +1,7 @@
+import Util from "../util";
+import { ColourPicker, Position } from "../colour-picker";
+import { tool, context } from "../variables";
+
 var Dropper = function() { };
 
 Dropper.prototype.onColourChange = function(rgb) {
@@ -17,3 +21,5 @@ Dropper.prototype.updateColour = function() {
 		this.onColourChange(rgb);
 	}
 };
+
+export default Dropper;

@@ -1,5 +1,37 @@
 // Public Functions
-function selectElement(ele) {
+
+window.onload = function() {
+	const rows = document.querySelectorAll(".room-item");
+	rows.forEach(element => {
+		element.addEventListener('click', () => {
+			selectElement(element);
+		});
+	});
+	
+	const joinButton = document.querySelector('.join-btn');
+
+	if(joinButton){
+		joinButton.addEventListener('click', () => joinRoom());
+	}
+	
+	
+	// search event
+	const searchButton = document.querySelector(".search-btn");
+	if(searchButton) {
+		searchButton.addEventListener('click', () => searchRoom());
+	}
+	
+	const searchBox = document.querySelector("#room-search");
+	if(searchBox) {
+		searchBox.addEventListener('keyup', e => searchRoom());
+		searchBox.addEventListener('keydown', e => searchRoom());
+	}
+};
+
+
+
+
+export function selectElement(ele) {
 	var temp = document.getElementById(ele.id + "-radio");
 	temp.checked = true;
 	var tableRows = document.getElementById("rooms").rows;
@@ -10,7 +42,7 @@ function selectElement(ele) {
 }
 
 var selectedRoom;
-function selectACPElement(ele) {
+export function selectACPElement(ele) {
 	var temp = document.getElementById(ele.id + "-radio");
 	temp.checked = true;
 	var tableRows = document.getElementById("rooms").rows;
@@ -30,7 +62,7 @@ function selectACPElement(ele) {
 	}
 }
 
-function redirectToRoom() {
+export function redirectToRoom() {
 	if(selectedRoom == null) {
 		var tableRows = document.getElementById("rooms").rows;
 		selectedRoom = tableRows[1].id;
@@ -38,7 +70,7 @@ function redirectToRoom() {
 	location.href = getBaseURL() + '/rooms/' + selectedRoom;
 }
 
-function searchRoom() {
+export function searchRoom() {
 	var table = document.getElementById('rooms');
 	var tbody = table.getElementsByTagName('tbody')[0];
 	var row = tbody.rows;
@@ -53,7 +85,7 @@ function searchRoom() {
 	}
 }
 
-function joinRoom() {
+export function joinRoom() {
 	var radios = document.getElementsByName("rooms");
 	var radioId = "";
 	for(var i = 0; i < radios.length; i++) {
@@ -67,7 +99,7 @@ function joinRoom() {
 }
 
 // Private Functions
-function getBaseURL() {
+export function getBaseURL() {
 	var pathArray = document.location.href.split( '/' );
 	var protocol = pathArray[0];
 	var host = pathArray[2];

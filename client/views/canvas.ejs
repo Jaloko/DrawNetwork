@@ -39,7 +39,7 @@
 						<div id="tool-save-img" class="button-icon"></div>
 					</div>
 					<div id="currentColour" data-tip="Current Colour"></div>
-					<div id="saveRoom" class="button tool" onclick="saveRoom()">Save Room</div>
+					<div id="saveRoom" class="button tool" >Save Room</div>
 					<div class="clear">
 					</div>
 				</div>
@@ -75,7 +75,7 @@
 					</div>
 					<div id="line-settings" class="invisible">
 						<span>Line Tip:</span>			
-						<select id="lineTip" onchange="changeLineTip()">
+						<select id="lineTip">
 							<option value="round">Rounded</option>
 							<option value="square">Flat</option>
 						</select>
@@ -98,7 +98,7 @@
 							<input id="textSizeSel" type="range" min="1" max="100" value="30"></input>
 						</div>
 
-						<div class="button" onclick="applyText()">
+						<div class="button applyText-btn">
 						Apply Text
 						</div>
 					</div>
@@ -155,7 +155,7 @@
 								</div>
 								<div id="chat-message-box">
 									<input id="chat-message" type="text" placeholder="Message..." maxlength="300"></input>
-									<div class="messageB button" onclick="sendChatMessage();">Send</div>
+									<div class="messageB button">Send</div>
 								</div>
 
 							</div>
@@ -173,7 +173,7 @@
 							<a id="room-full" class="invisible">Room is full!</a>
 							<a id="name-taken" class="invisible">Name is already taken!</a>
 							<input id="name" type="text" maxlength="20"></input></br>
-							<a class="btn outline" onclick="sync()">
+							<a class="btn outline sync-btn">
 							Submit Name
 							</a>
 						</div>
@@ -226,10 +226,10 @@
 							</div>
 						</div>
 						<div id="voteButtons">
-							<a class="btn outline" onclick="clearVote(true);">
+							<a class="btn outline clearVoteYes-btn">
 								Yes
 							</a>
-							<a class="btn outline" onclick="clearVote(false);">
+							<a class="btn outline  clearVoteNo-btn">
 								No
 							</a>
 						</div>
@@ -240,9 +240,5 @@
 		</div>
 	</div>
 	<div id="room-id" class="invisible"><%= roomId %></div>
-	<script src="/js/dn.min.js"></script>
-	<script> 
-		init();
-		loadCanvasPage();
-	</script>
+	<script src="/dist/js/dn.min.js"></script>
 <%- include('partials/footer'); -%>

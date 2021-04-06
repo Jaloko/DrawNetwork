@@ -1,3 +1,5 @@
+import { client } from "../canvas/variables";
+
 // Typical globals
 var usersOnlineTab = document.getElementById('users-online-tab');
 var usersChatTab = document.getElementById('users-chat-tab');
@@ -20,4 +22,21 @@ usersChatTab.onclick = function() {
 	var usersOnline = document.getElementById('users-online');
 	usersOnline.className = "invisible";
 	clearChatNotifs();
+};
+
+
+function clearChatNotifs() {
+	client.messageCounter = 0;
+	document.getElementById('users-chat-tab').innerHTML = '<a>Chat</a>';
+}
+
+function clearUserCounter() {
+	client.userJoinCounter = 0;
+	document.getElementById('users-online-tab').innerHTML = '<a>Users Online</a>';
+}
+
+
+export {
+	usersOnlineTab,
+	usersChatTab
 };

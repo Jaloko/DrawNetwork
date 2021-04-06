@@ -7,7 +7,9 @@ var express = require('express'),
 	sqlite3 = require('sqlite3').verbose(),
 	db = new sqlite3.Database('database.db');
 
+const path = require("path");
 app.use(express.static('client'));
+app.use("/dist", express.static(path.join(__dirname, 'dist')));
 
 // Set the view engine
 app.set('views', 'client/views');

@@ -7,32 +7,18 @@
 	Events - Click
 ------------------------------------------*/
 
+import { socket, tool, client, canvas, context, pointerCanvas, pointerContext } from "./variables";
 
-var socket = io.connect();
+import Input from "./input";
+import Util from "./util";
+import ToolSet from "./tools/tools";
+import ToolTypes from "./tools/types";
 
-var canvas = document.getElementById('canvas');
-var context = canvas.getContext('2d');
-var pointerCanvas = document.getElementById('pointer-canvas');
-var pointerContext = pointerCanvas.getContext('2d');
+import ColourPicker from "./colour-picker";
 
-var tool = new ToolSet();
+import "./tabs";
 
-var client = {
-	// Name of the current user
-	name: null,
-	// Used during initialization to check if the clients canvas has synced to the server
-	hasSynced: false,
-	// Is set to true when the mouse hovers over the drawing canvas
-	canDraw: false,
-	// Stops the client drawing while the voting screen is active
-	currentlyVoting: false,
-	// Stops the client drawing while the saving screen is active
-	currentlySaving: false,
-	// Number of messages sent while users tab is active
-	messageCounter: 0,
-	// Number of user join/leaves while chat tab is active
-	userJoinCounter: 0
-};
+tool = new ToolSet(); 
 
 function getConnectedUsers() {
 	return document.getElementById('users').children.length;
@@ -129,7 +115,6 @@ socket.on('user validated', function() {
 	document.getElementById('name-taken').className = "invisible";
 	document.getElementById('currently-syncing').className = "";
 	socket.emit('sync');
-	// Hide enter name box
 });
 
 socket.on('room full', function() {
@@ -294,7 +279,7 @@ socket.on('sync chat message', function(data) {
 });
 
 socket.on('canvas saved', function(data) {
-	cSavedTimer = new Date().getTime();
+	let cSavedTimer = new Date().getTime();
 	document.getElementById('save-complete').className = "";
 	document.getElementById('save-progress').className = "invisible";
 	setTimeout(function() {
@@ -308,16 +293,6 @@ socket.on('canvas saved', function(data) {
 socket.on('room does not exist', function() {
 	location.reload();
 });
-
-function clearChatNotifs() {
-	client.messageCounter = 0;
-	document.getElementById('users-chat-tab').innerHTML = '<a>Chat</a>';
-}
-
-function clearUserCounter() {
-	client.userJoinCounter = 0;
-	document.getElementById('users-online-tab').innerHTML = '<a>Users Online</a>';
-}
 
 function addChatMessage(data) {
 	var chat = document.getElementById('chat-box');
@@ -344,14 +319,6 @@ function clearVote(vote) {
 function clearCanvas() {
    	socket.emit('vote clear');
 	document.getElementById('voteButtons').className = "invisible";
-}
-
-function distanceBetween(point1, point2) {
-  return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
-}
-
-function angleBetween(point1, point2) {
-  return Math.atan2( point2.x - point1.x, point2.y - point1.y );
 }
 
 var myEvent = window.attachEvent || window.addEventListener;
@@ -431,23 +398,6 @@ function changeLineTip() {
 	var e = document.getElementById("lineTip");
 	tool.brush.lineTip = e.options[e.selectedIndex].value;
 }
-
-/*function inputColourChange() {
-	var rgb = {
-		r: document.getElementById("rValue").value | 0,
-		g: document.getElementById("gValue").value | 0,
-		b: document.getElementById("bValue").value | 0
-	};
-	onColourChange(rgb);
-}
-
-function onHexChange() {
-	if(document.getElementById("hexValue").value.length == 7) {
-		var rgb = Util.hexToRgb(document.getElementById("hexValue").value);
-		// Moved to dropper.js
-		onColourChange(rgb);
-	}
-}*/
 
 function applyText() {
 	if(tool.textTool.ready === true) {
@@ -870,3 +820,23 @@ function resetSubCategoryFlags(){
 	// Clear brush outline
 	pointerContext.clearRect(0, 0, pointerCanvas.width, pointerCanvas.height);
 }
+
+
+function bindEventsToDOM() {
+	document.querySelector("#saveRoom").addEventListener('click', () => saveRoom());
+	document.querySelector("#lineTip").addEventListener("change", () => changeLineTip());
+	document.querySelector('.applyText-btn').addEventListener('click', () => applyText());
+	document.querySelector(".messageB").addEventListener('click', () => sendChatMessage());
+	document.querySelector('.sync-btn').addEventListener('click', () => sync());
+
+	document.querySelector('.clearVoteYes-btn').addEventListener('click', () => clearVote(true));
+	document.querySelector('.clearVoteNo-btn').addEventListener('click', () => clearVote(false));
+}
+
+// Fires once the dom is loaded
+(function() {
+	bindEventsToDOM();
+
+	init();
+	loadCanvasPage();
+ })();

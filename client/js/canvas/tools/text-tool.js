@@ -1,4 +1,6 @@
-var TextTool = function(){
+import { pointerCanvas, pointerContext, context } from "../variables";
+
+var TextTool = function(tool){
 	this.textToRender = "",
 	this.textFont = "20px Arial",
 	this.ready = false,
@@ -38,3 +40,5 @@ TextTool.prototype.changeTextSize = function(newSize){
 	this.textFont = newSize + "px " + font;
 	this.drawTempText(textPos.x, textPos.y, tool.textTool.textFont, tool.brush.colour, tool.textTool.textToRender);
 };
+
+export default TextTool;
