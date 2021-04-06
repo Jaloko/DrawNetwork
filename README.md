@@ -7,17 +7,24 @@ npm install
 ```
 
 ## Building
-DrawNetwork uses Rollup to bundle JavaScript and SCSS  
-`npm run build:prod` - builds the production ready and minified bundle.  
-`npm run build:dev` - builds and raises the -watch flag, any changes made will be rebuilt. By default the dev build is un-minified
+DrawNetwork uses Rollup to bundle JavaScript and uses node-sass to complie scss into css.  
 
+Builds production ready and minified bundles of js and css
+```
+npm run build
+```
+
+### Dev builds
+indiviudal commands for both js and css. By default the dev build is un-minified  
+```
+npm run build:dev:js
+npm run build:dev:scss
+```
 
 ## Running the app
 ```
 npm run start
 ```
-If you want to make changes on the front-end, use the `npm run build:dev`
-
 
 ### update notes
 There is a `iife` that is fired at the very bottom of the global.js file that acts as the init step. Once we actually refactor this will be removed and an actual initialize function will be implemented.
