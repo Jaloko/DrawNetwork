@@ -1,9 +1,6 @@
 // I added this to avoid making to much code change as this isnt part of the refactor.
 // I wanted to keep as much of the original codebase as-is
 
-
-// import ToolSet from "./tools/tools";
-
 let socket = io.connect();
 let tool;
 let client = {

@@ -18,14 +18,7 @@ import ColourPicker from "./colour-picker";
 
 import "./tabs";
 
-tool = new ToolSet();
-
-// var socket = io.connect();
-
-// var canvas = document.getElementById('canvas');
-// var context = canvas.getContext('2d');
-// var pointerCanvas = document.getElementById('pointer-canvas');
-// var pointerContext = pointerCanvas.getContext('2d');
+tool = new ToolSet(); 
 
 function getConnectedUsers() {
 	return document.getElementById('users').children.length;
@@ -122,7 +115,6 @@ socket.on('user validated', function() {
 	document.getElementById('name-taken').className = "invisible";
 	document.getElementById('currently-syncing').className = "";
 	socket.emit('sync');
-	// Hide enter name box
 });
 
 socket.on('room full', function() {
@@ -406,23 +398,6 @@ function changeLineTip() {
 	var e = document.getElementById("lineTip");
 	tool.brush.lineTip = e.options[e.selectedIndex].value;
 }
-
-/*function inputColourChange() {
-	var rgb = {
-		r: document.getElementById("rValue").value | 0,
-		g: document.getElementById("gValue").value | 0,
-		b: document.getElementById("bValue").value | 0
-	};
-	onColourChange(rgb);
-}
-
-function onHexChange() {
-	if(document.getElementById("hexValue").value.length == 7) {
-		var rgb = Util.hexToRgb(document.getElementById("hexValue").value);
-		// Moved to dropper.js
-		onColourChange(rgb);
-	}
-}*/
 
 function applyText() {
 	if(tool.textTool.ready === true) {
@@ -858,7 +833,7 @@ function bindEventsToDOM() {
 	document.querySelector('.clearVoteNo-btn').addEventListener('click', () => clearVote(false));
 }
 
-// yeah I hate myself too.
+// Fires once the dom is loaded
 (function() {
 	bindEventsToDOM();
 
