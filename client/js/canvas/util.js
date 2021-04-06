@@ -1,9 +1,14 @@
+import { Colour } from "./colour-picker";
+import Input from "./input";
+
 /**
  * Abstract Utilities Class with Static Methods
  */
-var Util = { 
+let Util = { 
 	randomNames: null
 };
+
+
 
 /* ------------------------------------ 
 	Naming Helper Functions
@@ -46,7 +51,8 @@ Util.pickRandomName = function() {
  */
 Util.isMouseOnCanvas = function(canvas) {
     var pos = Input.mousePos;
-    canvasRect = canvas.getBoundingClientRect();
+    let canvasRect = canvas.getBoundingClientRect();
+    
     if(pos.x >= canvasRect.left && pos.x <= canvasRect.right 
         && pos.y >= canvasRect.top && pos.y <= canvasRect.bottom) {
         return true;
@@ -165,3 +171,5 @@ Util.rgbToHsv = function() {
         v: Math.round(v * 100)
     };
 };
+
+export default Util;

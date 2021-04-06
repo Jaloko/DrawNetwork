@@ -1,7 +1,7 @@
 /**
  * Abstract Input Class with Static Methods
  */
-var Input = { 
+ let Input = { 
 	mouseDown: false,
 	mousePos: {
 		x: 0,
@@ -22,3 +22,5 @@ Input.getMousePos = function(evt) {
 		y: evt.clientY
 	};
 }
+
+export default Input;

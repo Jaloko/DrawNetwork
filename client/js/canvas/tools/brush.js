@@ -9,8 +9,12 @@
 	- Line Tool
 	- Eraser
 --------------------------------------------*/
+import { socket, tool, client, pointerCanvas, pointerContext, context } from "../variables";
+import Input from "../input";
+import Util from "../util";
+import { Position, ColourPicker } from "../colour-picker";
 
-var Brush = function(){
+let Brush = function(){
 	this.size = 30,
 	this.colour = "#ff0000",
 	this.brushType = "freeroam",
@@ -107,7 +111,7 @@ Brush.prototype.drawEraserOutline = function(x, y) {
 	Gradient Draw
 --------------------------------------------*/
 Brush.prototype.gradientDraw = function() {
-	canvasRect = canvas.getBoundingClientRect();
+	let canvasRect = canvas.getBoundingClientRect();
 	var rgb = Util.hexToRgb(tool.brush.colour);
 	rgb.r -= this.gradientTimer;
 	rgb.g -= this.gradientTimer;
@@ -140,7 +144,7 @@ Brush.prototype.gradientDraw = function() {
 	Rainbow Brush		
 --------------------------------------------*/
 Brush.prototype.rainbowDraw = function() {
-	canvasRect = canvas.getBoundingClientRect();
+	let canvasRect = canvas.getBoundingClientRect();
 	var rgb = Util.hexToRgb(tool.brush.colour);
 	ColourPicker.huePosition = new Position(0, this.rainbowPointer);
 	var rgb = ColourPicker.getColourOnHueCanvas(ColourPicker.getHueContext(), ColourPicker.huePosition);
@@ -190,7 +194,7 @@ Brush.prototype.drawShapeLine = function(x, y, endX, endY, colour, size, lineTip
 	Then emits
 --------------------------------------------*/
 Brush.prototype.draw = function() {
-	canvasRect = canvas.getBoundingClientRect();
+	let canvasRect = canvas.getBoundingClientRect();
 	var json = {
 		'name': client.name,
 		'x': Input.mousePos.x - canvasRect.left,
@@ -205,7 +209,7 @@ Brush.prototype.draw = function() {
 };
 
 Brush.prototype.erase = function() {
-	canvasRect = canvas.getBoundingClientRect();
+	let canvasRect = canvas.getBoundingClientRect();
 	var json = {
 		'name': client.name,
 		'x': Input.mousePos.x - canvasRect.left,
@@ -220,7 +224,7 @@ Brush.prototype.erase = function() {
 };
 
 Brush.prototype.drawSquare = function() {
-	canvasRect = canvas.getBoundingClientRect();
+	let canvasRect = canvas.getBoundingClientRect();
 	var json = {
 		'name': client.name,
 		'x': Input.mousePos.x - canvasRect.left,
@@ -233,3 +237,6 @@ Brush.prototype.drawSquare = function() {
 	tool.shapeTool.drawRect(json['x'], json['y'], json['lastX'], json['lastY'], json['size'], json['colour']);
 	socket.emit('draw square', json);
 };
+
+
+export default Brush;

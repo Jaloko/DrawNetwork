@@ -1,3 +1,9 @@
+
+import Brush from "./brush";
+import TextTool from "./text-tool";
+import ShapeTool from "./shape-tool";
+import Dropper from "./dropper";
+
 var ToolSet = function(){
 	this.brush = new Brush(),
 	this.textTool = new TextTool(),
@@ -35,18 +41,5 @@ ToolSet.prototype.updateRainbowBrush = function() {
 	}
 };
 
+export default ToolSet;
 
-/*--------------------------------------------
-	ToolType Static Types
---------------------------------------------*/
-var ToolTypes = {
-	FREE_ROAM: "freeroam",
-	GRADIENT_BRUSH: "gradient-brush",
-	RAINBOW_BRUSH: "rainbow-brush",
-	DROPPER: "dropper",
-	ERASER: "eraser",
-	SQUARE_BRUSH: "square-brush",
-	TEXT_TOOL: "text",
-	SHAPE_TOOL: "shape",
-	LINE_TOOL: "line"
-};

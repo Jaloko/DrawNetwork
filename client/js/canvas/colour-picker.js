@@ -1,3 +1,7 @@
+import Util from "./util";
+import Input from "./input";
+import { socket, tool } from "./variables";
+
 /* ------------------------------------ 
 	Object Definitions
  ------------------------------------ */
@@ -246,3 +250,9 @@ ColourPicker.enforceHueBounds = function(position) {
 		position.y = 256;  
 	}
 } 
+export {
+	Colour,
+	Position,
+	ColourPicker
+}
+export default ColourPicker;
