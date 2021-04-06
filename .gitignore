@@ -3,5 +3,7 @@ public/js/*.min.js
 client/js/*.min.js
 client/js/maps/*
 client/js/*.min.js.map
+dist/*
 database.db
 .vscode/*
+

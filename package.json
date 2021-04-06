@@ -4,8 +4,9 @@
   "private": "true",  
   "scripts": {
     "start": "node app.js",
-    "build:prod": "rollup -c",
-    "build:dev": "rollup -c -w"
+    "build": "rollup -c && node-sass client/css/global.scss dist/css/global.css --output-style compressed",
+    "build:dev:js": "rollup -c -w",
+    "build:dev:scss": "node-sass --watch client/css/global.scss dist/css/global.css"
   },
   "dependencies": {
     "body-parser": "^1.19.0",

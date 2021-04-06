@@ -9,7 +9,7 @@ const config = [
   {
     input: 'client/js/canvas/global.js',
     output: {
-      file: 'client/js/dn.min.js',
+      file: 'dist/js/dn.min.js',
       format: 'iife',
       sourcemap: true
     },
@@ -23,7 +23,7 @@ const config = [
   {
     input: 'client/js/functions.js',
     output: {
-      file: "client/js/functions.min.js",
+      file: "dist/js/functions.min.js",
       format: "iife",
       sourcemap: true
     },
